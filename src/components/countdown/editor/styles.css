@@ -1,0 +1,362 @@
+.countdown-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 968px) {
+  .countdown-editor {
+    grid-template-columns: 1fr;
+  }
+}
+
+section {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.create-section {
+  height: fit-content;
+}
+
+.trackers-section {
+  height: auto;
+  overflow: hidden;
+}
+
+.trackers-section h3 {
+  flex-shrink: 0;
+  margin-bottom: 1rem;
+}
+
+.trackers-list {
+  overflow-y: auto;
+  min-height: 200px;
+  max-height: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-right: 0.5rem;
+}
+
+.trackers-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.trackers-list::-webkit-scrollbar-track {
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.trackers-list::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 4px;
+}
+
+.trackers-list::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
+}
+
+h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.checkbox-group {
+  margin: 0.5rem 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: normal !important;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-group input.error {
+  border-color: #dc3545;
+  background-color: #ffe6e6;
+}
+
+.form-group .error-message {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: none;
+}
+
+.form-group .error-message.show {
+  display: block;
+}
+
+.tick-labels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.tick-label-entry {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tick-label-entry .tick-input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.tick-label-entry .label-input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.tick-label-entry .tick-input:focus,
+.tick-label-entry .label-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.remove-tick-label {
+  width: 32px;
+  height: 32px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.remove-tick-label:hover {
+  background: #c82333;
+}
+
+.add-tick-label {
+  padding: 0.5rem 1rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-start;
+}
+
+.add-tick-label:hover:not(:disabled) {
+  background: #218838;
+}
+
+.add-tick-label:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button.create {
+  padding: 0.75rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button.create:hover {
+  background: #0056b3;
+}
+
+.empty {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+}
+
+.tracker-item {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tracker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tracker-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.tracker-type {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: #e9ecef;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #666;
+}
+
+.tracker-type.complex {
+  background: #d4edda;
+  color: #155724;
+}
+
+.complex-note {
+  margin: 0.75rem 0 0 0;
+  padding: 0.5rem;
+  background: #fff3cd;
+  border-left: 3px solid #ffc107;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #856404;
+}
+
+.current-label {
+  margin: 0.75rem 0 0 0;
+  padding: 0.75rem;
+  background: #e7f3ff;
+  border-left: 4px solid #007bff;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #004085;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-weight: 600;
+}
+
+.tracker-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.value-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.value-controls button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.value-controls button:hover {
+  background: #f0f0f0;
+  border-color: #999;
+}
+
+.value-controls .value {
+  min-width: 80px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.visibility-toggle,
+.hide-name-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.visibility-toggle input[type="checkbox"],
+.hide-name-toggle input[type="checkbox"] {
+  cursor: pointer;
+}
+
+button.delete {
+  margin-left: auto;
+  padding: 0.5rem 1rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button.delete:hover {
+  background: #c82333;
+}

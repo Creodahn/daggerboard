@@ -1,0 +1,19 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "player-view",
+  "description": "Read-only capability for the player view window",
+  "windows": ["player-view"],
+  "permissions": [
+    "core:default",
+    "core:event:allow-listen",
+    "core:event:allow-emit-to",
+    {
+      "identifier": "core:event:allow-listen",
+      "allow": [
+        { "event": "trackers-updated" },
+        { "event": "fear-level-updated" },
+        { "event": "entities-updated" }
+      ]
+    }
+  ]
+}
