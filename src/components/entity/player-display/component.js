@@ -8,6 +8,8 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
   static observedAttributes = [];
 
   entities = [];
+  #previousHp = new Map();
+  #pendingFlashes = new Map();
   stylesPath = './styles.css';
   templatePath = './template.html';
 
@@ -19,11 +21,38 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
 
   async loadEntities() {
     try {
-      this.entities = await invoke('get_entities', { visibleOnly: true });
+      const newEntities = await invoke('get_entities', { visibleOnly: true });
+      this.detectHpChanges(newEntities);
+      this.entities = newEntities;
       this.render();
+      this.applyFlashAnimations();
     } catch (error) {
       console.error('Failed to load entities:', error);
     }
+  }
+
+  detectHpChanges(newEntities) {
+    for (const entity of newEntities) {
+      const previousHp = this.#previousHp.get(entity.id);
+      if (previousHp !== undefined && previousHp !== entity.hp_current) {
+        const flashType = entity.hp_current > previousHp ? 'heal' : 'damage';
+        this.#pendingFlashes.set(entity.id, flashType);
+      }
+      this.#previousHp.set(entity.id, entity.hp_current);
+    }
+  }
+
+  applyFlashAnimations() {
+    for (const [entityId, flashType] of this.#pendingFlashes) {
+      const element = this.shadowRoot.querySelector(`[data-entity-id="${entityId}"]`);
+      if (element) {
+        element.classList.add(`flash-${flashType}`);
+        element.addEventListener('animationend', () => {
+          element.classList.remove(`flash-${flashType}`);
+        }, { once: true });
+      }
+    }
+    this.#pendingFlashes.clear();
   }
 
   setupEventListener() {
@@ -43,7 +72,7 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
 
     if (enemies.length > 0) {
       const enemiesList = enemies.map(entity => `
-        <li class="entity-item">
+        <li class="entity-item" data-entity-id="${entity.id}">
           <span class="entity-name">${entity.name}</span>
         </li>
       `).join('');
@@ -60,7 +89,7 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
         const healthPercent = (entity.hp_current / entity.hp_max) * 100;
         const healthClass = this.getHealthClass(healthPercent);
         return `
-          <li class="entity-item npc-item ${healthClass}">
+          <li class="entity-item npc-item ${healthClass}" data-entity-id="${entity.id}">
             <span class="entity-name">${entity.name}</span>
           </li>
         `;
