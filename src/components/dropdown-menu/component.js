@@ -13,30 +13,25 @@ class DropdownMenu extends ExtendedHtmlElement {
     this.#content = this.shadowRoot.querySelector('.dropdown-content');
 
     // Toggle dropdown on trigger click
-    this.#trigger.addEventListener('click', (e) => {
+    this.#trigger.addEventListener('click', e => {
       e.stopPropagation();
       this.toggleDropdown();
     });
 
-    // Prevent closing when clicking inside dropdown content
-    this.#content.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', () => {
+    // Handle popover toggle events (for when user clicks outside)
+    this.#content.addEventListener('toggle', e => {
+      this.#isOpen = e.newState === 'open';
       if (this.#isOpen) {
-        this.closeDropdown();
+        this.setAttribute('open', '');
+      } else {
+        this.removeAttribute('open');
       }
     });
 
-    // Handle slot changes to position content
-    const slot = this.shadowRoot.querySelector('slot[name="content"]');
-    if (slot) {
-      slot.addEventListener('slotchange', () => {
-        this.positionContent();
-      });
-    }
+    // Prevent closing when clicking inside dropdown content
+    this.#content.addEventListener('click', e => {
+      e.stopPropagation();
+    });
   }
 
   toggleDropdown() {
@@ -48,19 +43,36 @@ class DropdownMenu extends ExtendedHtmlElement {
   }
 
   openDropdown() {
-    this.#isOpen = true;
-    this.setAttribute('open', '');
+    this.#content.showPopover();
     this.positionContent();
   }
 
   closeDropdown() {
-    this.#isOpen = false;
-    this.removeAttribute('open');
+    this.#content.hidePopover();
   }
 
   positionContent() {
-    // Ensure dropdown content is positioned relative to trigger
-    // This happens automatically via CSS, but we could add dynamic positioning here if needed
+    // Position the popover relative to the trigger
+    const triggerRect = this.#trigger.getBoundingClientRect();
+
+    // Position below the trigger, aligned to the right edge
+    this.#content.style.position = 'fixed';
+    this.#content.style.top = `${triggerRect.bottom + 4}px`;
+    this.#content.style.left = 'auto';
+    this.#content.style.right = `${window.innerWidth - triggerRect.right}px`;
+
+    // Check if it would go off the bottom of the screen
+    const contentRect = this.#content.getBoundingClientRect();
+    if (contentRect.bottom > window.innerHeight) {
+      // Position above the trigger instead
+      this.#content.style.top = `${triggerRect.top - contentRect.height - 4}px`;
+    }
+
+    // Check if it would go off the left of the screen
+    if (contentRect.left < 0) {
+      this.#content.style.right = 'auto';
+      this.#content.style.left = `${triggerRect.left}px`;
+    }
   }
 }
 
