@@ -1,6 +1,9 @@
 import './extended-html-element.js';
 import './buttons/toggle-player-view/component.js';
 import './countdown/editor/component.js';
+import './dropdown-menu/component.js';
+import './dropdown-menu/item.js';
 import './entity/creator/component.js';
+import './entity/item/component.js';
 import './entity/list/component.js';
 import './fear-tracker/component.js';

@@ -1,17 +1,18 @@
 import ExtendedHtmlElement from '../../extended-html-element.js';
 
-const { invoke } = window.__TAURI__.core;
-
 class EntityItem extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #entity = null;
   #nameUpdateTimeout = null;
+  #isReady = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
   set entity(value) {
     this.#entity = value;
-    this.render();
+    if (this.#isReady) {
+      this.render();
+    }
   }
 
   get entity() {
@@ -19,7 +20,11 @@ class EntityItem extends ExtendedHtmlElement {
   }
 
   async setup() {
-    // Initial render will happen when entity is set
+    this.#isReady = true;
+    // Render now that template is ready (if entity was already set)
+    if (this.#entity) {
+      this.render();
+    }
   }
 
   getHealthPercentage(current, max) {
