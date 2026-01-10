@@ -28,6 +28,14 @@ class ActionButton extends HTMLElement {
     return this.hasAttribute('disabled') || this.hasAttribute('loading');
   }
 
+  set disabled(value) {
+    if (value) {
+      this.setAttribute('disabled', '');
+    } else {
+      this.removeAttribute('disabled');
+    }
+  }
+
   connectedCallback() {
     this.render();
     this.shadowRoot.querySelector('button').addEventListener('click', e => {

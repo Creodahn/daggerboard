@@ -31,9 +31,14 @@ class EntityCreator extends ExtendedHtmlElement {
       setTimeout(() => this.#nameField.focus(), 100);
     });
 
-    // Setup form submit handler (handles both Enter key and button click)
+    // Setup form submit handler (handles Enter key in form fields)
     this.shadowRoot.querySelector('form').addEventListener('submit', e => {
       e.preventDefault();
+      this.createEntity();
+    });
+
+    // Handle action-button click (button is in shadow DOM so can't trigger form submit)
+    this.shadowRoot.querySelector('action-button.create').addEventListener('action-click', () => {
       this.createEntity();
     });
   }

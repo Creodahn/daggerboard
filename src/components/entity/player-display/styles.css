@@ -62,7 +62,10 @@ flash-container:hover {
   color: #333;
 }
 
-/* NPC Health States */
+/* NPC Health States - smooth transitions between health levels */
+.npc-item {
+  transition: background 0.5s ease, border-left-color 0.5s ease, box-shadow 0.5s ease, border-left-width 0.3s ease;
+}
 
 @keyframes pulse-npc-danger {
   0%, 100% {

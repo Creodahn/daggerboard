@@ -50,7 +50,7 @@ class PulseContainer extends HTMLElement {
         }
 
         .pulse-container {
-          transition: transform 0.2s, box-shadow 0.2s;
+          transition: transform 0.2s;
         }
 
         @keyframes pulse-warning {
@@ -68,12 +68,10 @@ class PulseContainer extends HTMLElement {
           0%, 100% {
             transform: scale(1);
             opacity: 1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
           50% {
             transform: scale(1.03);
-            opacity: 0.95;
-            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+            opacity: 0.9;
           }
         }
 
@@ -81,12 +79,10 @@ class PulseContainer extends HTMLElement {
           0%, 100% {
             transform: scale(1);
             opacity: 1;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
           }
           50% {
             transform: scale(1.05);
-            opacity: 0.9;
-            box-shadow: 0 6px 16px rgba(244, 67, 54, 0.5);
+            opacity: 0.85;
           }
         }
 

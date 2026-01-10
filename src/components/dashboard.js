@@ -28,6 +28,7 @@ import './collapse-toggle/component.js';
 // Feature components
 import './buttons/toggle-player-view/component.js';
 import './countdown/editor/component.js';
+import './countdown/item/component.js';
 import './entity/creator/component.js';
 import './entity/item/component.js';
 import './entity/list/component.js';

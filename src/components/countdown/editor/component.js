@@ -26,7 +26,7 @@ class CountdownEditor extends ExtendedHtmlElement {
     this.#maxField = this.shadowRoot.querySelector('form-field[name="max"]');
     this.#visibleToggle = this.shadowRoot.querySelector('visibility-toggle[name="visibleToPlayers"]');
     this.#hideNameToggle = this.shadowRoot.querySelector('toggle-switch[name="hideNameFromPlayers"]');
-    this.#createButton = this.shadowRoot.querySelector('button.create');
+    this.#createButton = this.shadowRoot.querySelector('action-button.create');
     this.#trackersList = this.shadowRoot.querySelector('stack-list.trackers-list');
     this.#tickLabelsContainer = this.shadowRoot.querySelector('.tick-labels-container');
     this.#addTickLabelBtn = this.shadowRoot.querySelector('.add-tick-label');
@@ -57,6 +57,12 @@ class CountdownEditor extends ExtendedHtmlElement {
       this.trackers = event.payload.trackers;
       this.renderTrackers();
     });
+
+    // Listen for events from countdown-item components
+    this.addEventListener('value-change', this.handleValueChange.bind(this));
+    this.addEventListener('visibility-change', this.handleVisibilityChange.bind(this));
+    this.addEventListener('name-visibility-change', this.handleNameVisibilityChange.bind(this));
+    this.addEventListener('delete', this.handleDelete.bind(this));
   }
 
   async loadTrackers() {
@@ -208,8 +214,8 @@ class CountdownEditor extends ExtendedHtmlElement {
       // Reset form
       this.#nameField.value = '';
       this.#maxField.value = '10';
-      this.#visibleToggle.checked = false;
-      this.#hideNameToggle.checked = false;
+      this.#visibleToggle.removeAttribute('checked');
+      this.#hideNameToggle.removeAttribute('checked');
       this.#tickLabelsContainer.innerHTML = '';
       this.#tickLabelEntries = [];
       this.updateAddButtonState();
@@ -222,46 +228,39 @@ class CountdownEditor extends ExtendedHtmlElement {
     }
   }
 
-  async updateTrackerValue(id, amount) {
+  async handleValueChange(event) {
+    const { id, delta } = event.detail;
     try {
-      await invoke('update_tracker_value', { id, amount });
+      await invoke('update_tracker_value', { id, amount: delta });
     } catch (error) {
       console.error('Failed to update tracker:', error);
     }
   }
 
-  async deleteTracker(id, name, buttonEl) {
-    try {
-      // Show loading state
-      if (buttonEl) {
-        buttonEl.disabled = true;
-        buttonEl.textContent = 'Deleting...';
-      }
-
-      await invoke('delete_tracker', { id });
-
-      // Find and animate out the tracker item
-      const trackerItem = this.shadowRoot.querySelector(`[data-tracker-id="${id}"]`);
-      if (trackerItem) {
-        trackerItem.classList.add('fade-out');
-        setTimeout(() => {
-          trackerItem.remove();
-        }, 300);
-      }
-    } catch (error) {
-      console.error('Failed to delete tracker:', error);
-      if (buttonEl) {
-        buttonEl.disabled = false;
-        buttonEl.textContent = 'Delete';
-      }
-    }
-  }
-
-  async toggleVisibility(id, visible) {
+  async handleVisibilityChange(event) {
+    const { id, visible } = event.detail;
     try {
       await invoke('toggle_tracker_visibility', { id, visible });
     } catch (error) {
       console.error('Failed to toggle visibility:', error);
+    }
+  }
+
+  async handleNameVisibilityChange(event) {
+    const { id, hidden } = event.detail;
+    try {
+      await invoke('toggle_tracker_name_visibility', { id, hideName: hidden });
+    } catch (error) {
+      console.error('Failed to toggle name visibility:', error);
+    }
+  }
+
+  async handleDelete(event) {
+    const { id } = event.detail;
+    try {
+      await invoke('delete_tracker', { id });
+    } catch (error) {
+      console.error('Failed to delete tracker:', error);
     }
   }
 
@@ -274,55 +273,9 @@ class CountdownEditor extends ExtendedHtmlElement {
     }
 
     this.trackers.forEach(tracker => {
-      const isComplex = tracker.tracker_type === 'complex';
-      const currentLabel = isComplex && tracker.tick_labels?.[tracker.current]
-        ? tracker.tick_labels[tracker.current]
-        : null;
-
-      const trackerEl = document.createElement('card-container');
-      trackerEl.setAttribute('data-tracker-id', tracker.id);
-      trackerEl.innerHTML = `
-        <div class="tracker-header">
-          <h4>${tracker.name}</h4>
-          <type-badge type="${tracker.tracker_type}" label="${tracker.tracker_type.toUpperCase()}"></type-badge>
-        </div>
-        <div class="tracker-controls">
-          <counter-control value="${tracker.current}" min="0" max="${tracker.max}" show-max="${tracker.max}" data-tracker-id="${tracker.id}"></counter-control>
-          <visibility-toggle entity-id="${tracker.id}" ${tracker.visible_to_players ? 'checked' : ''}></visibility-toggle>
-          <toggle-switch name="hide-name-${tracker.id}" label="🙈 Hide Name from Players" ${tracker.hide_name_from_players ? 'checked' : ''}></toggle-switch>
-        </div>
-        ${currentLabel ? `<div class="current-label">${currentLabel}</div>` : ''}
-        <div class="delete-section">
-          <delete-trigger item-name="${tracker.name}" item-id="${tracker.id}"></delete-trigger>
-        </div>
-      `;
-
-      // Attach event listeners
-      trackerEl.querySelector('counter-control').addEventListener('counter-change', e => {
-        this.updateTrackerValue(tracker.id, e.detail.delta);
-      });
-
-      trackerEl.querySelector('delete-trigger').addEventListener('delete-confirmed', async e => {
-        await trackerEl.fadeOut();
-        this.deleteTracker(e.detail.id, e.detail.name);
-      });
-
-      trackerEl.querySelector('visibility-toggle').addEventListener('visibility-change', e => {
-        this.toggleVisibility(e.detail.entityId, e.detail.checked);
-      });
-
-      trackerEl.querySelector(`toggle-switch[name="hide-name-${tracker.id}"]`).addEventListener('toggle-change', async e => {
-        try {
-          await invoke('toggle_tracker_name_visibility', {
-            id: tracker.id,
-            hideName: e.detail.checked,
-          });
-        } catch (error) {
-          console.error('Failed to toggle name visibility:', error);
-        }
-      });
-
-      this.#trackersList.appendChild(trackerEl);
+      const trackerItem = document.createElement('countdown-item');
+      trackerItem.tracker = tracker;
+      this.#trackersList.appendChild(trackerItem);
     });
   }
 }
