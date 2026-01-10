@@ -5,6 +5,10 @@ class DropdownMenuItem extends HTMLElement {
   }
 
   connectedCallback() {
+    // Use a div instead of button when keep-open is set (for interactive controls)
+    const isKeepOpen = this.hasAttribute('keep-open');
+    const wrapperTag = isKeepOpen ? 'div' : 'button';
+
     this.shadowRoot.innerHTML = `
       <style>
         :host {
@@ -24,6 +28,7 @@ class DropdownMenuItem extends HTMLElement {
           font-size: 0.9rem;
           transition: background 0.2s;
           font-family: inherit;
+          box-sizing: border-box;
         }
 
         .menu-item:hover {
@@ -48,21 +53,30 @@ class DropdownMenuItem extends HTMLElement {
         :host([variant="delete"]) .menu-item:hover {
           background: #fee;
         }
+
+        /* Interactive items (keep-open) should not look like buttons */
+        :host([keep-open]) .menu-item {
+          cursor: default;
+        }
       </style>
-      <button class="menu-item" part="button">
+      <${wrapperTag} class="menu-item" part="item">
         <slot></slot>
-      </button>
+      </${wrapperTag}>
     `;
 
-    const button = this.shadowRoot.querySelector('.menu-item');
-    button.addEventListener('click', (e) => {
-      // Dispatch custom event that parent can listen to
-      this.dispatchEvent(new CustomEvent('menu-item-click', {
-        bubbles: true,
-        composed: true,
-        detail: { originalEvent: e }
-      }));
-    });
+    // Only dispatch menu-item-click for button items (not keep-open items)
+    if (!isKeepOpen) {
+      const item = this.shadowRoot.querySelector('.menu-item');
+      item.addEventListener('click', e => {
+        this.dispatchEvent(
+          new CustomEvent('menu-item-click', {
+            bubbles: true,
+            composed: true,
+            detail: { originalEvent: e },
+          })
+        );
+      });
+    }
   }
 }
 

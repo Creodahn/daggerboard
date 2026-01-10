@@ -5,12 +5,14 @@ class DropdownMenu extends ExtendedHtmlElement {
   #trigger;
   #content;
   #isOpen = false;
+  #boundHandleDocumentClick;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
   async setup() {
     this.#trigger = this.shadowRoot.querySelector('.dropdown-trigger');
     this.#content = this.shadowRoot.querySelector('.dropdown-content');
+    this.#boundHandleDocumentClick = this.#handleDocumentClick.bind(this);
 
     // Toggle dropdown on trigger click
     this.#trigger.addEventListener('click', e => {
@@ -18,20 +20,37 @@ class DropdownMenu extends ExtendedHtmlElement {
       this.toggleDropdown();
     });
 
-    // Handle popover toggle events (for when user clicks outside)
-    this.#content.addEventListener('toggle', e => {
-      this.#isOpen = e.newState === 'open';
-      if (this.#isOpen) {
-        this.setAttribute('open', '');
-      } else {
-        this.removeAttribute('open');
-      }
+    // Close when menu-item-click is dispatched (from non-keep-open items)
+    this.addEventListener('menu-item-click', () => {
+      setTimeout(() => this.closeDropdown(), 0);
     });
+  }
 
-    // Prevent closing when clicking inside dropdown content
-    this.#content.addEventListener('click', e => {
-      e.stopPropagation();
-    });
+  #isClickInsidePopover(e) {
+    const rect = this.#content.getBoundingClientRect();
+    return (
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
+      e.clientY <= rect.bottom
+    );
+  }
+
+  #isClickOnTrigger(e) {
+    const rect = this.#trigger.getBoundingClientRect();
+    return (
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
+      e.clientY <= rect.bottom
+    );
+  }
+
+  #handleDocumentClick(e) {
+    if (this.#isClickInsidePopover(e) || this.#isClickOnTrigger(e)) {
+      return;
+    }
+    this.closeDropdown();
   }
 
   toggleDropdown() {
@@ -43,36 +62,48 @@ class DropdownMenu extends ExtendedHtmlElement {
   }
 
   openDropdown() {
+    this.#isOpen = true;
+    this.setAttribute('open', '');
     this.#content.showPopover();
     this.positionContent();
+
+    // Listen for clicks to close - delay to avoid immediate trigger
+    requestAnimationFrame(() => {
+      document.addEventListener('click', this.#boundHandleDocumentClick);
+    });
   }
 
   closeDropdown() {
+    if (!this.#isOpen) return;
+
+    this.#isOpen = false;
+    this.removeAttribute('open');
     this.#content.hidePopover();
+
+    document.removeEventListener('click', this.#boundHandleDocumentClick);
   }
 
   positionContent() {
-    // Position the popover relative to the trigger
     const triggerRect = this.#trigger.getBoundingClientRect();
 
-    // Position below the trigger, aligned to the right edge
     this.#content.style.position = 'fixed';
     this.#content.style.top = `${triggerRect.bottom + 4}px`;
     this.#content.style.left = 'auto';
     this.#content.style.right = `${window.innerWidth - triggerRect.right}px`;
 
-    // Check if it would go off the bottom of the screen
     const contentRect = this.#content.getBoundingClientRect();
     if (contentRect.bottom > window.innerHeight) {
-      // Position above the trigger instead
       this.#content.style.top = `${triggerRect.top - contentRect.height - 4}px`;
     }
 
-    // Check if it would go off the left of the screen
     if (contentRect.left < 0) {
       this.#content.style.right = 'auto';
       this.#content.style.left = `${triggerRect.left}px`;
     }
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener('click', this.#boundHandleDocumentClick);
   }
 }
 

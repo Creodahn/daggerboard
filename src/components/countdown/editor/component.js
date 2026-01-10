@@ -265,17 +265,50 @@ class CountdownEditor extends ExtendedHtmlElement {
   }
 
   renderTrackers() {
-    this.#trackersList.innerHTML = '';
-
     if (this.trackers.length === 0) {
       this.#trackersList.innerHTML = '<empty-state message="No trackers yet"></empty-state>';
       return;
     }
 
+    // Get existing items
+    const existingItems = this.#trackersList.querySelectorAll('countdown-item');
+    const existingById = new Map();
+    existingItems.forEach(item => {
+      if (item.tracker?.id) {
+        existingById.set(item.tracker.id, item);
+      }
+    });
+
+    // Remove empty state if present
+    const emptyState = this.#trackersList.querySelector('empty-state');
+    if (emptyState) {
+      emptyState.remove();
+    }
+
+    // Track which IDs we've seen
+    const seenIds = new Set();
+
+    // Update or create items
     this.trackers.forEach(tracker => {
-      const trackerItem = document.createElement('countdown-item');
-      trackerItem.tracker = tracker;
-      this.#trackersList.appendChild(trackerItem);
+      seenIds.add(tracker.id);
+      const existingItem = existingById.get(tracker.id);
+
+      if (existingItem) {
+        // Update existing item's data without recreating
+        existingItem.tracker = tracker;
+      } else {
+        // Create new item
+        const trackerItem = document.createElement('countdown-item');
+        trackerItem.tracker = tracker;
+        this.#trackersList.appendChild(trackerItem);
+      }
+    });
+
+    // Remove items that no longer exist
+    existingItems.forEach(item => {
+      if (item.tracker?.id && !seenIds.has(item.tracker.id)) {
+        item.remove();
+      }
     });
   }
 }

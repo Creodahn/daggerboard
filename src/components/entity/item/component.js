@@ -5,13 +5,22 @@ class EntityItem extends ExtendedHtmlElement {
   #entity = null;
   #nameUpdateTimeout = null;
   #isReady = false;
+  #hasRendered = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
   set entity(value) {
+    const oldEntity = this.#entity;
     this.#entity = value;
+
     if (this.#isReady) {
-      this.render();
+      if (this.#hasRendered && oldEntity?.id === value?.id) {
+        // Same entity, just update values without re-rendering
+        this.updateValues();
+      } else {
+        // Different entity or first render
+        this.render();
+      }
     }
   }
 
@@ -24,6 +33,33 @@ class EntityItem extends ExtendedHtmlElement {
     // Render now that template is ready (if entity was already set)
     if (this.#entity) {
       this.render();
+    }
+  }
+
+  updateValues() {
+    if (!this.#entity) return;
+
+    const entity = this.#entity;
+    const container = this.shadowRoot.querySelector('card-container');
+    if (!container) return;
+
+    // Update HP bar
+    const hpBar = container.querySelector('hp-bar');
+    if (hpBar) {
+      hpBar.setAttribute('current', entity.hp_current);
+      hpBar.setAttribute('max', entity.hp_max);
+    }
+
+    // Update visibility toggle
+    const visibilityToggle = container.querySelector('visibility-toggle');
+    if (visibilityToggle) {
+      visibilityToggle.checked = entity.visible_to_players;
+    }
+
+    // Update name input only if it's not currently focused (to avoid overwriting user input)
+    const nameInput = container.querySelector('.entity-name-input');
+    if (nameInput && document.activeElement !== nameInput) {
+      nameInput.value = entity.name;
     }
   }
 
@@ -77,7 +113,7 @@ class EntityItem extends ExtendedHtmlElement {
           </div>
         </dropdown-menu>
         <dropdown-menu>
-          <dropdown-menu-item slot="content">
+          <dropdown-menu-item slot="content" keep-open>
             <visibility-toggle entity-id="${entity.id}" ${entity.visible_to_players ? 'checked' : ''} compact></visibility-toggle>
           </dropdown-menu-item>
           <dropdown-menu-item slot="content" variant="delete">
@@ -89,6 +125,7 @@ class EntityItem extends ExtendedHtmlElement {
       </div>
     `;
 
+    this.#hasRendered = true;
     this.attachEventListeners();
   }
 

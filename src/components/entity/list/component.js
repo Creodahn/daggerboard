@@ -101,17 +101,50 @@ class EntityList extends ExtendedHtmlElement {
   }
 
   renderEntities() {
-    this.#entitiesList.innerHTML = '';
-
     if (this.entities.length === 0) {
       this.#entitiesList.innerHTML = '<empty-state message="No entities created yet"></empty-state>';
       return;
     }
 
+    // Get existing items
+    const existingItems = this.#entitiesList.querySelectorAll('entity-item');
+    const existingById = new Map();
+    existingItems.forEach(item => {
+      if (item.entity?.id) {
+        existingById.set(item.entity.id, item);
+      }
+    });
+
+    // Remove empty state if present
+    const emptyState = this.#entitiesList.querySelector('empty-state');
+    if (emptyState) {
+      emptyState.remove();
+    }
+
+    // Track which IDs we've seen
+    const seenIds = new Set();
+
+    // Update or create items
     this.entities.forEach(entity => {
-      const entityItem = document.createElement('entity-item');
-      entityItem.entity = entity;
-      this.#entitiesList.appendChild(entityItem);
+      seenIds.add(entity.id);
+      const existingItem = existingById.get(entity.id);
+
+      if (existingItem) {
+        // Update existing item's data without recreating
+        existingItem.entity = entity;
+      } else {
+        // Create new item
+        const entityItem = document.createElement('entity-item');
+        entityItem.entity = entity;
+        this.#entitiesList.appendChild(entityItem);
+      }
+    });
+
+    // Remove items that no longer exist
+    existingItems.forEach(item => {
+      if (item.entity?.id && !seenIds.has(item.entity.id)) {
+        item.remove();
+      }
     });
   }
 }
