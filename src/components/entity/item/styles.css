@@ -14,9 +14,6 @@
   transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 
-.entity-container.collapsed .entity-content {
-  display: none;
-}
 
 .collapse-toggle {
   background: none;
@@ -61,14 +58,44 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
+}
+
+.hp-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   flex: 1;
   min-width: 0;
 }
 
-.entity-name-section .hp-bar-container {
-  flex: 0 0 200px;
+.hp-section .hp-bar-container {
+  flex: 1;
+  max-width: 200px;
   height: 24px;
-  margin-left: auto;
+}
+
+.hp-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.damage-trigger {
+  padding: 0.35rem 0.75rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.damage-trigger:hover {
+  background: #c82333;
 }
 
 .entity-type-badge {
@@ -118,6 +145,8 @@
 
 dropdown-menu {
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .visibility-toggle {
@@ -177,41 +206,31 @@ dropdown-menu {
 
 .healing-section {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
-.healing-section label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.healing-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.healing-controls input {
+.heal-input {
   flex: 1;
   padding: 0.5rem;
   border: 1px solid #28a745;
-  border-radius: 4px;
+  border-radius: 4px 0 0 4px;
   font-size: 0.9rem;
 }
 
-.healing-controls input:focus {
+.heal-input:focus {
   outline: none;
   border-color: #218838;
   box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .apply-heal {
   padding: 0.5rem 1rem;
   background: #28a745;
   color: white;
-  border: none;
-  border-radius: 4px;
+  border: 1px solid #28a745;
+  border-left: none;
+  border-radius: 0 4px 4px 0;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
@@ -219,78 +238,41 @@ dropdown-menu {
 
 .apply-heal:hover {
   background: #218838;
+  border-color: #218838;
 }
 
-.thresholds-display {
-  display: flex;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 4px;
-  flex-wrap: wrap;
+/* Threshold menu items get colored indicators */
+.threshold.minor::part(button) {
+  border-left: 3px solid #ffc107;
 }
 
-.threshold {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 2px solid transparent;
-}
-
-.threshold.minor {
+.threshold.minor:hover::part(button) {
   background: #fff3cd;
-  color: #856404;
-  border-color: #ffeaa7;
 }
 
-.threshold.minor:hover {
-  background: #ffe8a1;
-  border-color: #ffdc6e;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.threshold.major::part(button) {
+  border-left: 3px solid #fd7e14;
 }
 
-.threshold.massive {
-  background: #343a40;
-  color: white;
-  border-color: #000;
+.threshold.major:hover::part(button) {
+  background: #ffe5d0;
+}
+
+.threshold.severe::part(button) {
+  border-left: 3px solid #dc3545;
+}
+
+.threshold.severe:hover::part(button) {
+  background: #f8d7da;
+}
+
+.threshold.massive::part(button) {
+  border-left: 3px solid #343a40;
   font-weight: 700;
 }
 
-.threshold.massive:hover {
-  background: #23272b;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-
-.threshold.major {
-  background: #f8d7da;
-  color: #721c24;
-  border-color: #f5c6cb;
-}
-
-.threshold.major:hover {
-  background: #f3b8bd;
-  border-color: #ed969e;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.threshold.severe {
-  background: #f8d7da;
-  color: #721c24;
-  border-color: #dc3545;
-}
-
-.threshold.severe:hover {
-  background: #f1aeb5;
-  border-color: #bd2130;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+.threshold.massive:hover::part(button) {
+  background: #e2e3e5;
 }
 
 .delete-backdrop {

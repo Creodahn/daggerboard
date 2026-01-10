@@ -10,20 +10,27 @@
 
 .dropdown-trigger {
   background: none;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 0.5rem;
+  border: none;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #666;
   transition: all 0.2s;
-  width: 32px;
-  height: 32px;
 }
 
-.dropdown-trigger:hover {
+/* Style the default icon when no custom trigger is provided */
+.dropdown-trigger > svg {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+}
+
+.dropdown-trigger:hover > svg {
   background: #f8f9fa;
   border-color: #adb5bd;
   color: #333;

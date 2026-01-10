@@ -59,9 +59,32 @@ class EntityItem extends ExtendedHtmlElement {
           </button>
           <span class="entity-type-badge ${entity.entity_type}">${entity.entity_type === 'enemy' ? 'Enemy' : 'NPC'}</span>
           <input type="text" class="entity-name-input" value="${entity.name}">
+        </div>
+        <div class="hp-section">
           <div class="hp-bar-container">
             <div class="hp-bar ${healthClass}" style="width: ${healthPercent}%"></div>
             <span class="hp-text">${entity.hp_current} / ${entity.hp_max} HP</span>
+          </div>
+          <div class="hp-controls">
+            <dropdown-menu class="damage-dropdown">
+              <button slot="trigger" class="damage-trigger">⚔️ Damage</button>
+              <dropdown-menu-item slot="content" class="threshold minor" data-hp-loss="1" data-threshold="minor">
+                Minor: ${entity.thresholds.minor}
+              </dropdown-menu-item>
+              <dropdown-menu-item slot="content" class="threshold major" data-hp-loss="2" data-threshold="major">
+                Major: ${entity.thresholds.major}
+              </dropdown-menu-item>
+              <dropdown-menu-item slot="content" class="threshold severe" data-hp-loss="3" data-threshold="severe">
+                Severe: ${entity.thresholds.severe}
+              </dropdown-menu-item>
+              <dropdown-menu-item slot="content" class="threshold massive" data-hp-loss="4" data-threshold="massive">
+                Massive: ${massiveThreshold}
+              </dropdown-menu-item>
+            </dropdown-menu>
+            <div class="healing-section">
+              <input type="number" min="1" placeholder="Heal amount" class="heal-input">
+              <button class="apply-heal">Heal</button>
+            </div>
           </div>
         </div>
         <dropdown-menu>
@@ -75,31 +98,6 @@ class EntityItem extends ExtendedHtmlElement {
             <span>🗑️ Delete Entity</span>
           </dropdown-menu-item>
         </dropdown-menu>
-      </div>
-
-      <div class="entity-content">
-        <div class="healing-section">
-          <label>Heal:</label>
-          <div class="healing-controls">
-            <input type="number" min="1" placeholder="Amount" class="heal-input">
-            <button class="apply-heal">Heal</button>
-          </div>
-        </div>
-
-        <div class="thresholds-display">
-          <button class="threshold minor" data-hp-loss="1" data-threshold="minor">
-            Minor: ${entity.thresholds.minor} (-1 HP)
-          </button>
-          <button class="threshold major" data-hp-loss="2" data-threshold="major">
-            Major: ${entity.thresholds.major} (-2 HP)
-          </button>
-          <button class="threshold severe" data-hp-loss="3" data-threshold="severe">
-            Severe: ${entity.thresholds.severe} (-3 HP)
-          </button>
-          <button class="threshold massive" data-hp-loss="4" data-threshold="massive">
-            Massive: ${massiveThreshold} (-4 HP)
-          </button>
-        </div>
       </div>
 
       <div class="delete-backdrop hidden"></div>
@@ -124,11 +122,11 @@ class EntityItem extends ExtendedHtmlElement {
       container.classList.toggle('collapsed');
     });
 
-    // Threshold buttons
-    container.querySelectorAll('.threshold').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const hpLoss = parseInt(btn.dataset.hpLoss);
-        const threshold = btn.dataset.threshold;
+    // Threshold menu items
+    container.querySelectorAll('.threshold').forEach(item => {
+      item.addEventListener('menu-item-click', () => {
+        const hpLoss = parseInt(item.dataset.hpLoss);
+        const threshold = item.dataset.threshold;
         this.dispatchEvent(new CustomEvent('threshold-damage', {
           bubbles: true,
           composed: true,
@@ -138,15 +136,16 @@ class EntityItem extends ExtendedHtmlElement {
     });
 
     // Heal button
+    const healInput = container.querySelector('.heal-input');
     container.querySelector('.apply-heal').addEventListener('click', () => {
-      const input = container.querySelector('.heal-input');
-      const amount = parseInt(input.value);
+      const amount = parseInt(healInput.value);
       if (!isNaN(amount) && amount > 0) {
         this.dispatchEvent(new CustomEvent('heal', {
           bubbles: true,
           composed: true,
           detail: { id: this.#entity.id, amount }
         }));
+        healInput.value = '';
       }
     });
 
