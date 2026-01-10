@@ -56,11 +56,15 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
     }
 
     if (npcs.length > 0) {
-      const npcsList = npcs.map(entity => `
-        <li class="entity-item">
-          <span class="entity-name">${entity.name}</span>
-        </li>
-      `).join('');
+      const npcsList = npcs.map(entity => {
+        const healthPercent = (entity.hp_current / entity.hp_max) * 100;
+        const healthClass = this.getHealthClass(healthPercent);
+        return `
+          <li class="entity-item npc-item ${healthClass}">
+            <span class="entity-name">${entity.name}</span>
+          </li>
+        `;
+      }).join('');
       html += `
         <div class="entity-section">
           <h3 class="section-header">NPCs</h3>
@@ -74,6 +78,14 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
     }
 
     container.innerHTML = html;
+  }
+
+  getHealthClass(healthPercent) {
+    if (healthPercent <= 0) return 'health-dead';
+    if (healthPercent >= 75) return 'health-good';
+    if (healthPercent >= 50) return 'health-warning';
+    if (healthPercent >= 24) return 'health-danger';
+    return 'health-critical';
   }
 }
 

@@ -62,3 +62,73 @@
   font-weight: 600;
   color: #333;
 }
+
+/* NPC Health States */
+
+@keyframes pulse-npc-danger {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+  }
+}
+
+@keyframes pulse-npc-critical {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.5);
+  }
+}
+
+.npc-item.health-good {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-left-color: #4caf50;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.npc-item.health-warning {
+  background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+  border-left-color: #ffc107;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.npc-item.health-danger {
+  background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+  border-left-color: #ff9800;
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+  animation: pulse-npc-danger 2s ease-in-out infinite;
+}
+
+.npc-item.health-critical {
+  background: linear-gradient(135deg, #ffcdd2 0%, #ef5350 100%);
+  border-left-color: #f44336;
+  border-left-width: 6px;
+  animation: pulse-npc-critical 0.75s ease-in-out infinite;
+}
+
+.npc-item.health-critical .entity-name {
+  color: #c62828;
+  font-weight: 700;
+}
+
+.npc-item.health-dead {
+  background: #8b0000;
+  border-left-color: #5c0000;
+  border-left-width: 6px;
+  animation: none;
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.6);
+  opacity: 0.95;
+}
+
+.npc-item.health-dead .entity-name {
+  color: #2d0000;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+}

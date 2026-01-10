@@ -32,11 +32,11 @@ class TogglePlayerViewButton extends ExtendedHtmlElement {
       const existing = await WebviewWindow.getByLabel('player-view');
       const wasOpen = this.#isOpen;
       this.#isOpen = !!existing;
-      
+
       if (wasOpen !== this.#isOpen) {
         this.updateButtonText();
       }
-      
+
       if (this.#isOpen && !this.#playerWindow) {
         this.#playerWindow = existing;
       } else if (!this.#isOpen) {
