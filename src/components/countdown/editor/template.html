@@ -23,20 +23,20 @@
       <div class="form-group">
         <label>Tick Labels (optional)</label>
         <div class="tick-labels-container"></div>
-        <button type="button" class="add-tick-label">+ Add Label</button>
+        <action-button type="button" variant="success" size="small" class="add-tick-label">+ Add Label</action-button>
       </div>
 
       <visibility-toggle name="visibleToPlayers"></visibility-toggle>
       <toggle-switch name="hideNameFromPlayers" label="🙈 Hide Name from Players"></toggle-switch>
 
-      <button type="button" class="create">Create Tracker</button>
+      <action-button variant="primary" size="large" class="create">Create Tracker</action-button>
     </form>
   </modal-dialog>
 
-  <section class="trackers-section">
-    <section-header title="Active Trackers">
-      <button slot="action" class="open-creator">+ Create Tracker</button>
+  <panel-section>
+    <section-header slot="header" title="Active Trackers">
+      <action-button slot="action" variant="primary" class="open-creator">+ Create Tracker</action-button>
     </section-header>
-    <div class="trackers-list"></div>
-  </section>
+    <stack-list class="trackers-list" scrollable max-height="350px"></stack-list>
+  </panel-section>
 </div>

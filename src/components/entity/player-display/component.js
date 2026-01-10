@@ -1,4 +1,5 @@
 import ExtendedHtmlElement from '../../extended-html-element.js';
+import { getHealthPercentage, getNpcHealthClass, getHpChangeType } from '../../../helpers/health-utils.js';
 
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
@@ -34,9 +35,9 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
   detectHpChanges(newEntities) {
     for (const entity of newEntities) {
       const previousHp = this.#previousHp.get(entity.id);
-      if (previousHp !== undefined && previousHp !== entity.hp_current) {
-        const flashType = entity.hp_current > previousHp ? 'heal' : 'damage';
-        this.#pendingFlashes.set(entity.id, flashType);
+      const changeType = getHpChangeType(previousHp, entity.hp_current);
+      if (changeType) {
+        this.#pendingFlashes.set(entity.id, changeType);
       }
       this.#previousHp.set(entity.id, entity.hp_current);
     }
@@ -44,12 +45,9 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
 
   applyFlashAnimations() {
     for (const [entityId, flashType] of this.#pendingFlashes) {
-      const element = this.shadowRoot.querySelector(`[data-entity-id="${entityId}"]`);
-      if (element) {
-        element.classList.add(`flash-${flashType}`);
-        element.addEventListener('animationend', () => {
-          element.classList.remove(`flash-${flashType}`);
-        }, { once: true });
+      const flashContainer = this.shadowRoot.querySelector(`flash-container[data-entity-id="${entityId}"]`);
+      if (flashContainer) {
+        flashContainer.flash(flashType);
       }
     }
     this.#pendingFlashes.clear();
@@ -72,9 +70,11 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
 
     if (enemies.length > 0) {
       const enemiesList = enemies.map(entity => `
-        <li class="entity-item" data-entity-id="${entity.id}">
-          <span class="entity-name">${entity.name}</span>
-        </li>
+        <flash-container data-entity-id="${entity.id}">
+          <li class="entity-item">
+            <span class="entity-name">${entity.name}</span>
+          </li>
+        </flash-container>
       `).join('');
       html += `
         <div class="entity-section">
@@ -86,12 +86,14 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
 
     if (npcs.length > 0) {
       const npcsList = npcs.map(entity => {
-        const healthPercent = (entity.hp_current / entity.hp_max) * 100;
-        const healthClass = this.getHealthClass(healthPercent);
+        const healthPercent = getHealthPercentage(entity.hp_current, entity.hp_max);
+        const healthClass = getNpcHealthClass(healthPercent);
         return `
-          <li class="entity-item npc-item ${healthClass}" data-entity-id="${entity.id}">
-            <span class="entity-name">${entity.name}</span>
-          </li>
+          <flash-container data-entity-id="${entity.id}">
+            <li class="entity-item npc-item ${healthClass}">
+              <span class="entity-name">${entity.name}</span>
+            </li>
+          </flash-container>
         `;
       }).join('');
       html += `
@@ -109,13 +111,6 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
     container.innerHTML = html;
   }
 
-  getHealthClass(healthPercent) {
-    if (healthPercent <= 0) return 'health-dead';
-    if (healthPercent >= 75) return 'health-good';
-    if (healthPercent >= 50) return 'health-warning';
-    if (healthPercent >= 24) return 'health-danger';
-    return 'health-critical';
-  }
 }
 
 customElements.define('entity-player-display', EntityPlayerDisplay);

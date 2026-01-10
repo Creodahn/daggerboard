@@ -41,14 +41,18 @@
 }
 
 .entity-item {
-  background: #f8f9fa;
   border-left: 4px solid #007bff;
   padding: 1rem;
+  border-radius: 4px;
+}
+
+flash-container {
+  background: #f8f9fa;
   border-radius: 4px;
   transition: background 0.2s;
 }
 
-.entity-item:hover {
+flash-container:hover {
   background: #e9ecef;
 }
 
@@ -128,41 +132,4 @@
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-/* Heal/Damage Flash Animations */
-@keyframes flash-heal {
-  0% {
-    background-color: transparent;
-    box-shadow: none;
-  }
-  15% {
-    background-color: rgba(40, 167, 69, 0.6);
-    box-shadow: 0 0 20px rgba(40, 167, 69, 0.8), inset 0 0 15px rgba(40, 167, 69, 0.4);
-  }
-  100% {
-    background-color: transparent;
-    box-shadow: none;
-  }
-}
-
-@keyframes flash-damage {
-  0% {
-    background-color: transparent;
-    box-shadow: none;
-  }
-  15% {
-    background-color: rgba(220, 53, 69, 0.6);
-    box-shadow: 0 0 20px rgba(220, 53, 69, 0.8), inset 0 0 15px rgba(220, 53, 69, 0.4);
-  }
-  100% {
-    background-color: transparent;
-    box-shadow: none;
-  }
-}
-
-.entity-item.flash-heal {
-  animation: flash-heal 0.75s ease-out forwards;
-}
-
-.entity-item.flash-damage {
-  animation: flash-damage 0.75s ease-out forwards;
-}
+/* Heal/Damage Flash Animations handled by flash-container component */

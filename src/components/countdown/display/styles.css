@@ -36,17 +36,25 @@
 
 /* Empty state handled by empty-state component */
 
+/* Countdown items use pulse-container for animations */
 .countdown-item {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: var(--gradient-urgency-normal, linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%));
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
 }
 
-.countdown-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.countdown-item[data-urgency="warning"] {
+  background: var(--gradient-urgency-warning, linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%));
+}
+
+.countdown-item[data-urgency="urgent"] {
+  background: var(--gradient-urgency-urgent, linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%));
+}
+
+.countdown-item[data-urgency="critical"] {
+  background: var(--gradient-urgency-critical, linear-gradient(135deg, #ffcdd2 0%, #ef5350 100%));
+  border: 2px solid #d32f2f;
 }
 
 .countdown-content {
@@ -62,12 +70,21 @@
   color: #333;
 }
 
-.countdown-value {
-  font-size: 3rem;
-  font-weight: 700;
-  color: #667eea;
-  min-width: 80px;
-  text-align: center;
+/* Value display handled by counter-control component */
+counter-control {
+  --counter-value-color: #667eea;
+}
+
+.countdown-item.warning counter-control {
+  --counter-value-color: #ff9800;
+}
+
+.countdown-item.urgent counter-control {
+  --counter-value-color: #f44336;
+}
+
+.countdown-item.critical counter-control {
+  --counter-value-color: #b71c1c;
 }
 
 .tick-label {
@@ -80,75 +97,9 @@
   border-left: 4px solid #667eea;
 }
 
-/* Urgency states with pulsing animations */
+/* Pulse animations handled by pulse-container component */
 
-@keyframes pulse-warning {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.02);
-    opacity: 0.9;
-  }
-}
-
-@keyframes pulse-urgent {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  50% {
-    transform: scale(1.03);
-    opacity: 0.95;
-    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
-  }
-}
-
-@keyframes pulse-critical {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.9;
-    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.5);
-  }
-}
-
-.countdown-item.warning {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  animation: pulse-warning 2s ease-in-out infinite;
-}
-
-.countdown-item.warning .countdown-value {
-  color: #ff9800;
-}
-
-.countdown-item.urgent {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-  animation: pulse-urgent 1s ease-in-out infinite;
-}
-
-.countdown-item.urgent .countdown-value {
-  color: #f44336;
-}
-
-.countdown-item.critical {
-  background: linear-gradient(135deg, #ffcdd2 0%, #ef5350 100%);
-  animation: pulse-critical 0.5s ease-in-out infinite;
-  border: 2px solid #d32f2f;
-}
-
-.countdown-item.critical .countdown-value {
-  color: #b71c1c;
-  font-size: 3.5rem;
-}
-
-.countdown-item.critical .countdown-name {
+.countdown-item[data-urgency="critical"] .countdown-name {
   color: #b71c1c;
   font-weight: 700;
 }

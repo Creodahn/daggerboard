@@ -16,8 +16,8 @@ class ConfirmDialog extends ExtendedHtmlElement {
     this.#confirmBtn = this.shadowRoot.querySelector('.btn-confirm');
     this.#cancelBtn = this.shadowRoot.querySelector('.btn-cancel');
 
-    this.#confirmBtn.addEventListener('click', () => this.close(true));
-    this.#cancelBtn.addEventListener('click', () => this.close(false));
+    this.#confirmBtn.addEventListener('action-click', () => this.close(true));
+    this.#cancelBtn.addEventListener('action-click', () => this.close(false));
 
     // Listen for modal close event (backdrop click or escape)
     this.#modal.addEventListener('modal-close', () => {
@@ -42,7 +42,9 @@ class ConfirmDialog extends ExtendedHtmlElement {
     this.#messageEl.textContent = message;
     this.#confirmBtn.textContent = confirmText;
     this.#cancelBtn.textContent = cancelText;
-    this.setAttribute('variant', variant);
+
+    // Update confirm button variant
+    this.#confirmBtn.setAttribute('variant', variant);
 
     // Hide the modal title for confirm dialogs
     this.#modal.setTitle('');

@@ -1,4 +1,5 @@
 import ExtendedHtmlElement from '../../extended-html-element.js';
+import { getUrgencyClass } from '../../../helpers/urgency-utils.js';
 
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
@@ -18,10 +19,7 @@ class CountdownDisplay extends ExtendedHtmlElement {
 
     // Listen for tracker updates
     await listen('trackers-updated', event => {
-      console.log('Received trackers-updated event:', event);
-      console.log('Payload:', event.payload);
       this.trackers = event.payload.trackers.filter(t => t.visible_to_players);
-      console.log('Filtered visible trackers:', this.trackers);
       this.renderTrackers();
     });
   }
@@ -35,13 +33,6 @@ class CountdownDisplay extends ExtendedHtmlElement {
     }
   }
 
-  getUrgencyClass(current) {
-    if (current === 0) return 'critical';
-    if (current <= 2) return 'urgent';
-    if (current < 5) return 'warning';
-    return '';
-  }
-
   renderTrackers() {
     this.#countdownsList.innerHTML = '';
 
@@ -51,16 +42,18 @@ class CountdownDisplay extends ExtendedHtmlElement {
     }
 
     this.trackers.forEach(tracker => {
-      const urgencyClass = this.getUrgencyClass(tracker.current);
+      const urgency = getUrgencyClass(tracker.current);
       const displayName = tracker.hide_name_from_players ? '???' : tracker.name;
 
-      const trackerEl = document.createElement('div');
-      trackerEl.className = `countdown-item ${urgencyClass}`;
+      const trackerEl = document.createElement('pulse-container');
+      trackerEl.setAttribute('urgency', urgency || 'normal');
+      trackerEl.className = 'countdown-item';
+      trackerEl.setAttribute('data-urgency', urgency || 'normal');
 
       trackerEl.innerHTML = `
         <div class="countdown-content">
           <h4 class="countdown-name">${displayName}</h4>
-          <div class="countdown-value">${tracker.current}</div>
+          <counter-control value="${tracker.current}" display-only size="large"></counter-control>
         </div>
       `;
 

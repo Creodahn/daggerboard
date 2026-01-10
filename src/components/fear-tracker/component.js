@@ -30,7 +30,6 @@ class FearTracker extends ExtendedHtmlElement {
 
     // Listen for backend updates
     await listen('fear-level-updated', event => {
-      console.log(event);
       this.fearLevel = event.payload.level;
       this.#counter.value = this.fearLevel;
     });

@@ -12,6 +12,18 @@ import './empty-state/component.js';
 import './toggle-switch/component.js';
 import './visibility-toggle/component.js';
 import './counter-control/component.js';
+import './action-button/component.js';
+import './delete-trigger/component.js';
+import './flash-container/component.js';
+import './card-container/component.js';
+import './hp-bar/component.js';
+import './input-group/component.js';
+import './fade-wrapper/component.js';
+import './section-label/component.js';
+import './pulse-container/component.js';
+import './panel-section/component.js';
+import './stack-list/component.js';
+import './collapse-toggle/component.js';
 
 // Feature components
 import './buttons/toggle-player-view/component.js';

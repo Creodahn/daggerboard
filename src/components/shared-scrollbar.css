@@ -1,0 +1,47 @@
+/**
+ * Shared custom scrollbar styles.
+ * Import this in components that need styled scrollbars.
+ *
+ * Usage in Shadow DOM components:
+ * Add these styles to your component's CSS for elements with .custom-scrollbar class
+ */
+
+.custom-scrollbar {
+  overflow-y: auto;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
+}
+
+/* Thin variant */
+.custom-scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* Dark variant for dark backgrounds */
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: #343a40;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #6c757d;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: #adb5bd;
+}

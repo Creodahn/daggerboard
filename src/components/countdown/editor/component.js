@@ -27,14 +27,14 @@ class CountdownEditor extends ExtendedHtmlElement {
     this.#visibleToggle = this.shadowRoot.querySelector('visibility-toggle[name="visibleToPlayers"]');
     this.#hideNameToggle = this.shadowRoot.querySelector('toggle-switch[name="hideNameFromPlayers"]');
     this.#createButton = this.shadowRoot.querySelector('button.create');
-    this.#trackersList = this.shadowRoot.querySelector('.trackers-list');
+    this.#trackersList = this.shadowRoot.querySelector('stack-list.trackers-list');
     this.#tickLabelsContainer = this.shadowRoot.querySelector('.tick-labels-container');
     this.#addTickLabelBtn = this.shadowRoot.querySelector('.add-tick-label');
 
     const openBtn = this.shadowRoot.querySelector('.open-creator');
 
     // Open modal handler
-    openBtn.addEventListener('click', () => {
+    openBtn.addEventListener('action-click', () => {
       this.#modal.open();
       setTimeout(() => this.#nameField.focus(), 100);
     });
@@ -43,8 +43,8 @@ class CountdownEditor extends ExtendedHtmlElement {
     await this.loadTrackers();
 
     // Setup event listeners
-    this.#createButton.addEventListener('click', () => this.createTracker());
-    this.#addTickLabelBtn.addEventListener('click', () => this.addTickLabelEntry());
+    this.#createButton.addEventListener('action-click', () => this.createTracker());
+    this.#addTickLabelBtn.addEventListener('action-click', () => this.addTickLabelEntry());
 
     // Listen for max field changes to update tick label limits
     this.#maxField.addEventListener('field-input', () => this.updateTickLabelLimit());
@@ -83,10 +83,10 @@ class CountdownEditor extends ExtendedHtmlElement {
     entry.innerHTML = `
       <input type="number" class="tick-input" placeholder="Tick" min="0" max="${max}" required>
       <input type="text" class="label-input" placeholder="Label" required>
-      <button type="button" class="remove-tick-label" data-id="${entryId}">&times;</button>
+      <action-button type="button" variant="danger" size="small" class="remove-tick-label" data-id="${entryId}">×</action-button>
     `;
 
-    entry.querySelector('.remove-tick-label').addEventListener('click', () => {
+    entry.querySelector('.remove-tick-label').addEventListener('action-click', () => {
       this.removeTickLabelEntry(entryId);
     });
 
@@ -279,8 +279,7 @@ class CountdownEditor extends ExtendedHtmlElement {
         ? tracker.tick_labels[tracker.current]
         : null;
 
-      const trackerEl = document.createElement('div');
-      trackerEl.className = 'tracker-item';
+      const trackerEl = document.createElement('card-container');
       trackerEl.setAttribute('data-tracker-id', tracker.id);
       trackerEl.innerHTML = `
         <div class="tracker-header">
@@ -294,8 +293,7 @@ class CountdownEditor extends ExtendedHtmlElement {
         </div>
         ${currentLabel ? `<div class="current-label">${currentLabel}</div>` : ''}
         <div class="delete-section">
-          <button class="delete" data-id="${tracker.id}">Delete</button>
-          <confirm-dialog></confirm-dialog>
+          <delete-trigger item-name="${tracker.name}" item-id="${tracker.id}"></delete-trigger>
         </div>
       `;
 
@@ -304,18 +302,9 @@ class CountdownEditor extends ExtendedHtmlElement {
         this.updateTrackerValue(tracker.id, e.detail.delta);
       });
 
-      trackerEl.querySelector('.delete').addEventListener('click', async () => {
-        const confirmDialog = trackerEl.querySelector('confirm-dialog');
-        const confirmed = await confirmDialog.show({
-          message: `Are you sure you want to delete "${tracker.name}"?`,
-          confirmText: 'Delete',
-          cancelText: 'Cancel',
-          variant: 'danger'
-        });
-
-        if (confirmed) {
-          this.deleteTracker(tracker.id, tracker.name);
-        }
+      trackerEl.querySelector('delete-trigger').addEventListener('delete-confirmed', async e => {
+        await trackerEl.fadeOut();
+        this.deleteTracker(e.detail.id, e.detail.name);
       });
 
       trackerEl.querySelector('visibility-toggle').addEventListener('visibility-change', e => {

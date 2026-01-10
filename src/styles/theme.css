@@ -1,0 +1,79 @@
+/**
+ * Theme CSS custom properties for consistent styling across the app.
+ * Import this file in your main stylesheet or components.
+ */
+
+:root {
+  /* Brand colors */
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-success: #28a745;
+  --color-success-hover: #218838;
+  --color-danger: #dc3545;
+  --color-danger-hover: #c82333;
+  --color-warning: #ffc107;
+  --color-warning-hover: #e0a800;
+  --color-secondary: #6c757d;
+  --color-secondary-hover: #5a6268;
+
+  /* Health gradients */
+  --gradient-health-full: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  --gradient-health-good: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  --gradient-health-medium: linear-gradient(90deg, #ffc107 0%, #fd7e14 100%);
+  --gradient-health-low: linear-gradient(90deg, #fd7e14 0%, #dc3545 100%);
+  --gradient-health-critical: linear-gradient(90deg, #dc3545 0%, #bd2130 100%);
+  --color-health-dead: #8b0000;
+
+  /* NPC health backgrounds */
+  --gradient-npc-good: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  --gradient-npc-warning: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+  --gradient-npc-danger: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+  --gradient-npc-critical: linear-gradient(135deg, #ffcdd2 0%, #ef5350 100%);
+
+  /* Urgency backgrounds */
+  --gradient-urgency-normal: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --gradient-urgency-warning: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  --gradient-urgency-urgent: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  --gradient-urgency-critical: linear-gradient(135deg, #ffcdd2 0%, #ef5350 100%);
+
+  /* Brand/accent gradients */
+  --gradient-brand: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-brand-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+  /* Urgency colors */
+  --color-urgency-normal: #667eea;
+  --color-urgency-warning: #ff9800;
+  --color-urgency-urgent: #f44336;
+  --color-urgency-critical: #b71c1c;
+
+  /* Surface colors */
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-background: #f5f5f5;
+  --color-border: #ddd;
+  --color-border-light: #e9ecef;
+
+  /* Text colors */
+  --color-text-primary: #333;
+  --color-text-secondary: #666;
+  --color-text-muted: #999;
+
+  /* Border radius */
+  --radius-small: 4px;
+  --radius-medium: 6px;
+  --radius-large: 8px;
+  --radius-xl: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.24);
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+}

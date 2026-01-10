@@ -2,50 +2,11 @@
   display: block;
 }
 
-.entity-container {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  position: relative;
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-}
+/* Entity container handled by card-container component */
 
+/* Collapse toggle handled by collapse-toggle component */
 
-.collapse-toggle {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #666;
-  transition: color 0.2s;
-  width: 24px;
-  height: 24px;
-}
-
-.collapse-toggle:hover {
-  color: #333;
-}
-
-.caret-icon {
-  transition: transform 0.2s ease;
-}
-
-.entity-container.collapsed .caret-icon {
-  transform: rotate(-90deg);
-}
-
-.entity-container.fade-out {
-  opacity: 0;
-  transform: translateX(-20px);
-  pointer-events: none;
-}
+/* Fade-out animation handled by card-container component */
 
 .entity-header {
   display: flex;
@@ -81,13 +42,7 @@
   gap: 0.5rem;
 }
 
-.section-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+/* Section labels handled by section-label component */
 
 .threshold-buttons {
   display: flex;
@@ -144,9 +99,7 @@
   background: #e2e3e5;
 }
 
-.healing-controls {
-  display: flex;
-}
+/* Healing controls handled by input-group component */
 
 /* Type badge handled by type-badge component */
 
@@ -184,114 +137,13 @@ dropdown-menu {
 
 /* Visibility toggle handled by visibility-toggle component */
 
-.hp-bar-container {
-  position: relative;
-  background: #e9ecef;
-  border-radius: 6px;
-  height: 24px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: box-shadow 0.2s;
+/* HP bar handled by hp-bar component */
+hp-bar {
   min-width: 120px;
 }
 
-.hp-bar-container:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.hp-bar {
-  height: 100%;
-  transition: width 0.3s ease;
-  border-radius: 6px;
-}
-
-.hp-bar.healthy {
-  background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-}
-
-.hp-bar.medium {
-  background: linear-gradient(90deg, #ffc107 0%, #fd7e14 100%);
-}
-
-.hp-bar.low {
-  background: linear-gradient(90deg, #fd7e14 0%, #dc3545 100%);
-}
-
-.hp-bar.critical {
-  background: linear-gradient(90deg, #dc3545 0%, #bd2130 100%);
-  animation: pulse-critical 0.5s ease-in-out infinite;
-}
-
-.hp-bar.dead {
-  width: 100% !important;
-  background: #8b0000;
-}
-
-.hp-bar-container:has(.hp-bar.dead) {
-  background: #8b0000;
-  box-shadow: 0 2px 8px rgba(139, 0, 0, 0.5);
-}
-
-.hp-bar-container:has(.hp-bar.dead) .hp-text {
-  color: #ffcccc;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.hp-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-weight: 600;
-  font-size: 0.75rem;
-  color: #333;
-  text-shadow: 0 0 3px white;
-  white-space: nowrap;
-}
-
-.heal-input {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #28a745;
-  border-radius: 4px 0 0 4px;
-  font-size: 0.85rem;
-  min-width: 0;
-}
-
-.heal-input:focus {
-  outline: none;
-  border-color: #218838;
-  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
-  position: relative;
-  z-index: 1;
-}
-
-.apply-heal {
-  padding: 0.5rem 0.75rem;
-  background: #28a745;
-  color: white;
-  border: 1px solid #28a745;
-  border-left: none;
-  border-radius: 0 4px 4px 0;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.2s;
-  white-space: nowrap;
-}
-
-.apply-heal:hover {
-  background: #218838;
-  border-color: #218838;
-}
+/* Heal input handled by input-group component */
 
 
 
-@keyframes pulse-critical {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-}
+/* Pulse animation handled by hp-bar component */

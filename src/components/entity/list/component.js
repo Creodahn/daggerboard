@@ -11,10 +11,10 @@ class EntityList extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#entitiesList = this.shadowRoot.querySelector('.entities-list');
+    this.#entitiesList = this.shadowRoot.querySelector('stack-list');
 
     // Setup create button to dispatch event
-    this.shadowRoot.querySelector('.open-creator').addEventListener('click', () => {
+    this.shadowRoot.querySelector('.open-creator').addEventListener('action-click', () => {
       const event = new CustomEvent('open-entity-creator', {
         bubbles: true,
         composed: true
@@ -49,16 +49,9 @@ class EntityList extends ExtendedHtmlElement {
   }
 
   async handleThresholdDamage(event) {
-    const { id, hpLoss, threshold } = event.detail;
+    const { id, hpLoss } = event.detail;
     try {
       await invoke('update_entity_hp', { id, amount: -hpLoss });
-      const messages = {
-        minor: '⚠️',
-        major: '🔥',
-        severe: '💀',
-        massive: '☠️',
-      };
-      console.log(`${messages[threshold] || ''} ${threshold} damage: ${hpLoss} HP lost`);
     } catch (error) {
       console.error('Failed to apply threshold damage:', error);
     }
@@ -96,10 +89,9 @@ class EntityList extends ExtendedHtmlElement {
   }
 
   async handleDelete(event) {
-    const { id, name } = event.detail;
+    const { id } = event.detail;
     try {
       await invoke('delete_entity', { id });
-      console.log('Entity deleted:', name);
       // Manually reload in case event doesn't fire
       await this.loadEntities();
     } catch (error) {

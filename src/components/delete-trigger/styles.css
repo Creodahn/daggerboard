@@ -1,0 +1,8 @@
+:host {
+  display: inline-block;
+}
+
+.delete-trigger {
+  display: inline-flex;
+  align-items: center;
+}

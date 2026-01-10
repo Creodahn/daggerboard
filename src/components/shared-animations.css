@@ -1,0 +1,109 @@
+/**
+ * Shared animation keyframes used across multiple components.
+ * Import this file in components that need these animations.
+ */
+
+/* Pulse animations for urgency/status states */
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulse-danger {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+  }
+}
+
+@keyframes pulse-critical {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.9;
+    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.5);
+  }
+}
+
+/* Flash animations for feedback */
+@keyframes flash-heal {
+  0% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+  15% {
+    background-color: rgba(40, 167, 69, 0.6);
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.8), inset 0 0 15px rgba(40, 167, 69, 0.4);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+@keyframes flash-damage {
+  0% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+  15% {
+    background-color: rgba(220, 53, 69, 0.6);
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.8), inset 0 0 15px rgba(220, 53, 69, 0.4);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}
+
+/* Fade out animation for removing items */
+@keyframes fade-out-left {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+/* Utility classes */
+.animate-pulse-warning {
+  animation: pulse-warning 2s ease-in-out infinite;
+}
+
+.animate-pulse-danger {
+  animation: pulse-danger 1.5s ease-in-out infinite;
+}
+
+.animate-pulse-critical {
+  animation: pulse-critical 0.75s ease-in-out infinite;
+}
+
+.animate-flash-heal {
+  animation: flash-heal 0.75s ease-out forwards;
+}
+
+.animate-flash-damage {
+  animation: flash-damage 0.75s ease-out forwards;
+}
+
+.animate-fade-out {
+  animation: fade-out-left 0.3s ease-out forwards;
+  pointer-events: none;
+}

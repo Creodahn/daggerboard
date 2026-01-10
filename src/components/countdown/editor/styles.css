@@ -4,41 +4,7 @@
   gap: 2rem;
 }
 
-.trackers-section {
-  background: #f5f5f5;
-  border-radius: 8px;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.trackers-list {
-  overflow-y: auto;
-  min-height: 200px;
-  max-height: 350px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding-right: 0.5rem;
-}
-
-.trackers-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.trackers-list::-webkit-scrollbar-track {
-  background: #e9ecef;
-  border-radius: 4px;
-}
-
-.trackers-list::-webkit-scrollbar-thumb {
-  background: #adb5bd;
-  border-radius: 4px;
-}
-
-.trackers-list::-webkit-scrollbar-thumb:hover {
-  background: #6c757d;
-}
+/* Panel and list layout handled by panel-section and stack-list components */
 
 .create-form {
   display: flex;
@@ -87,75 +53,21 @@
   border-color: #007bff;
 }
 
+/* Tick label buttons handled by action-button component */
 .remove-tick-label {
   width: 32px;
-  height: 32px;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-}
-
-.remove-tick-label:hover {
-  background: #c82333;
 }
 
 .add-tick-label {
-  padding: 0.5rem 1rem;
-  background: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
   align-self: flex-start;
 }
 
-.add-tick-label:hover:not(:disabled) {
-  background: #218838;
-}
-
-.add-tick-label:disabled {
-  background: #6c757d;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-button.create {
-  padding: 0.75rem 1.5rem;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
+/* Create button handled by action-button component */
+.create {
   margin-top: 0.5rem;
 }
 
-button.create:hover {
-  background: #0056b3;
-}
-
-.tracker-item {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
+/* Tracker item container handled by card-container component */
 
 .tracker-header {
   display: flex;
@@ -201,21 +113,7 @@ button.create:hover {
 
 /* Value controls handled by counter-control component */
 
-button.delete {
-  margin-left: auto;
-  padding: 0.5rem 1rem;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-button.delete:hover {
-  background: #c82333;
-}
+/* Delete button handled by delete-trigger component */
 
 .delete-section {
   display: flex;
@@ -225,9 +123,4 @@ button.delete:hover {
   margin-top: 0.5rem;
 }
 
-.tracker-item.fade-out {
-  opacity: 0;
-  transform: translateX(-20px);
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-  pointer-events: none;
-}
+/* Fade-out animation handled by card-container component */
