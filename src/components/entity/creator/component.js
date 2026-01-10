@@ -4,6 +4,7 @@ const { invoke } = window.__TAURI__.core;
 
 class EntityCreator extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
+  #modal;
   #nameInput;
   #entityTypeSelect;
   #hpMaxInput;
@@ -16,6 +17,7 @@ class EntityCreator extends ExtendedHtmlElement {
 
   async setup() {
     // Get DOM elements
+    this.#modal = this.shadowRoot.querySelector('modal-dialog');
     this.#nameInput = this.shadowRoot.querySelector('input[name="name"]');
     this.#entityTypeSelect = this.shadowRoot.querySelector('select[name="entity-type"]');
     this.#hpMaxInput = this.shadowRoot.querySelector('input[name="hp-max"]');
@@ -24,24 +26,11 @@ class EntityCreator extends ExtendedHtmlElement {
     this.#severeInput = this.shadowRoot.querySelector('input[name="severe"]');
     this.#createButton = this.shadowRoot.querySelector('button.create');
 
-    const backdrop = this.shadowRoot.querySelector('.modal-backdrop');
-    const closeBtn = this.shadowRoot.querySelector('.close-modal');
-
     // Listen for open event from entity list
     document.addEventListener('open-entity-creator', () => {
-      backdrop.classList.remove('hidden');
-      this.#nameInput.focus();
-    });
-
-    // Close modal handlers
-    closeBtn.addEventListener('click', () => {
-      backdrop.classList.add('hidden');
-    });
-
-    backdrop.addEventListener('click', (e) => {
-      if (e.target === backdrop) {
-        backdrop.classList.add('hidden');
-      }
+      this.#modal.open();
+      // Focus name input after modal opens
+      setTimeout(() => this.#nameInput.focus(), 100);
     });
 
     // Setup form submit handler (handles both Enter key and button click)
@@ -142,15 +131,13 @@ class EntityCreator extends ExtendedHtmlElement {
 
       // Reset form
       this.#nameInput.value = '';
-      this.#hpMaxInput.value = '';
-      this.#minorInput.value = '';
-      this.#majorInput.value = '';
-      this.#severeInput.value = '';
-
-      this.#nameInput.focus();
+      this.#hpMaxInput.value = '20';
+      this.#minorInput.value = '5';
+      this.#majorInput.value = '10';
+      this.#severeInput.value = '15';
 
       // Close modal
-      this.shadowRoot.querySelector('.modal-backdrop').classList.add('hidden');
+      this.#modal.close();
     } catch (error) {
       console.error('Failed to create entity:', error);
       alert(`Error: ${error}`);

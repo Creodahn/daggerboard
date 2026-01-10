@@ -1,4 +1,6 @@
 import './extended-html-element.js';
+import './modal-dialog/component.js';
+import './confirm-dialog/component.js';
 import './buttons/toggle-player-view/component.js';
 import './countdown/editor/component.js';
 import './dropdown-menu/component.js';

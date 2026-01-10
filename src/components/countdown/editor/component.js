@@ -5,6 +5,7 @@ const { listen } = window.__TAURI__.event;
 
 class CountdownEditor extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
+  #modal;
   #nameInput;
   #maxInput;
   #visibleCheckbox;
@@ -20,6 +21,7 @@ class CountdownEditor extends ExtendedHtmlElement {
 
   async setup() {
     // Get DOM elements
+    this.#modal = this.shadowRoot.querySelector('modal-dialog');
     this.#nameInput = this.shadowRoot.querySelector('input[name="name"]');
     this.#maxInput = this.shadowRoot.querySelector('input[name="max"]');
     this.#visibleCheckbox = this.shadowRoot.querySelector('input[name="visibleToPlayers"]');
@@ -29,25 +31,12 @@ class CountdownEditor extends ExtendedHtmlElement {
     this.#tickLabelsContainer = this.shadowRoot.querySelector('.tick-labels-container');
     this.#addTickLabelBtn = this.shadowRoot.querySelector('.add-tick-label');
 
-    const backdrop = this.shadowRoot.querySelector('.modal-backdrop');
-    const closeBtn = this.shadowRoot.querySelector('.close-modal');
     const openBtn = this.shadowRoot.querySelector('.open-creator');
 
     // Open modal handler
     openBtn.addEventListener('click', () => {
-      backdrop.classList.remove('hidden');
-      this.#nameInput.focus();
-    });
-
-    // Close modal handlers
-    closeBtn.addEventListener('click', () => {
-      backdrop.classList.add('hidden');
-    });
-
-    backdrop.addEventListener('click', (e) => {
-      if (e.target === backdrop) {
-        backdrop.classList.add('hidden');
-      }
+      this.#modal.open();
+      setTimeout(() => this.#nameInput.focus(), 100);
     });
 
     // Load existing trackers
@@ -247,7 +236,7 @@ class CountdownEditor extends ExtendedHtmlElement {
       this.updateAddButtonState();
 
       // Close modal
-      this.shadowRoot.querySelector('.modal-backdrop').classList.add('hidden');
+      this.#modal.close();
     } catch (error) {
       console.error('Failed to create tracker:', error);
       alert(`Error: ${error}`);
@@ -336,15 +325,8 @@ class CountdownEditor extends ExtendedHtmlElement {
         </div>
         ${currentLabel ? `<div class="current-label">${currentLabel}</div>` : ''}
         <div class="delete-section">
-          <div class="delete-backdrop hidden"></div>
           <button class="delete" data-id="${tracker.id}">Delete</button>
-          <div class="delete-confirmation hidden">
-            <p class="delete-message">Delete this tracker?</p>
-            <div class="delete-actions">
-              <button class="delete-yes">Yes</button>
-              <button class="delete-no">No</button>
-            </div>
-          </div>
+          <confirm-dialog></confirm-dialog>
         </div>
       `;
 
@@ -357,38 +339,18 @@ class CountdownEditor extends ExtendedHtmlElement {
         this.updateTrackerValue(tracker.id, 1);
       });
 
-      trackerEl.querySelector('.delete').addEventListener('click', (e) => {
-        const deleteBtn = e.target;
-        const backdrop = trackerEl.querySelector('.delete-backdrop');
-        const confirmation = trackerEl.querySelector('.delete-confirmation');
+      trackerEl.querySelector('.delete').addEventListener('click', async () => {
+        const confirmDialog = trackerEl.querySelector('confirm-dialog');
+        const confirmed = await confirmDialog.show({
+          message: `Are you sure you want to delete "${tracker.name}"?`,
+          confirmText: 'Delete',
+          cancelText: 'Cancel',
+          variant: 'danger'
+        });
 
-        backdrop.classList.remove('hidden');
-        backdrop.classList.remove('fade-out');
-        backdrop.classList.add('fade-in');
-
-        confirmation.classList.remove('hidden');
-        confirmation.classList.remove('slide-up');
-        confirmation.classList.add('slide-down');
-      });
-
-      trackerEl.querySelector('.delete-yes').addEventListener('click', () => {
-        const deleteBtn = trackerEl.querySelector('.delete');
-        this.deleteTracker(tracker.id, tracker.name, deleteBtn);
-      });
-
-      trackerEl.querySelector('.delete-no').addEventListener('click', () => {
-        const backdrop = trackerEl.querySelector('.delete-backdrop');
-        const confirmation = trackerEl.querySelector('.delete-confirmation');
-
-        backdrop.classList.remove('fade-in');
-        backdrop.classList.add('fade-out');
-        confirmation.classList.remove('slide-down');
-        confirmation.classList.add('slide-up');
-
-        setTimeout(() => {
-          backdrop.classList.add('hidden');
-          confirmation.classList.add('hidden');
-        }, 300);
+        if (confirmed) {
+          this.deleteTracker(tracker.id, tracker.name);
+        }
       });
 
       trackerEl.querySelector('.visibility-checkbox').addEventListener('change', e => {

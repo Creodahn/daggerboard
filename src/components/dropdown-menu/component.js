@@ -56,7 +56,6 @@ class DropdownMenu extends ExtendedHtmlElement {
   closeDropdown() {
     this.#isOpen = false;
     this.removeAttribute('open');
-    this.#content.style.display = 'none';
   }
 
   positionContent() {

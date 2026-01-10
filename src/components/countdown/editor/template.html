@@ -1,36 +1,30 @@
 <div class="countdown-editor">
-  <div class="modal-backdrop hidden">
-    <div class="modal-content">
-      <div class="countdown-creator">
-        <div class="creator-header">
-          <h3>Create Countdown Tracker</h3>
-          <button class="close-modal" aria-label="Close">&times;</button>
-        </div>
-        <form class="create-form">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" name="name" id="name" placeholder="e.g., Round Timer" required>
-            <span class="error-message" data-for="name">Name is required</span>
-          </div>
+  <modal-dialog title="Create Countdown Tracker">
+    <form class="create-form">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" placeholder="e.g., Round Timer" required>
+        <span class="error-message" data-for="name">Name is required</span>
+      </div>
 
-          <div class="form-group">
-            <label for="max">Maximum Value</label>
-            <input type="number" name="max" id="max" min="1" value="10" required>
-            <span class="error-message" data-for="max">Maximum value must be greater than 0</span>
-          </div>
+      <div class="form-group">
+        <label for="max">Maximum Value</label>
+        <input type="number" name="max" id="max" min="1" value="10" required>
+        <span class="error-message" data-for="max">Maximum value must be greater than 0</span>
+      </div>
 
-          <div class="form-group">
-            <label>Tick Labels (optional)</label>
-            <div class="tick-labels-container"></div>
-            <button type="button" class="add-tick-label">+ Add Label</button>
-          </div>
+      <div class="form-group">
+        <label>Tick Labels (optional)</label>
+        <div class="tick-labels-container"></div>
+        <button type="button" class="add-tick-label">+ Add Label</button>
+      </div>
 
-          <div class="form-group checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" name="visibleToPlayers" id="visibleToPlayers">
-              <span>Visible to Players</span>
-            </label>
-          </div>
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" name="visibleToPlayers" id="visibleToPlayers">
+          <span>Visible to Players</span>
+        </label>
+      </div>
 
       <div class="form-group checkbox-group">
         <label class="checkbox-label">
@@ -41,9 +35,7 @@
 
       <button type="button" class="create">Create Tracker</button>
     </form>
-      </div>
-    </div>
-  </div>
+  </modal-dialog>
 
   <section class="trackers-section">
     <div class="list-header">

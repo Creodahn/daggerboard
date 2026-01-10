@@ -106,14 +106,7 @@ class EntityItem extends ExtendedHtmlElement {
         </dropdown-menu>
       </div>
 
-      <div class="delete-backdrop hidden"></div>
-      <div class="delete-confirmation hidden">
-        <p class="delete-message">Are you sure you want to delete?</p>
-        <div class="delete-actions">
-          <button class="delete-yes">Yes</button>
-          <button class="delete-no">No</button>
-        </div>
-      </div>
+      <confirm-dialog></confirm-dialog>
     `;
 
     this.attachEventListeners();
@@ -180,40 +173,26 @@ class EntityItem extends ExtendedHtmlElement {
 
     // Delete menu item
     const deleteMenuItem = container.querySelector('dropdown-menu-item[variant="delete"]');
-    const deleteConfirmation = container.querySelector('.delete-confirmation');
-    const deleteBackdrop = container.querySelector('.delete-backdrop');
-    const deleteYesBtn = container.querySelector('.delete-yes');
-    const deleteNoBtn = container.querySelector('.delete-no');
+    const confirmDialog = container.querySelector('confirm-dialog');
 
-    deleteMenuItem.addEventListener('menu-item-click', () => {
-      deleteBackdrop.classList.remove('hidden');
-      deleteConfirmation.classList.remove('hidden');
-      deleteConfirmation.classList.remove('slide-up');
-    });
+    deleteMenuItem.addEventListener('menu-item-click', async () => {
+      const confirmed = await confirmDialog.show({
+        message: `Are you sure you want to delete "${this.#entity.name}"?`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger'
+      });
 
-    deleteNoBtn.addEventListener('click', () => {
-      deleteConfirmation.classList.add('slide-up');
-      deleteBackdrop.classList.add('fade-out');
-      setTimeout(() => {
-        deleteConfirmation.classList.add('hidden');
-        deleteBackdrop.classList.add('hidden');
-        deleteConfirmation.classList.remove('slide-up');
-        deleteBackdrop.classList.remove('fade-out');
-      }, 300);
-    });
-
-    deleteYesBtn.addEventListener('click', () => {
-      deleteYesBtn.disabled = true;
-      deleteYesBtn.textContent = 'Deleting...';
-      container.classList.add('fade-out');
-
-      setTimeout(() => {
-        this.dispatchEvent(new CustomEvent('delete', {
-          bubbles: true,
-          composed: true,
-          detail: { id: this.#entity.id, name: this.#entity.name }
-        }));
-      }, 300);
+      if (confirmed) {
+        container.classList.add('fade-out');
+        setTimeout(() => {
+          this.dispatchEvent(new CustomEvent('delete', {
+            bubbles: true,
+            composed: true,
+            detail: { id: this.#entity.id, name: this.#entity.name }
+          }));
+        }, 300);
+      }
     });
   }
 }
