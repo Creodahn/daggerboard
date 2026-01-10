@@ -17,8 +17,12 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            // Fear tracker commands
             fear_tracker::get_fear_level,
             fear_tracker::set_fear_level,
+            fear_tracker::adjust_fear_level,
+            fear_tracker::reset_fear_level,
+            // Countdown tracker commands
             countdown::create_tracker,
             countdown::update_tracker_value,
             countdown::set_tracker_value,
@@ -28,6 +32,8 @@ pub fn run() {
             countdown::get_trackers,
             countdown::set_tick_label,
             countdown::remove_tick_label,
+            countdown::set_all_trackers_visibility,
+            // Entity commands
             entity::create_entity,
             entity::delete_entity,
             entity::get_entities,
@@ -36,7 +42,8 @@ pub fn run() {
             entity::apply_damage,
             entity::update_entity_thresholds,
             entity::update_entity_name,
-            entity::toggle_entity_visibility
+            entity::toggle_entity_visibility,
+            entity::set_all_entities_visibility,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

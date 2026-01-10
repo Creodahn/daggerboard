@@ -1,9 +1,12 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Mutex;
-use tauri::{Emitter, Manager, State};
-use tauri_plugin_store::StoreExt;
+use tauri::{Manager, State};
 use uuid::Uuid;
+
+use super::error::{AppError, AppResult};
+use super::persistence::{self, Persistable};
+use super::state_manager::{delete_and_persist, lock_or_error, mutate_and_persist, read_items};
 
 // ============================================================================
 // Types & State
@@ -40,6 +43,22 @@ struct TrackersPayload {
     trackers: Vec<CountdownTracker>,
 }
 
+// Implement Persistable for CountdownTracker
+impl Persistable for CountdownTracker {
+    fn store_key() -> &'static str {
+        "countdownTrackers"
+    }
+
+    fn event_name() -> &'static str {
+        "trackers-updated"
+    }
+}
+
+// Helper to create the payload
+fn trackers_payload(trackers: Vec<CountdownTracker>) -> TrackersPayload {
+    TrackersPayload { trackers }
+}
+
 // ============================================================================
 // CRUD Commands
 // ============================================================================
@@ -51,14 +70,16 @@ pub fn create_tracker(
     name: String,
     max: i32,
     tracker_type: TrackerType,
-) -> Result<CountdownTracker, String> {
+    visible_to_players: Option<bool>,
+    hide_name_from_players: Option<bool>,
+) -> AppResult<CountdownTracker> {
     let tracker = CountdownTracker {
         id: Uuid::new_v4().to_string(),
         name,
         current: max,
         max,
-        visible_to_players: false,
-        hide_name_from_players: false,
+        visible_to_players: visible_to_players.unwrap_or(false),
+        hide_name_from_players: hide_name_from_players.unwrap_or(false),
         tracker_type: tracker_type.clone(),
         tick_labels: if tracker_type == TrackerType::Complex {
             Some(HashMap::new())
@@ -67,16 +88,43 @@ pub fn create_tracker(
         },
     };
 
-    let trackers_clone = {
-        let mut trackers = state.trackers.lock().unwrap();
-        trackers.push(tracker.clone());
-        trackers.clone()
-    };
+    let tracker_clone = tracker.clone();
 
-    save_trackers(&app, &trackers_clone)?;
-    emit_tracker_update(&app, &trackers_clone)?;
+    mutate_and_persist(
+        &state.trackers,
+        &app,
+        |trackers| {
+            trackers.push(tracker);
+            Ok(())
+        },
+        trackers_payload,
+    )?;
 
-    Ok(tracker)
+    Ok(tracker_clone)
+}
+
+#[tauri::command]
+pub fn delete_tracker(
+    state: State<CountdownState>,
+    app: tauri::AppHandle,
+    id: String,
+) -> AppResult<()> {
+    delete_and_persist(&state.trackers, &app, &id, |t| &t.id, trackers_payload)
+}
+
+#[tauri::command]
+pub fn get_trackers(
+    state: State<CountdownState>,
+    visible_only: bool,
+) -> AppResult<Vec<CountdownTracker>> {
+    if visible_only {
+        read_items(
+            &state.trackers,
+            Some(|t: &CountdownTracker| t.visible_to_players),
+        )
+    } else {
+        read_items::<CountdownTracker, fn(&CountdownTracker) -> bool>(&state.trackers, None)
+    }
 }
 
 // ============================================================================
@@ -89,21 +137,21 @@ pub fn update_tracker_value(
     app: tauri::AppHandle,
     id: String,
     amount: i32,
-) -> Result<CountdownTracker, String> {
-    let (tracker_clone, trackers_clone) = {
-        let mut trackers = state.trackers.lock().unwrap();
-        let tracker = trackers
-            .iter_mut()
-            .find(|t| t.id == id)
-            .ok_or("Tracker not found")?;
-        tracker.current = (tracker.current + amount).clamp(0, tracker.max);
-        (tracker.clone(), trackers.clone())
-    };
+) -> AppResult<CountdownTracker> {
+    mutate_and_persist(
+        &state.trackers,
+        &app,
+        |trackers| {
+            let tracker = trackers
+                .iter_mut()
+                .find(|t| t.id == id)
+                .ok_or_else(|| AppError::TrackerNotFound(id.clone()))?;
 
-    save_trackers(&app, &trackers_clone)?;
-    emit_tracker_update(&app, &trackers_clone)?;
-
-    Ok(tracker_clone)
+            tracker.current = (tracker.current + amount).clamp(0, tracker.max);
+            Ok(tracker.clone())
+        },
+        trackers_payload,
+    )
 }
 
 #[tauri::command]
@@ -112,25 +160,25 @@ pub fn set_tracker_value(
     app: tauri::AppHandle,
     id: String,
     value: i32,
-) -> Result<CountdownTracker, String> {
-    let (tracker_clone, trackers_clone) = {
-        let mut trackers = state.trackers.lock().unwrap();
-        let tracker = trackers
-            .iter_mut()
-            .find(|t| t.id == id)
-            .ok_or("Tracker not found")?;
-        tracker.current = value.clamp(0, tracker.max);
-        (tracker.clone(), trackers.clone())
-    };
+) -> AppResult<CountdownTracker> {
+    mutate_and_persist(
+        &state.trackers,
+        &app,
+        |trackers| {
+            let tracker = trackers
+                .iter_mut()
+                .find(|t| t.id == id)
+                .ok_or_else(|| AppError::TrackerNotFound(id.clone()))?;
 
-    save_trackers(&app, &trackers_clone)?;
-    emit_tracker_update(&app, &trackers_clone)?;
-
-    Ok(tracker_clone)
+            tracker.current = value.clamp(0, tracker.max);
+            Ok(tracker.clone())
+        },
+        trackers_payload,
+    )
 }
 
 // ============================================================================
-// Visibility & Deletion
+// Visibility Management
 // ============================================================================
 
 #[tauri::command]
@@ -139,21 +187,21 @@ pub fn toggle_tracker_visibility(
     app: tauri::AppHandle,
     id: String,
     visible: bool,
-) -> Result<CountdownTracker, String> {
-    let (tracker_clone, trackers_clone) = {
-        let mut trackers = state.trackers.lock().unwrap();
-        let tracker = trackers
-            .iter_mut()
-            .find(|t| t.id == id)
-            .ok_or("Tracker not found")?;
-        tracker.visible_to_players = visible;
-        (tracker.clone(), trackers.clone())
-    };
+) -> AppResult<CountdownTracker> {
+    mutate_and_persist(
+        &state.trackers,
+        &app,
+        |trackers| {
+            let tracker = trackers
+                .iter_mut()
+                .find(|t| t.id == id)
+                .ok_or_else(|| AppError::TrackerNotFound(id.clone()))?;
 
-    save_trackers(&app, &trackers_clone)?;
-    emit_tracker_update(&app, &trackers_clone)?;
-
-    Ok(tracker_clone)
+            tracker.visible_to_players = visible;
+            Ok(tracker.clone())
+        },
+        trackers_payload,
+    )
 }
 
 #[tauri::command]
@@ -162,61 +210,44 @@ pub fn toggle_tracker_name_visibility(
     app: tauri::AppHandle,
     id: String,
     hide_name: bool,
-) -> Result<CountdownTracker, String> {
-    let (tracker_clone, trackers_clone) = {
-        let mut trackers = state.trackers.lock().unwrap();
-        let tracker = trackers
-            .iter_mut()
-            .find(|t| t.id == id)
-            .ok_or("Tracker not found")?;
-        tracker.hide_name_from_players = hide_name;
-        (tracker.clone(), trackers.clone())
-    };
+) -> AppResult<CountdownTracker> {
+    mutate_and_persist(
+        &state.trackers,
+        &app,
+        |trackers| {
+            let tracker = trackers
+                .iter_mut()
+                .find(|t| t.id == id)
+                .ok_or_else(|| AppError::TrackerNotFound(id.clone()))?;
 
-    save_trackers(&app, &trackers_clone)?;
-    emit_tracker_update(&app, &trackers_clone)?;
-
-    Ok(tracker_clone)
+            tracker.hide_name_from_players = hide_name;
+            Ok(tracker.clone())
+        },
+        trackers_payload,
+    )
 }
 
+// ============================================================================
+// Bulk Operations
+// ============================================================================
+
 #[tauri::command]
-pub fn delete_tracker(
+pub fn set_all_trackers_visibility(
     state: State<CountdownState>,
     app: tauri::AppHandle,
-    id: String,
-) -> Result<(), String> {
-    let trackers_clone = {
-        let mut trackers = state.trackers.lock().unwrap();
-        trackers.retain(|t| t.id != id);
-        trackers.clone()
-    };
-
-    save_trackers(&app, &trackers_clone)?;
-    emit_tracker_update(&app, &trackers_clone)?;
-
-    Ok(())
-}
-
-// ============================================================================
-// Query Commands
-// ============================================================================
-
-#[tauri::command]
-pub fn get_trackers(
-    state: State<CountdownState>,
-    visible_only: bool,
-) -> Vec<CountdownTracker> {
-    let trackers = state.trackers.lock().unwrap();
-
-    if visible_only {
-        trackers
-            .iter()
-            .filter(|t| t.visible_to_players)
-            .cloned()
-            .collect()
-    } else {
-        trackers.clone()
-    }
+    visible: bool,
+) -> AppResult<Vec<CountdownTracker>> {
+    mutate_and_persist(
+        &state.trackers,
+        &app,
+        |trackers| {
+            for tracker in trackers.iter_mut() {
+                tracker.visible_to_players = visible;
+            }
+            Ok(trackers.clone())
+        },
+        trackers_payload,
+    )
 }
 
 // ============================================================================
@@ -230,33 +261,37 @@ pub fn set_tick_label(
     id: String,
     tick: i32,
     text: String,
-) -> Result<CountdownTracker, String> {
-    let (tracker_clone, trackers_clone) = {
-        let mut trackers = state.trackers.lock().unwrap();
-        let tracker = trackers
-            .iter_mut()
-            .find(|t| t.id == id)
-            .ok_or("Tracker not found")?;
+) -> AppResult<CountdownTracker> {
+    mutate_and_persist(
+        &state.trackers,
+        &app,
+        |trackers| {
+            let tracker = trackers
+                .iter_mut()
+                .find(|t| t.id == id)
+                .ok_or_else(|| AppError::TrackerNotFound(id.clone()))?;
 
-        if tracker.tracker_type != TrackerType::Complex {
-            return Err("Cannot add tick labels to simple tracker".to_string());
-        }
+            if tracker.tracker_type != TrackerType::Complex {
+                return Err(AppError::InvalidOperation(
+                    "Cannot add tick labels to simple tracker".to_string(),
+                ));
+            }
 
-        if tick < 0 || tick > tracker.max {
-            return Err(format!("Tick {} out of range (0-{})", tick, tracker.max));
-        }
+            if tick < 0 || tick > tracker.max {
+                return Err(AppError::OutOfRange(format!(
+                    "Tick {} out of range (0-{})",
+                    tick, tracker.max
+                )));
+            }
 
-        if let Some(labels) = &mut tracker.tick_labels {
-            labels.insert(tick, text);
-        }
+            if let Some(labels) = &mut tracker.tick_labels {
+                labels.insert(tick, text);
+            }
 
-        (tracker.clone(), trackers.clone())
-    };
-
-    save_trackers(&app, &trackers_clone)?;
-    emit_tracker_update(&app, &trackers_clone)?;
-
-    Ok(tracker_clone)
+            Ok(tracker.clone())
+        },
+        trackers_payload,
+    )
 }
 
 #[tauri::command]
@@ -265,55 +300,35 @@ pub fn remove_tick_label(
     app: tauri::AppHandle,
     id: String,
     tick: i32,
-) -> Result<CountdownTracker, String> {
-    let (tracker_clone, trackers_clone) = {
-        let mut trackers = state.trackers.lock().unwrap();
-        let tracker = trackers
-            .iter_mut()
-            .find(|t| t.id == id)
-            .ok_or("Tracker not found")?;
+) -> AppResult<CountdownTracker> {
+    mutate_and_persist(
+        &state.trackers,
+        &app,
+        |trackers| {
+            let tracker = trackers
+                .iter_mut()
+                .find(|t| t.id == id)
+                .ok_or_else(|| AppError::TrackerNotFound(id.clone()))?;
 
-        if let Some(labels) = &mut tracker.tick_labels {
-            labels.remove(&tick);
-        }
+            if let Some(labels) = &mut tracker.tick_labels {
+                labels.remove(&tick);
+            }
 
-        (tracker.clone(), trackers.clone())
-    };
-
-    save_trackers(&app, &trackers_clone)?;
-    emit_tracker_update(&app, &trackers_clone)?;
-
-    Ok(tracker_clone)
+            Ok(tracker.clone())
+        },
+        trackers_payload,
+    )
 }
 
 // ============================================================================
 // Persistence
 // ============================================================================
 
-fn save_trackers(app: &tauri::AppHandle, trackers: &[CountdownTracker]) -> Result<(), String> {
-    let store = app.store("store.json").map_err(|e| e.to_string())?;
-    let json_value = serde_json::to_value(trackers).map_err(|e| e.to_string())?;
-    store.set("countdownTrackers", json_value);
-    store.save().map_err(|e| e.to_string())?;
-    Ok(())
-}
-
-fn emit_tracker_update(
-    app: &tauri::AppHandle,
-    trackers: &[CountdownTracker],
-) -> Result<(), String> {
-    app.emit("trackers-updated", TrackersPayload {
-        trackers: trackers.to_vec(),
-    })
-    .map_err(|e| e.to_string())
-}
-
 pub fn load_state(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    let store = app.store("store.json")?;
-    if let Some(trackers_value) = store.get("countdownTrackers") {
-        let trackers: Vec<CountdownTracker> = serde_json::from_value(trackers_value.clone())?;
-        let countdown_state: State<CountdownState> = app.state();
-        *countdown_state.trackers.lock().unwrap() = trackers;
-    }
+    let trackers = persistence::load::<CountdownTracker>(app)?;
+    let countdown_state: State<CountdownState> = app.state();
+    *lock_or_error(&countdown_state.trackers)
+        .map_err(|e| Box::new(std::io::Error::new(std::io::ErrorKind::Other, e.to_string())))? =
+        trackers;
     Ok(())
 }

@@ -36,7 +36,7 @@ class FearTracker extends ExtendedHtmlElement {
   }
 
   changeFearLevel(amount) {
-    invoke('set_fear_level', { amount });
+    invoke('adjust_fear_level', { amount });
   }
 }
 
