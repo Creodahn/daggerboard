@@ -1,19 +1,28 @@
 mod modules;
 
-use modules::{countdown, entity, fear_tracker};
+use modules::{countdown, database::Database, entity, fear_tracker, migration};
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .manage(fear_tracker::FearTrackerState::default())
-        .manage(countdown::CountdownState::default())
-        .manage(entity::EntityState::default())
         .plugin(tauri_plugin_store::Builder::new().build())
         .setup(|app| {
-            // Load persisted state
-            fear_tracker::load_state(app)?;
-            countdown::load_state(app)?;
-            entity::load_state(app)?;
+            // Get app data directory for database
+            let app_data_dir = app.path().app_data_dir()?;
+
+            // Initialize SQLite database
+            let db = Database::new(app_data_dir)?;
+
+            // Run migration from old store.json if needed
+            db.with_conn(|conn| {
+                migration::migrate_if_needed(app, conn)
+                    .map_err(|e| modules::error::AppError::PersistenceError(e.to_string()))
+            })?;
+
+            // Manage database as state
+            app.manage(db);
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
