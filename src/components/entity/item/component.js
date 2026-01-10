@@ -32,6 +32,7 @@ class EntityItem extends ExtendedHtmlElement {
   }
 
   getHealthClass(percentage) {
+    if (percentage <= 0) return 'dead';
     if (percentage <= 25) return 'critical';
     if (percentage <= 50) return 'low';
     if (percentage <= 75) return 'medium';
@@ -60,33 +61,38 @@ class EntityItem extends ExtendedHtmlElement {
           <span class="entity-type-badge ${entity.entity_type}">${entity.entity_type === 'enemy' ? 'Enemy' : 'NPC'}</span>
           <input type="text" class="entity-name-input" value="${entity.name}">
         </div>
-        <div class="hp-section">
-          <div class="hp-bar-container">
+        <dropdown-menu class="hp-dropdown">
+          <div slot="trigger" class="hp-bar-container">
             <div class="hp-bar ${healthClass}" style="width: ${healthPercent}%"></div>
             <span class="hp-text">${entity.hp_current} / ${entity.hp_max} HP</span>
           </div>
-          <div class="hp-controls">
-            <dropdown-menu class="damage-dropdown">
-              <button slot="trigger" class="damage-trigger">⚔️ Damage</button>
-              <dropdown-menu-item slot="content" class="threshold minor" data-hp-loss="1" data-threshold="minor">
-                Minor: ${entity.thresholds.minor}
-              </dropdown-menu-item>
-              <dropdown-menu-item slot="content" class="threshold major" data-hp-loss="2" data-threshold="major">
-                Major: ${entity.thresholds.major}
-              </dropdown-menu-item>
-              <dropdown-menu-item slot="content" class="threshold severe" data-hp-loss="3" data-threshold="severe">
-                Severe: ${entity.thresholds.severe}
-              </dropdown-menu-item>
-              <dropdown-menu-item slot="content" class="threshold massive" data-hp-loss="4" data-threshold="massive">
-                Massive: ${massiveThreshold}
-              </dropdown-menu-item>
-            </dropdown-menu>
-            <div class="healing-section">
-              <input type="number" min="1" placeholder="Heal amount" class="heal-input">
-              <button class="apply-heal">Heal</button>
+          <div slot="content" class="hp-menu-content">
+            <div class="hp-menu-section damage-section">
+              <span class="section-label">⚔️ Damage</span>
+              <div class="threshold-buttons">
+                <button class="threshold minor" data-hp-loss="1" data-threshold="minor">
+                  Minor: ${entity.thresholds.minor}
+                </button>
+                <button class="threshold major" data-hp-loss="2" data-threshold="major">
+                  Major: ${entity.thresholds.major}
+                </button>
+                <button class="threshold severe" data-hp-loss="3" data-threshold="severe">
+                  Severe: ${entity.thresholds.severe}
+                </button>
+                <button class="threshold massive" data-hp-loss="4" data-threshold="massive">
+                  Massive: ${massiveThreshold}
+                </button>
+              </div>
+            </div>
+            <div class="hp-menu-section heal-section">
+              <span class="section-label">💚 Heal</span>
+              <div class="healing-controls">
+                <input type="number" min="1" placeholder="Amount" class="heal-input">
+                <button class="apply-heal">Heal</button>
+              </div>
             </div>
           </div>
-        </div>
+        </dropdown-menu>
         <dropdown-menu>
           <dropdown-menu-item slot="content">
             <label class="visibility-toggle">
@@ -122,11 +128,11 @@ class EntityItem extends ExtendedHtmlElement {
       container.classList.toggle('collapsed');
     });
 
-    // Threshold menu items
-    container.querySelectorAll('.threshold').forEach(item => {
-      item.addEventListener('menu-item-click', () => {
-        const hpLoss = parseInt(item.dataset.hpLoss);
-        const threshold = item.dataset.threshold;
+    // Threshold buttons
+    container.querySelectorAll('.threshold').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const hpLoss = parseInt(btn.dataset.hpLoss);
+        const threshold = btn.dataset.threshold;
         this.dispatchEvent(new CustomEvent('threshold-damage', {
           bubbles: true,
           composed: true,

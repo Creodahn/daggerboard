@@ -61,41 +61,91 @@
   min-width: 0;
 }
 
-.hp-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.hp-dropdown {
   flex: 1;
-  min-width: 0;
-}
-
-.hp-section .hp-bar-container {
-  flex: 1;
+  min-width: 120px;
   max-width: 200px;
-  height: 24px;
+  display: block;
 }
 
-.hp-controls {
+.hp-menu-content {
+  padding: 0.75rem;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hp-menu-section {
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
-.damage-trigger {
-  padding: 0.35rem 0.75rem;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.8rem;
+.section-label {
+  font-size: 0.75rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-  white-space: nowrap;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.damage-trigger:hover {
-  background: #c82333;
+.threshold-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.threshold {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  background: #f8f9fa;
+}
+
+.threshold:hover {
+  transform: translateX(2px);
+}
+
+.threshold.minor {
+  border-left: 3px solid #ffc107;
+}
+
+.threshold.minor:hover {
+  background: #fff3cd;
+}
+
+.threshold.major {
+  border-left: 3px solid #fd7e14;
+}
+
+.threshold.major:hover {
+  background: #ffe5d0;
+}
+
+.threshold.severe {
+  border-left: 3px solid #dc3545;
+}
+
+.threshold.severe:hover {
+  background: #f8d7da;
+}
+
+.threshold.massive {
+  border-left: 3px solid #343a40;
+  font-weight: 700;
+}
+
+.threshold.massive:hover {
+  background: #e2e3e5;
+}
+
+.healing-controls {
+  display: flex;
 }
 
 .entity-type-badge {
@@ -167,6 +217,13 @@ dropdown-menu {
   border-radius: 6px;
   height: 24px;
   overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  min-width: 120px;
+}
+
+.hp-bar-container:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .hp-bar {
@@ -192,6 +249,21 @@ dropdown-menu {
   animation: pulse-critical 0.5s ease-in-out infinite;
 }
 
+.hp-bar.dead {
+  width: 100% !important;
+  background: #8b0000;
+}
+
+.hp-bar-container:has(.hp-bar.dead) {
+  background: #8b0000;
+  box-shadow: 0 2px 8px rgba(139, 0, 0, 0.5);
+}
+
+.hp-bar-container:has(.hp-bar.dead) .hp-text {
+  color: #ffcccc;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
 .hp-text {
   position: absolute;
   top: 50%;
@@ -204,16 +276,13 @@ dropdown-menu {
   white-space: nowrap;
 }
 
-.healing-section {
-  display: flex;
-}
-
 .heal-input {
   flex: 1;
   padding: 0.5rem;
   border: 1px solid #28a745;
   border-radius: 4px 0 0 4px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  min-width: 0;
 }
 
 .heal-input:focus {
@@ -225,15 +294,17 @@ dropdown-menu {
 }
 
 .apply-heal {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   background: #28a745;
   color: white;
   border: 1px solid #28a745;
   border-left: none;
   border-radius: 0 4px 4px 0;
   font-weight: 600;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: background 0.2s;
+  white-space: nowrap;
 }
 
 .apply-heal:hover {
@@ -241,39 +312,6 @@ dropdown-menu {
   border-color: #218838;
 }
 
-/* Threshold menu items get colored indicators */
-.threshold.minor::part(button) {
-  border-left: 3px solid #ffc107;
-}
-
-.threshold.minor:hover::part(button) {
-  background: #fff3cd;
-}
-
-.threshold.major::part(button) {
-  border-left: 3px solid #fd7e14;
-}
-
-.threshold.major:hover::part(button) {
-  background: #ffe5d0;
-}
-
-.threshold.severe::part(button) {
-  border-left: 3px solid #dc3545;
-}
-
-.threshold.severe:hover::part(button) {
-  background: #f8d7da;
-}
-
-.threshold.massive::part(button) {
-  border-left: 3px solid #343a40;
-  font-weight: 700;
-}
-
-.threshold.massive:hover::part(button) {
-  background: #e2e3e5;
-}
 
 .delete-backdrop {
   position: absolute;
