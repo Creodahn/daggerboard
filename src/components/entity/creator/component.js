@@ -5,32 +5,30 @@ const { invoke } = window.__TAURI__.core;
 class EntityCreator extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #modal;
-  #nameInput;
+  #nameField;
   #entityTypeSelect;
-  #hpMaxInput;
-  #minorInput;
-  #majorInput;
-  #severeInput;
-  #createButton;
+  #hpMaxField;
+  #minorField;
+  #majorField;
+  #severeField;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
   async setup() {
     // Get DOM elements
     this.#modal = this.shadowRoot.querySelector('modal-dialog');
-    this.#nameInput = this.shadowRoot.querySelector('input[name="name"]');
+    this.#nameField = this.shadowRoot.querySelector('form-field[name="name"]');
     this.#entityTypeSelect = this.shadowRoot.querySelector('select[name="entity-type"]');
-    this.#hpMaxInput = this.shadowRoot.querySelector('input[name="hp-max"]');
-    this.#minorInput = this.shadowRoot.querySelector('input[name="minor"]');
-    this.#majorInput = this.shadowRoot.querySelector('input[name="major"]');
-    this.#severeInput = this.shadowRoot.querySelector('input[name="severe"]');
-    this.#createButton = this.shadowRoot.querySelector('button.create');
+    this.#hpMaxField = this.shadowRoot.querySelector('form-field[name="hp-max"]');
+    this.#minorField = this.shadowRoot.querySelector('form-field[name="minor"]');
+    this.#majorField = this.shadowRoot.querySelector('form-field[name="major"]');
+    this.#severeField = this.shadowRoot.querySelector('form-field[name="severe"]');
 
     // Listen for open event from entity list
     document.addEventListener('open-entity-creator', () => {
       this.#modal.open();
       // Focus name input after modal opens
-      setTimeout(() => this.#nameInput.focus(), 100);
+      setTimeout(() => this.#nameField.focus(), 100);
     });
 
     // Setup form submit handler (handles both Enter key and button click)
@@ -38,80 +36,57 @@ class EntityCreator extends ExtendedHtmlElement {
       e.preventDefault();
       this.createEntity();
     });
-
-    // Clear errors on input
-    this.#nameInput.addEventListener('input', () => this.clearError(this.#nameInput));
-    this.#hpMaxInput.addEventListener('input', () => this.clearError(this.#hpMaxInput));
-    this.#minorInput.addEventListener('input', () => this.clearError(this.#minorInput));
-    this.#majorInput.addEventListener('input', () => this.clearError(this.#majorInput));
-    this.#severeInput.addEventListener('input', () => this.clearError(this.#severeInput));
-  }
-
-  showError(input, message) {
-    input.classList.add('error');
-    const errorMsg = this.shadowRoot.querySelector(`[data-for="${input.name}"]`);
-    if (errorMsg) {
-      if (message) {
-        errorMsg.textContent = message;
-      }
-      errorMsg.classList.add('show');
-    }
-  }
-
-  clearError(input) {
-    input.classList.remove('error');
-    const errorMsg = this.shadowRoot.querySelector(`[data-for="${input.name}"]`);
-    if (errorMsg) {
-      errorMsg.classList.remove('show');
-    }
   }
 
   clearAllErrors() {
-    this.shadowRoot.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-    this.shadowRoot.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+    this.#nameField?.clearError();
+    this.#hpMaxField?.clearError();
+    this.#minorField?.clearError();
+    this.#majorField?.clearError();
+    this.#severeField?.clearError();
   }
 
   async createEntity() {
     this.clearAllErrors();
 
-    const name = this.#nameInput.value.trim();
+    const name = this.#nameField.value.trim();
     const entityType = this.#entityTypeSelect.value;
-    const hpMax = parseInt(this.#hpMaxInput.value);
-    const minor = parseInt(this.#minorInput.value);
-    const major = parseInt(this.#majorInput.value);
-    const severe = parseInt(this.#severeInput.value);
+    const hpMax = parseInt(this.#hpMaxField.value);
+    const minor = parseInt(this.#minorField.value);
+    const major = parseInt(this.#majorField.value);
+    const severe = parseInt(this.#severeField.value);
 
     let hasError = false;
 
     if (!name) {
-      this.showError(this.#nameInput);
+      this.#nameField.showError();
       hasError = true;
     }
 
     if (isNaN(hpMax) || hpMax <= 0) {
-      this.showError(this.#hpMaxInput);
+      this.#hpMaxField.showError();
       hasError = true;
     }
 
     if (isNaN(minor) || minor <= 0) {
-      this.showError(this.#minorInput);
+      this.#minorField.showError();
       hasError = true;
     }
 
     if (isNaN(major) || major <= 0) {
-      this.showError(this.#majorInput);
+      this.#majorField.showError();
       hasError = true;
     }
 
     if (isNaN(severe) || severe <= 0) {
-      this.showError(this.#severeInput);
+      this.#severeField.showError();
       hasError = true;
     }
 
     if (!hasError && (minor >= major || major >= severe)) {
-      this.showError(this.#minorInput, 'Thresholds must be in ascending order');
-      this.showError(this.#majorInput, 'Minor < Major < Severe');
-      this.showError(this.#severeInput, 'Minor < Major < Severe');
+      this.#minorField.showError('Thresholds must be in ascending order');
+      this.#majorField.showError('Minor < Major < Severe');
+      this.#severeField.showError('Minor < Major < Severe');
       hasError = true;
     }
 
@@ -130,11 +105,11 @@ class EntityCreator extends ExtendedHtmlElement {
       });
 
       // Reset form
-      this.#nameInput.value = '';
-      this.#hpMaxInput.value = '20';
-      this.#minorInput.value = '5';
-      this.#majorInput.value = '10';
-      this.#severeInput.value = '15';
+      this.#nameField.value = '';
+      this.#hpMaxField.value = '20';
+      this.#minorField.value = '5';
+      this.#majorField.value = '10';
+      this.#severeField.value = '15';
 
       // Close modal
       this.#modal.close();

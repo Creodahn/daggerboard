@@ -83,9 +83,13 @@ class EntityList extends ExtendedHtmlElement {
   }
 
   async handleVisibilityChange(event) {
-    const { id, visible } = event.detail;
+    // Handle both old format (id, visible) and new visibility-toggle format (entityId, checked)
+    const { entityId, checked, id, visible } = event.detail;
+    const entityIdToUse = entityId || id;
+    const visibleToUse = checked !== undefined ? checked : visible;
+
     try {
-      await invoke('toggle_entity_visibility', { id, visible });
+      await invoke('toggle_entity_visibility', { id: entityIdToUse, visible: visibleToUse });
     } catch (error) {
       console.error('Failed to toggle visibility:', error);
     }
@@ -108,7 +112,7 @@ class EntityList extends ExtendedHtmlElement {
     this.#entitiesList.innerHTML = '';
 
     if (this.entities.length === 0) {
-      this.#entitiesList.innerHTML = '<p class="empty">No entities created yet</p>';
+      this.#entitiesList.innerHTML = '<empty-state message="No entities created yet"></empty-state>';
       return;
     }
 

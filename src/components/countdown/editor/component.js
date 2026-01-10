@@ -6,10 +6,10 @@ const { listen } = window.__TAURI__.event;
 class CountdownEditor extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #modal;
-  #nameInput;
-  #maxInput;
-  #visibleCheckbox;
-  #hideNameCheckbox;
+  #nameField;
+  #maxField;
+  #visibleToggle;
+  #hideNameToggle;
   #createButton;
   #trackersList;
   #tickLabelsContainer;
@@ -22,10 +22,10 @@ class CountdownEditor extends ExtendedHtmlElement {
   async setup() {
     // Get DOM elements
     this.#modal = this.shadowRoot.querySelector('modal-dialog');
-    this.#nameInput = this.shadowRoot.querySelector('input[name="name"]');
-    this.#maxInput = this.shadowRoot.querySelector('input[name="max"]');
-    this.#visibleCheckbox = this.shadowRoot.querySelector('input[name="visibleToPlayers"]');
-    this.#hideNameCheckbox = this.shadowRoot.querySelector('input[name="hideNameFromPlayers"]');
+    this.#nameField = this.shadowRoot.querySelector('form-field[name="name"]');
+    this.#maxField = this.shadowRoot.querySelector('form-field[name="max"]');
+    this.#visibleToggle = this.shadowRoot.querySelector('visibility-toggle[name="visibleToPlayers"]');
+    this.#hideNameToggle = this.shadowRoot.querySelector('toggle-switch[name="hideNameFromPlayers"]');
     this.#createButton = this.shadowRoot.querySelector('button.create');
     this.#trackersList = this.shadowRoot.querySelector('.trackers-list');
     this.#tickLabelsContainer = this.shadowRoot.querySelector('.tick-labels-container');
@@ -36,7 +36,7 @@ class CountdownEditor extends ExtendedHtmlElement {
     // Open modal handler
     openBtn.addEventListener('click', () => {
       this.#modal.open();
-      setTimeout(() => this.#nameInput.focus(), 100);
+      setTimeout(() => this.#nameField.focus(), 100);
     });
 
     // Load existing trackers
@@ -45,11 +45,9 @@ class CountdownEditor extends ExtendedHtmlElement {
     // Setup event listeners
     this.#createButton.addEventListener('click', () => this.createTracker());
     this.#addTickLabelBtn.addEventListener('click', () => this.addTickLabelEntry());
-    this.#maxInput.addEventListener('input', () => this.updateTickLabelLimit());
 
-    // Clear errors on input
-    this.#nameInput.addEventListener('input', () => this.clearError(this.#nameInput));
-    this.#maxInput.addEventListener('input', () => this.clearError(this.#maxInput));
+    // Listen for max field changes to update tick label limits
+    this.#maxField.addEventListener('field-input', () => this.updateTickLabelLimit());
 
     // Add first tick label entry by default
     this.addTickLabelEntry();
@@ -71,7 +69,7 @@ class CountdownEditor extends ExtendedHtmlElement {
   }
 
   addTickLabelEntry() {
-    const max = parseInt(this.#maxInput.value) || 10;
+    const max = parseInt(this.#maxField.value) || 10;
 
     if (this.#tickLabelEntries.length >= max) {
       alert(`Cannot add more than ${max} tick labels (maximum value)`);
@@ -107,7 +105,7 @@ class CountdownEditor extends ExtendedHtmlElement {
   }
 
   updateTickLabelLimit() {
-    const max = parseInt(this.#maxInput.value) || 10;
+    const max = parseInt(this.#maxField.value) || 10;
     this.shadowRoot.querySelectorAll('.tick-input').forEach(input => {
       input.max = max;
     });
@@ -115,32 +113,13 @@ class CountdownEditor extends ExtendedHtmlElement {
   }
 
   updateAddButtonState() {
-    const max = parseInt(this.#maxInput.value) || 10;
+    const max = parseInt(this.#maxField.value) || 10;
     this.#addTickLabelBtn.disabled = this.#tickLabelEntries.length >= max;
   }
 
-  showError(input, message) {
-    input.classList.add('error');
-    const errorMsg = this.shadowRoot.querySelector(`[data-for="${input.name}"]`);
-    if (errorMsg) {
-      if (message) {
-        errorMsg.textContent = message;
-      }
-      errorMsg.classList.add('show');
-    }
-  }
-
-  clearError(input) {
-    input.classList.remove('error');
-    const errorMsg = this.shadowRoot.querySelector(`[data-for="${input.name}"]`);
-    if (errorMsg) {
-      errorMsg.classList.remove('show');
-    }
-  }
-
   clearAllErrors() {
-    this.shadowRoot.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
-    this.shadowRoot.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+    this.#nameField?.clearError();
+    this.#maxField?.clearError();
   }
 
   getTickLabels() {
@@ -161,10 +140,10 @@ class CountdownEditor extends ExtendedHtmlElement {
   async createTracker() {
     this.clearAllErrors();
 
-    const name = this.#nameInput.value.trim();
-    const max = parseInt(this.#maxInput.value);
-    const visibleToPlayers = this.#visibleCheckbox.checked;
-    const hideNameFromPlayers = this.#hideNameCheckbox.checked;
+    const name = this.#nameField.value.trim();
+    const max = parseInt(this.#maxField.value);
+    const visibleToPlayers = this.#visibleToggle.checked;
+    const hideNameFromPlayers = this.#hideNameToggle.checked;
     const tickLabels = this.getTickLabels();
     const hasLabels = Object.keys(tickLabels).length > 0;
     const trackerType = hasLabels ? 'complex' : 'simple';
@@ -172,12 +151,12 @@ class CountdownEditor extends ExtendedHtmlElement {
     let hasError = false;
 
     if (!name) {
-      this.showError(this.#nameInput);
+      this.#nameField.showError();
       hasError = true;
     }
 
     if (isNaN(max) || max <= 0) {
-      this.showError(this.#maxInput);
+      this.#maxField.showError();
       hasError = true;
     }
 
@@ -227,10 +206,10 @@ class CountdownEditor extends ExtendedHtmlElement {
       }
 
       // Reset form
-      this.#nameInput.value = '';
-      this.#maxInput.value = '10';
-      this.#visibleCheckbox.checked = false;
-      this.#hideNameCheckbox.checked = false;
+      this.#nameField.value = '';
+      this.#maxField.value = '10';
+      this.#visibleToggle.checked = false;
+      this.#hideNameToggle.checked = false;
       this.#tickLabelsContainer.innerHTML = '';
       this.#tickLabelEntries = [];
       this.updateAddButtonState();
@@ -290,7 +269,7 @@ class CountdownEditor extends ExtendedHtmlElement {
     this.#trackersList.innerHTML = '';
 
     if (this.trackers.length === 0) {
-      this.#trackersList.innerHTML = '<p class="empty">No trackers yet</p>';
+      this.#trackersList.innerHTML = '<empty-state message="No trackers yet"></empty-state>';
       return;
     }
 
@@ -306,22 +285,12 @@ class CountdownEditor extends ExtendedHtmlElement {
       trackerEl.innerHTML = `
         <div class="tracker-header">
           <h4>${tracker.name}</h4>
-          <span class="tracker-type ${tracker.tracker_type}">${tracker.tracker_type.toUpperCase()}</span>
+          <type-badge type="${tracker.tracker_type}" label="${tracker.tracker_type.toUpperCase()}"></type-badge>
         </div>
         <div class="tracker-controls">
-          <div class="value-controls">
-            <button class="decrease" data-id="${tracker.id}">-</button>
-            <span class="value">${tracker.current} / ${tracker.max}</span>
-            <button class="increase" data-id="${tracker.id}">+</button>
-          </div>
-          <label class="visibility-toggle">
-            <input type="checkbox" class="visibility-checkbox" data-id="${tracker.id}" ${tracker.visible_to_players ? 'checked' : ''}>
-            <span>Visible to Players</span>
-          </label>
-          <label class="hide-name-toggle">
-            <input type="checkbox" class="hide-name-checkbox" data-id="${tracker.id}" ${tracker.hide_name_from_players ? 'checked' : ''}>
-            <span>Hide Name from Players</span>
-          </label>
+          <counter-control value="${tracker.current}" min="0" max="${tracker.max}" show-max="${tracker.max}" data-tracker-id="${tracker.id}"></counter-control>
+          <visibility-toggle entity-id="${tracker.id}" ${tracker.visible_to_players ? 'checked' : ''}></visibility-toggle>
+          <toggle-switch name="hide-name-${tracker.id}" label="🙈 Hide Name from Players" ${tracker.hide_name_from_players ? 'checked' : ''}></toggle-switch>
         </div>
         ${currentLabel ? `<div class="current-label">${currentLabel}</div>` : ''}
         <div class="delete-section">
@@ -331,12 +300,8 @@ class CountdownEditor extends ExtendedHtmlElement {
       `;
 
       // Attach event listeners
-      trackerEl.querySelector('.decrease').addEventListener('click', () => {
-        this.updateTrackerValue(tracker.id, -1);
-      });
-
-      trackerEl.querySelector('.increase').addEventListener('click', () => {
-        this.updateTrackerValue(tracker.id, 1);
+      trackerEl.querySelector('counter-control').addEventListener('counter-change', e => {
+        this.updateTrackerValue(tracker.id, e.detail.delta);
       });
 
       trackerEl.querySelector('.delete').addEventListener('click', async () => {
@@ -353,15 +318,15 @@ class CountdownEditor extends ExtendedHtmlElement {
         }
       });
 
-      trackerEl.querySelector('.visibility-checkbox').addEventListener('change', e => {
-        this.toggleVisibility(tracker.id, e.target.checked);
+      trackerEl.querySelector('visibility-toggle').addEventListener('visibility-change', e => {
+        this.toggleVisibility(e.detail.entityId, e.detail.checked);
       });
 
-      trackerEl.querySelector('.hide-name-checkbox').addEventListener('change', async e => {
+      trackerEl.querySelector(`toggle-switch[name="hide-name-${tracker.id}"]`).addEventListener('toggle-change', async e => {
         try {
           await invoke('toggle_tracker_name_visibility', {
             id: tracker.id,
-            hideName: e.target.checked,
+            hideName: e.detail.checked,
           });
         } catch (error) {
           console.error('Failed to toggle name visibility:', error);

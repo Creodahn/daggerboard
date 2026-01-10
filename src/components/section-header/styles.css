@@ -1,0 +1,56 @@
+:host {
+  display: block;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.action-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Default action button styling */
+::slotted(button) {
+  padding: 0.5rem 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+::slotted(button:hover) {
+  background: #0056b3;
+}
+
+/* Variant support via attribute */
+:host([variant="success"]) ::slotted(button) {
+  background: #28a745;
+}
+
+:host([variant="success"]) ::slotted(button:hover) {
+  background: #218838;
+}
+
+:host([variant="danger"]) ::slotted(button) {
+  background: #dc3545;
+}
+
+:host([variant="danger"]) ::slotted(button:hover) {
+  background: #c82333;
+}

@@ -4,34 +4,35 @@ const { listen } = window.__TAURI__.event;
 
 class FearTracker extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
-  #addButton;
-  #fearDisplay;
-  #subtractButton;
+  #counter;
   fearLevel = 0;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
   async setup() {
-    this.#addButton = this.shadowRoot.querySelector('button.add');
-    this.#fearDisplay = this.shadowRoot.querySelector('h3.value');
-    this.#subtractButton = this.shadowRoot.querySelector('button.subtract');
+    this.#counter = this.shadowRoot.querySelector('counter-control');
+
+    // If no-controls mode, set counter to display-only
+    if (this.hasAttribute('no-controls')) {
+      this.#counter.setAttribute('display-only', '');
+    }
 
     // Load initial state from Rust
     this.fearLevel = await invoke('get_fear_level');
-    this.#fearDisplay.textContent = this.fearLevel;
+    this.#counter.value = this.fearLevel;
 
-    this.#addButton.addEventListener('click', () => {
-      this.changeFearLevel(1);
-    });
+    // Listen for counter changes (only if controls are enabled)
+    if (!this.hasAttribute('no-controls')) {
+      this.#counter.addEventListener('counter-change', e => {
+        this.changeFearLevel(e.detail.delta);
+      });
+    }
 
-    this.#subtractButton.addEventListener('click', () => {
-      this.changeFearLevel(-1);
-    });
-
+    // Listen for backend updates
     await listen('fear-level-updated', event => {
       console.log(event);
       this.fearLevel = event.payload.level;
-      this.#fearDisplay.textContent = this.fearLevel;
+      this.#counter.value = this.fearLevel;
     });
   }
 

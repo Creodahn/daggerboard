@@ -1,17 +1,15 @@
-:host([no-controls]) .controls {
-  display: none;
-}
+/* no-controls mode handled via display-only attribute on counter-control */
 
 :host {
   align-items: center;
   border: 1px solid red;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
   text-align: center;
-  width: fit-content
+  width: fit-content;
 }
 
 :host([inline]) {
@@ -28,53 +26,31 @@
   font-weight: 600;
 }
 
-:host([inline]) .value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  min-width: 2rem;
-  text-align: center;
+:host([inline]) counter-control {
+  --counter-size: compact;
 }
 
-:host([inline]) .controls {
+.fear-tracker {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+:host([inline]) .fear-tracker {
+  flex-direction: row;
   gap: 0.5rem;
 }
 
-:host([inline]) button {
-  width: 1.5rem;
-  height: 1.5rem;
-  font-size: 0.875rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-h2, h3 {
+h2 {
   margin: 0;
 }
 
-.label,
-.value {
-  color: red;
-}
-
 .label {
+  color: red;
   text-transform: uppercase;
 }
 
-button {
-  border: none;
-  border-radius: 4px;
-  color: white;
-  cursor: pointer;
-  font-size: 1.5rem;
-
-  &.add {
-    background-color: green;
-  }
-
-  &.subtract {
-    background-color: red;
-  }
+counter-control {
+  --counter-value-color: red;
 }

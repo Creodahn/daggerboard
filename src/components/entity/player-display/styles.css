@@ -10,12 +10,7 @@
   gap: 1.5rem;
 }
 
-.empty-message {
-  text-align: center;
-  color: #6c757d;
-  font-style: italic;
-  margin: 2rem 0;
-}
+/* Empty state handled by empty-state component */
 
 .entity-section {
   display: flex;

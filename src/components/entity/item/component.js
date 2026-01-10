@@ -58,7 +58,7 @@ class EntityItem extends ExtendedHtmlElement {
               <path d="M4 6l4 4 4-4z"/>
             </svg>
           </button>
-          <span class="entity-type-badge ${entity.entity_type}">${entity.entity_type === 'enemy' ? 'Enemy' : 'NPC'}</span>
+          <type-badge type="${entity.entity_type}" label="${entity.entity_type === 'enemy' ? 'Enemy' : 'NPC'}" variant="pill"></type-badge>
           <input type="text" class="entity-name-input" value="${entity.name}">
         </div>
         <dropdown-menu class="hp-dropdown">
@@ -95,10 +95,7 @@ class EntityItem extends ExtendedHtmlElement {
         </dropdown-menu>
         <dropdown-menu>
           <dropdown-menu-item slot="content">
-            <label class="visibility-toggle">
-              <input type="checkbox" ${entity.visible_to_players ? 'checked' : ''}>
-              <span>👁️ Visible to Players</span>
-            </label>
+            <visibility-toggle entity-id="${entity.id}" ${entity.visible_to_players ? 'checked' : ''} compact></visibility-toggle>
           </dropdown-menu-item>
           <dropdown-menu-item slot="content" variant="delete">
             <span>🗑️ Delete Entity</span>
@@ -162,14 +159,8 @@ class EntityItem extends ExtendedHtmlElement {
       }, 500);
     });
 
-    // Visibility checkbox
-    container.querySelector('input[type="checkbox"]').addEventListener('change', e => {
-      this.dispatchEvent(new CustomEvent('visibility-change', {
-        bubbles: true,
-        composed: true,
-        detail: { id: this.#entity.id, visible: e.target.checked }
-      }));
-    });
+    // Visibility toggle - event bubbles up from visibility-toggle component
+    // The visibility-change event is already dispatched by the component with entityId
 
     // Delete menu item
     const deleteMenuItem = container.querySelector('dropdown-menu-item[variant="delete"]');

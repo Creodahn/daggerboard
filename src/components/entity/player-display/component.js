@@ -103,7 +103,7 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
     }
 
     if (enemies.length === 0 && npcs.length === 0) {
-      html = '<p class="empty-message">No visible entities</p>';
+      html = '<empty-state message="No visible entities"></empty-state>';
     }
 
     container.innerHTML = html;

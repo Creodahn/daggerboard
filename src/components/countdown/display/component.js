@@ -46,7 +46,7 @@ class CountdownDisplay extends ExtendedHtmlElement {
     this.#countdownsList.innerHTML = '';
 
     if (this.trackers.length === 0) {
-      this.#countdownsList.innerHTML = '<p class="empty">No active countdowns</p>';
+      this.#countdownsList.innerHTML = '<empty-state message="No active countdowns"></empty-state>';
       return;
     }
 

@@ -148,24 +148,7 @@
   display: flex;
 }
 
-.entity-type-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.entity-type-badge.enemy {
-  background: #dc3545;
-  color: white;
-}
-
-.entity-type-badge.npc {
-  background: #28a745;
-  color: white;
-}
+/* Type badge handled by type-badge component */
 
 .entity-name-input {
   border: 1px solid transparent;
@@ -199,17 +182,7 @@ dropdown-menu {
   z-index: 1;
 }
 
-.visibility-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  user-select: none;
-}
-
-.visibility-toggle input[type="checkbox"] {
-  cursor: pointer;
-}
+/* Visibility toggle handled by visibility-toggle component */
 
 .hp-bar-container {
   position: relative;

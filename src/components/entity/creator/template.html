@@ -1,10 +1,13 @@
 <modal-dialog title="Create Entity">
   <form class="create-form">
-    <div class="form-group">
-      <label for="name">Name</label>
-      <input type="text" name="name" id="name" placeholder="e.g., Goblin Scout" required>
-      <span class="error-message" data-for="name">Name is required</span>
-    </div>
+    <form-field
+      name="name"
+      label="Name"
+      type="text"
+      placeholder="e.g., Goblin Scout"
+      required
+      error-message="Name is required"
+    ></form-field>
 
     <div class="form-group">
       <label for="entity-type">Type</label>
@@ -14,32 +17,48 @@
       </select>
     </div>
 
-    <div class="form-group">
-      <label for="hp-max">Max HP</label>
-      <input type="number" name="hp-max" id="hp-max" min="1" value="20" required>
-      <span class="error-message" data-for="hp-max">Max HP must be greater than 0</span>
-    </div>
+    <form-field
+      name="hp-max"
+      label="Max HP"
+      type="number"
+      value="20"
+      min="1"
+      required
+      error-message="Max HP must be greater than 0"
+    ></form-field>
 
     <fieldset class="thresholds-group">
       <legend>Damage Thresholds</legend>
 
-      <div class="form-group">
-        <label for="minor">Minor</label>
-        <input type="number" name="minor" id="minor" min="1" value="5" required>
-        <span class="error-message" data-for="minor">Minor threshold is required</span>
-      </div>
+      <form-field
+        name="minor"
+        label="Minor"
+        type="number"
+        value="5"
+        min="1"
+        required
+        error-message="Minor threshold is required"
+      ></form-field>
 
-      <div class="form-group">
-        <label for="major">Major</label>
-        <input type="number" name="major" id="major" min="1" value="10" required>
-        <span class="error-message" data-for="major">Major threshold is required</span>
-      </div>
+      <form-field
+        name="major"
+        label="Major"
+        type="number"
+        value="10"
+        min="1"
+        required
+        error-message="Major threshold is required"
+      ></form-field>
 
-      <div class="form-group">
-        <label for="severe">Severe</label>
-        <input type="number" name="severe" id="severe" min="1" value="15" required>
-        <span class="error-message" data-for="severe">Severe threshold is required</span>
-      </div>
+      <form-field
+        name="severe"
+        label="Severe"
+        type="number"
+        value="15"
+        min="1"
+        required
+        error-message="Severe threshold is required"
+      ></form-field>
     </fieldset>
 
     <button type="submit" class="create">Create Entity</button>

@@ -12,34 +12,6 @@
   flex-direction: column;
 }
 
-.list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.list-header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: #333;
-}
-
-.open-creator {
-  padding: 0.5rem 1rem;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.open-creator:hover {
-  background: #0056b3;
-}
-
 .trackers-list {
   overflow-y: auto;
   min-height: 200px;
@@ -74,6 +46,7 @@
   gap: 1rem;
 }
 
+/* Keep custom styling for tick labels section */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -84,54 +57,6 @@
   font-weight: 600;
   font-size: 0.9rem;
   color: #555;
-}
-
-.checkbox-group {
-  margin: 0.5rem 0;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  font-weight: normal !important;
-  user-select: none;
-}
-
-.checkbox-label input[type="checkbox"] {
-  cursor: pointer;
-}
-
-.form-group input,
-.form-group select {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #007bff;
-}
-
-.form-group input.error {
-  border-color: #dc3545;
-  background-color: #ffe6e6;
-}
-
-.form-group .error-message {
-  color: #dc3545;
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
-  display: none;
-}
-
-.form-group .error-message.show {
-  display: block;
 }
 
 .tick-labels-container {
@@ -148,13 +73,7 @@
   align-items: center;
 }
 
-.tick-label-entry .tick-input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.95rem;
-}
-
+.tick-label-entry .tick-input,
 .tick-label-entry .label-input {
   padding: 0.5rem;
   border: 1px solid #ccc;
@@ -228,13 +147,6 @@ button.create:hover {
   background: #0056b3;
 }
 
-.empty {
-  color: #999;
-  font-style: italic;
-  text-align: center;
-  padding: 2rem;
-}
-
 .tracker-item {
   background: white;
   border: 1px solid #ddd;
@@ -255,22 +167,6 @@ button.create:hover {
   margin: 0;
   font-size: 1.1rem;
   color: #333;
-}
-
-.tracker-type {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  background: #e9ecef;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: #666;
-}
-
-.tracker-type.complex {
-  background: #d4edda;
-  color: #155724;
 }
 
 .complex-note {
@@ -303,48 +199,7 @@ button.create:hover {
   flex-wrap: wrap;
 }
 
-.value-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.value-controls button {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #ccc;
-  background: white;
-  border-radius: 4px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.value-controls button:hover {
-  background: #f0f0f0;
-  border-color: #999;
-}
-
-.value-controls .value {
-  min-width: 80px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.visibility-toggle,
-.hide-name-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-  user-select: none;
-}
-
-.visibility-toggle input[type="checkbox"],
-.hide-name-toggle input[type="checkbox"] {
-  cursor: pointer;
-}
+/* Value controls handled by counter-control component */
 
 button.delete {
   margin-left: auto;

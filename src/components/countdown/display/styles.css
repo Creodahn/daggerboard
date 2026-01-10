@@ -34,13 +34,7 @@
   min-height: 100px;
 }
 
-.empty {
-  color: #999;
-  font-style: italic;
-  text-align: center;
-  padding: 2rem;
-  margin: 0;
-}
+/* Empty state handled by empty-state component */
 
 .countdown-item {
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
