@@ -5,14 +5,12 @@ class SectionHeader extends ExtendedHtmlElement {
   static observedAttributes = ['title'];
 
   #titleEl;
-  #isReady = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
   async setup() {
     this.#titleEl = this.shadowRoot.querySelector('.section-title');
     this.updateTitle();
-    this.#isReady = true;
 
     // Listen for action button clicks
     this.shadowRoot.querySelector('.action-slot').addEventListener('click', e => {
@@ -26,7 +24,7 @@ class SectionHeader extends ExtendedHtmlElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (this.#isReady && name === 'title' && oldValue !== newValue) {
+    if (this.isSetup && name === 'title' && oldValue !== newValue) {
       this.updateTitle();
     }
   }

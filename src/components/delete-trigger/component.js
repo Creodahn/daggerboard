@@ -26,7 +26,6 @@ class DeleteTrigger extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
 
   #confirmDialog;
-  #isSetup = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
@@ -64,10 +63,10 @@ class DeleteTrigger extends ExtendedHtmlElement {
   }
 
   async setup() {
-    // Async initialization - get references after template is loaded
-    await customElements.whenDefined('confirm-dialog');
+    // Get reference to confirm-dialog after template is loaded
     this.#confirmDialog = this.shadowRoot.querySelector('confirm-dialog');
-    this.#isSetup = true;
+    // Wait for confirm-dialog to be ready
+    await this.#confirmDialog.ready;
   }
 
   disconnectedCallback() {
@@ -87,11 +86,9 @@ class DeleteTrigger extends ExtendedHtmlElement {
 
     // Wait for dialog to be ready if it isn't yet
     if (!this.#confirmDialog) {
-      await customElements.whenDefined('confirm-dialog');
       this.#confirmDialog = this.shadowRoot.querySelector('confirm-dialog');
-      // Wait for dialog's setup to complete
-      await new Promise(resolve => setTimeout(resolve, 0));
     }
+    await this.#confirmDialog.ready;
 
     const confirmed = await this.#confirmDialog.show({
       message,

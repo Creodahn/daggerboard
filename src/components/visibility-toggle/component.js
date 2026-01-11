@@ -46,10 +46,10 @@ class VisibilityToggle extends ExtendedHtmlElement {
   }
 
   async setup() {
-    // Wait for toggle-switch to be defined
-    await customElements.whenDefined('toggle-switch');
-
     this.#toggleSwitch = this.shadowRoot.querySelector('toggle-switch');
+
+    // Wait for the child component to be ready
+    await this.#toggleSwitch.ready;
 
     // Set initial attributes
     const label = this.getAttribute('label') || 'Visible to Players';

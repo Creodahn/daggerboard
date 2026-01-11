@@ -16,7 +16,6 @@ import ExtendedHtmlElement from '../../extended-html-element.js';
 class CountdownItem extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #tracker = null;
-  #isReady = false;
   #hasRendered = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -25,7 +24,7 @@ class CountdownItem extends ExtendedHtmlElement {
     const oldTracker = this.#tracker;
     this.#tracker = value;
 
-    if (this.#isReady) {
+    if (this.isSetup) {
       if (this.#hasRendered && oldTracker?.id === value?.id) {
         // Same tracker, just update values without re-rendering
         this.updateValues();
@@ -41,8 +40,6 @@ class CountdownItem extends ExtendedHtmlElement {
   }
 
   async setup() {
-    this.#isReady = true;
-
     // Attach delegated event listeners (setup is only called once)
     this.shadowRoot.addEventListener('counter-change', e => {
       e.stopPropagation();

@@ -4,7 +4,6 @@ class EntityItem extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #entity = null;
   #nameUpdateTimeout = null;
-  #isReady = false;
   #hasRendered = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -13,7 +12,7 @@ class EntityItem extends ExtendedHtmlElement {
     const oldEntity = this.#entity;
     this.#entity = value;
 
-    if (this.#isReady) {
+    if (this.isSetup) {
       if (this.#hasRendered && oldEntity?.id === value?.id) {
         // Same entity, just update values without re-rendering
         this.updateValues();
@@ -29,8 +28,6 @@ class EntityItem extends ExtendedHtmlElement {
   }
 
   async setup() {
-    this.#isReady = true;
-
     // Attach delegated event listeners (setup is only called once)
     this.shadowRoot.addEventListener('delete-confirmed', async e => {
       e.stopPropagation();

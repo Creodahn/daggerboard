@@ -7,7 +7,6 @@ class FormField extends ExtendedHtmlElement {
   #input;
   #label;
   #errorMessage;
-  #isReady = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
@@ -43,11 +42,10 @@ class FormField extends ExtendedHtmlElement {
     this.#errorMessage = this.shadowRoot.querySelector('.error-message');
 
     this.render();
-    this.#isReady = true;
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (this.#isReady && oldValue !== newValue) {
+    if (this.isSetup && oldValue !== newValue) {
       this.render();
     }
   }
