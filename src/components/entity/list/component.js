@@ -6,6 +6,7 @@ const { invoke } = window.__TAURI__.core;
 class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
   #entitiesList;
+  #allowMassiveDamage = false;
   entities = [];
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -32,6 +33,10 @@ class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
         'entities-updated': (payload) => {
           this.entities = payload.entities;
           this.renderEntities();
+        },
+        'campaign-settings-updated': (payload) => {
+          this.#allowMassiveDamage = payload.settings.allow_massive_damage;
+          this.updateMassiveDamageVisibility();
         }
       }
     });
@@ -40,10 +45,25 @@ class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
   async loadEntities() {
     try {
       this.entities = await invoke('get_entities', { visibleOnly: false });
+
+      // Also load campaign settings for massive damage toggle
+      if (this.currentCampaignId) {
+        const settings = await invoke('get_campaign_settings', { campaignId: this.currentCampaignId });
+        this.#allowMassiveDamage = settings.allow_massive_damage;
+      }
+
       this.renderEntities();
     } catch (error) {
       console.error('Failed to load entities:', error);
     }
+  }
+
+  updateMassiveDamageVisibility() {
+    // Update all entity items with the new setting
+    const items = this.#entitiesList.querySelectorAll('entity-item');
+    items.forEach(item => {
+      item.allowMassiveDamage = this.#allowMassiveDamage;
+    });
   }
 
   async handleThresholdDamage(event) {
@@ -130,9 +150,11 @@ class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
       if (existingItem) {
         // Update existing item's data without recreating
         existingItem.entity = entity;
+        existingItem.allowMassiveDamage = this.#allowMassiveDamage;
       } else {
         // Create new item
         const entityItem = document.createElement('entity-item');
+        entityItem.allowMassiveDamage = this.#allowMassiveDamage;
         entityItem.entity = entity;
         this.#entitiesList.appendChild(entityItem);
       }

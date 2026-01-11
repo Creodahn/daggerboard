@@ -17,6 +17,7 @@ class CampaignMenu extends ExtendedHtmlElement {
   #campaignName;
   #playerViewBtn;
   #playerViewText;
+  #settingsBtn;
   #isPlayerViewOpen = false;
   #playerWindow = null;
   stylesPath = './styles.css';
@@ -61,14 +62,12 @@ class CampaignMenu extends ExtendedHtmlElement {
       this.togglePlayerView();
     });
 
-    // Setup delete campaign modal
-    const deleteInput = this.$('.delete-confirm-input');
-    const deleteBtn = this.$('.delete-confirm-btn');
-    const cancelBtn = this.$('.delete-cancel-btn');
-
-    deleteInput.addEventListener('input', (e) => this.handleDeleteInputChange(e));
-    deleteBtn.addEventListener('action-click', () => this.confirmDeleteCampaign());
-    cancelBtn.addEventListener('action-click', () => this.closeDeleteModal());
+    // Setup settings button
+    this.#settingsBtn = this.$('.settings-btn');
+    this.#settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openSettings();
+    });
 
     // Poll for player view window state
     setInterval(() => this.checkPlayerViewState(), 1000);
@@ -132,10 +131,6 @@ class CampaignMenu extends ExtendedHtmlElement {
       this.selectCampaign(e.detail.id);
     });
 
-    list.addEventListener('campaign-delete', (e) => {
-      this.showDeleteConfirmation(e.detail.id, e.detail.name);
-    });
-
     this.#campaigns.forEach(campaign => {
       const isCurrent = this.#currentCampaign?.id === campaign.id;
       const item = document.createElement('campaign-list-item');
@@ -146,46 +141,6 @@ class CampaignMenu extends ExtendedHtmlElement {
       }
       list.appendChild(item);
     });
-  }
-
-  showDeleteConfirmation(id, name) {
-    const modal = this.$('.delete-campaign-modal');
-    const nameDisplay = this.$('.delete-campaign-name');
-    const input = this.$('.delete-confirm-input');
-    const deleteBtn = this.$('.delete-confirm-btn');
-
-    nameDisplay.textContent = name;
-    input.value = '';
-    deleteBtn.disabled = true;
-    modal.dataset.campaignId = id;
-    modal.dataset.campaignName = name;
-
-    modal.openAndFocus(input);
-  }
-
-  handleDeleteInputChange(e) {
-    const modal = this.$('.delete-campaign-modal');
-    const expectedName = modal.dataset.campaignName;
-    const deleteBtn = this.$('.delete-confirm-btn');
-
-    deleteBtn.disabled = e.target.value !== expectedName;
-  }
-
-  async confirmDeleteCampaign() {
-    const modal = this.$('.delete-campaign-modal');
-    const id = modal.dataset.campaignId;
-
-    try {
-      await invoke('delete_campaign', { id });
-      modal.close();
-    } catch (error) {
-      console.error('Failed to delete campaign:', error);
-      alert(`Failed to delete campaign: ${error}`);
-    }
-  }
-
-  closeDeleteModal() {
-    this.$('.delete-campaign-modal').close();
   }
 
   async selectCampaign(id) {
@@ -271,6 +226,17 @@ class CampaignMenu extends ExtendedHtmlElement {
       });
       // State will be updated by checkPlayerViewState interval
     }
+    this.#dropdown.closeDropdown();
+  }
+
+  async openSettings() {
+    await createWindow('settings-view', {
+      title: 'Campaign Settings',
+      width: 500,
+      height: 400,
+      resizable: true,
+      url: '/settings-view.html',
+    });
     this.#dropdown.closeDropdown();
   }
 }

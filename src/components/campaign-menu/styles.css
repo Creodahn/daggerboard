@@ -163,7 +163,8 @@
   background: #5a6fd6;
 }
 
-.player-view-btn {
+.player-view-btn,
+.settings-btn {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -178,7 +179,8 @@
   transition: all 0.2s;
 }
 
-.player-view-btn:hover {
+.player-view-btn:hover,
+.settings-btn:hover {
   background: #e9ecef;
   border-color: #dee2e6;
 }
@@ -189,86 +191,11 @@
   color: #004085;
 }
 
-.player-view-icon {
+.player-view-icon,
+.settings-icon {
   font-size: 1rem;
 }
 
-/* Delete campaign button */
-.delete-campaign-btn {
-  padding: 0.25rem 0.4rem;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  opacity: 0.5;
-  transition: all 0.2s;
-}
-
-.delete-campaign-btn:hover {
-  background: #fee;
-  opacity: 1;
-}
-
-/* Delete campaign modal */
-.delete-modal-content {
-  min-width: 350px;
-}
-
-.delete-warning-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-}
-
-.delete-warning-icon {
-  font-size: 1.25rem;
-}
-
-.delete-warning-title {
-  font-weight: 600;
-  color: #856404;
-  font-size: 0.9rem;
-}
-
-.delete-warning-text {
-  color: #555;
-  line-height: 1.5;
-  margin: 0 0 1rem 0;
-}
-
-.delete-warning-text strong {
-  color: #333;
-}
-
-.delete-confirm-text {
-  color: #666;
-  font-size: 0.9rem;
-  margin: 0 0 0.5rem 0;
-}
-
-.delete-confirm-input {
-  width: 100%;
-  padding: 0.6rem 0.75rem;
-  border: 2px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  margin-bottom: 1.25rem;
-  box-sizing: border-box;
-}
-
-.delete-confirm-input:focus {
-  outline: none;
-  border-color: #dc3545;
-}
-
-.delete-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
+.settings-btn {
+  margin-top: 0.5rem;
 }

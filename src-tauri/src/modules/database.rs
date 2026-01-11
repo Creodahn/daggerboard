@@ -82,6 +82,10 @@ fn run_migrations(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
         migrate_v3_fear_level_on_campaign(conn)?;
     }
 
+    if current_version < 4 {
+        migrate_v4_add_campaign_settings(conn)?;
+    }
+
     Ok(())
 }
 
@@ -289,6 +293,34 @@ fn migrate_v3_fear_level_on_campaign(conn: &Connection) -> Result<(), Box<dyn st
 
     conn.execute(
         "INSERT INTO schema_migrations (version) VALUES (3)",
+        [],
+    )?;
+
+    Ok(())
+}
+
+/// V4: Add campaign settings (allow_massive_damage)
+fn migrate_v4_add_campaign_settings(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    // Check if campaigns table has allow_massive_damage column
+    let has_column: bool = conn
+        .query_row(
+            "SELECT COUNT(*) > 0 FROM pragma_table_info('campaigns') WHERE name='allow_massive_damage'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+    if !has_column {
+        conn.execute(
+            "ALTER TABLE campaigns ADD COLUMN allow_massive_damage INTEGER NOT NULL DEFAULT 0",
+            [],
+        )?;
+
+        println!("Added allow_massive_damage setting to campaigns");
+    }
+
+    conn.execute(
+        "INSERT INTO schema_migrations (version) VALUES (4)",
         [],
     )?;
 

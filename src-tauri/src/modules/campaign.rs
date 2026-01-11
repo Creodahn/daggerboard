@@ -15,7 +15,19 @@ pub struct Campaign {
     pub id: String,
     pub name: String,
     pub fear_level: i32,
+    pub allow_massive_damage: bool,
     pub created_at: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct CampaignSettings {
+    pub allow_massive_damage: bool,
+}
+
+#[derive(Clone, Serialize)]
+struct SettingsPayload {
+    campaign_id: String,
+    settings: CampaignSettings,
 }
 
 #[derive(Clone, Serialize)]
@@ -37,13 +49,14 @@ fn row_to_campaign(row: &Row) -> rusqlite::Result<Campaign> {
         id: row.get(0)?,
         name: row.get(1)?,
         fear_level: row.get(2)?,
-        created_at: row.get(3)?,
+        allow_massive_damage: row.get::<_, i32>(3)? != 0,
+        created_at: row.get(4)?,
     })
 }
 
 fn get_all_campaigns(conn: &Connection) -> AppResult<Vec<Campaign>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, fear_level, created_at FROM campaigns ORDER BY created_at DESC",
+        "SELECT id, name, fear_level, allow_massive_damage, created_at FROM campaigns ORDER BY created_at DESC",
     )?;
 
     let campaigns = stmt
@@ -55,7 +68,7 @@ fn get_all_campaigns(conn: &Connection) -> AppResult<Vec<Campaign>> {
 
 pub fn get_campaign_by_id(conn: &Connection, id: &str) -> AppResult<Campaign> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, fear_level, created_at FROM campaigns WHERE id = ?1",
+        "SELECT id, name, fear_level, allow_massive_damage, created_at FROM campaigns WHERE id = ?1",
     )?;
 
     stmt.query_row([id], |row| row_to_campaign(row))
@@ -212,6 +225,52 @@ pub fn delete_campaign(
         emit_campaigns_update(&app, conn)?;
 
         Ok(())
+    })
+}
+
+#[tauri::command]
+pub fn get_campaign_settings(
+    db: State<Database>,
+    campaign_id: String,
+) -> AppResult<CampaignSettings> {
+    db.with_conn(|conn| {
+        let campaign = get_campaign_by_id(conn, &campaign_id)?;
+        Ok(CampaignSettings {
+            allow_massive_damage: campaign.allow_massive_damage,
+        })
+    })
+}
+
+#[tauri::command]
+pub fn update_campaign_settings(
+    db: State<Database>,
+    app: tauri::AppHandle,
+    campaign_id: String,
+    settings: CampaignSettings,
+) -> AppResult<CampaignSettings> {
+    db.with_conn(|conn| {
+        // Verify campaign exists
+        let _ = get_campaign_by_id(conn, &campaign_id)?;
+
+        conn.execute(
+            "UPDATE campaigns SET allow_massive_damage = ?1 WHERE id = ?2",
+            params![settings.allow_massive_damage as i32, campaign_id],
+        )?;
+
+        // Emit settings update event
+        app.emit(
+            "campaign-settings-updated",
+            SettingsPayload {
+                campaign_id: campaign_id.clone(),
+                settings: settings.clone(),
+            },
+        )
+        .map_err(|e| AppError::EmitError(e.to_string()))?;
+
+        // Also emit campaigns update for UI refresh
+        emit_campaigns_update(&app, conn)?;
+
+        Ok(settings)
     })
 }
 

@@ -33,6 +33,8 @@ pub fn run() {
             campaign::set_current_campaign,
             campaign::rename_campaign,
             campaign::delete_campaign,
+            campaign::get_campaign_settings,
+            campaign::update_campaign_settings,
             // Fear tracker commands
             fear_tracker::get_fear_level,
             fear_tracker::set_fear_level,

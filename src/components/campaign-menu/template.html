@@ -19,27 +19,11 @@
           <span class="player-view-icon">👁️</span>
           <span class="player-view-text">Open Player View</span>
         </button>
+        <button class="settings-btn">
+          <span class="settings-icon">⚙️</span>
+          <span class="settings-text">Campaign Settings</span>
+        </button>
       </div>
     </div>
   </dropdown-menu>
-
-  <modal-dialog class="delete-campaign-modal" title="Delete Campaign">
-    <div class="delete-modal-content">
-      <div class="delete-warning-header">
-        <span class="delete-warning-icon">⚠️</span>
-        <span class="delete-warning-title">This action cannot be undone</span>
-      </div>
-      <p class="delete-warning-text">
-        This will permanently delete the campaign <strong class="delete-campaign-name"></strong> and all its data including entities, trackers, and fear level.
-      </p>
-      <p class="delete-confirm-text">
-        Type the campaign name to confirm:
-      </p>
-      <input type="text" class="delete-confirm-input" placeholder="Campaign name" autocomplete="off" />
-      <div class="delete-modal-actions">
-        <action-button class="delete-cancel-btn" variant="secondary">Cancel</action-button>
-        <action-button class="delete-confirm-btn" variant="danger" disabled>Delete Campaign</action-button>
-      </div>
-    </div>
-  </modal-dialog>
 </div>

@@ -1,0 +1,130 @@
+:host {
+  display: block;
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.loading {
+  color: #666;
+  text-align: center;
+  padding: 2rem;
+}
+
+.setting-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+
+.setting-row:not(:last-child) {
+  border-bottom: 1px solid #eee;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.setting-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.setting-description {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+toggle-switch {
+  flex-shrink: 0;
+}
+
+input-group {
+  flex-shrink: 0;
+  min-width: 200px;
+}
+
+action-button {
+  flex-shrink: 0;
+}
+
+/* Danger Zone */
+.danger-zone {
+  --card-border-color: #f5c6cb;
+  border-color: #f5c6cb;
+}
+
+/* Delete Campaign Modal */
+.delete-modal-content {
+  min-width: 350px;
+}
+
+.delete-warning-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.delete-warning-icon {
+  font-size: 1.25rem;
+}
+
+.delete-warning-title {
+  font-weight: 600;
+  color: #856404;
+  font-size: 0.9rem;
+}
+
+.delete-warning-text {
+  color: #555;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+}
+
+.delete-warning-text strong {
+  color: #333;
+}
+
+.delete-confirm-text {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.delete-confirm-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+  box-sizing: border-box;
+}
+
+.delete-confirm-input:focus {
+  outline: none;
+  border-color: #dc3545;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}

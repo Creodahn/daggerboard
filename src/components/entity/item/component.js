@@ -6,6 +6,7 @@ class EntityItem extends ExtendedHtmlElement {
   #entity = null;
   #hasRendered = false;
   #emitNameChange;
+  #allowMassiveDamage = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
@@ -34,6 +35,19 @@ class EntityItem extends ExtendedHtmlElement {
 
   get entity() {
     return this.#entity;
+  }
+
+  set allowMassiveDamage(value) {
+    const changed = this.#allowMassiveDamage !== value;
+    this.#allowMassiveDamage = value;
+
+    if (changed && this.isSetup) {
+      this.updateMassiveDamageButton();
+    }
+  }
+
+  get allowMassiveDamage() {
+    return this.#allowMassiveDamage;
   }
 
   async setup() {
@@ -113,7 +127,7 @@ class EntityItem extends ExtendedHtmlElement {
                 <button class="threshold severe" data-hp-loss="3" data-threshold="severe">
                   Severe: ${entity.thresholds.severe}
                 </button>
-                <button class="threshold massive" data-hp-loss="4" data-threshold="massive">
+                <button class="threshold massive" data-hp-loss="4" data-threshold="massive" ${this.#allowMassiveDamage ? '' : 'hidden'}>
                   Massive: ${massiveThreshold}
                 </button>
               </div>
@@ -183,6 +197,16 @@ class EntityItem extends ExtendedHtmlElement {
     // Visibility toggle - event bubbles up from visibility-toggle component
     // The visibility-change event is already dispatched by the component with entityId
     // Delete trigger is handled in attachGlobalListeners
+  }
+
+  updateMassiveDamageButton() {
+    const container = this.$('card-container');
+    if (!container) return;
+
+    const massiveBtn = container.querySelector('.threshold.massive');
+    if (massiveBtn) {
+      massiveBtn.hidden = !this.#allowMassiveDamage;
+    }
   }
 }
 
