@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.tick-label-entry {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tick-input {
+  width: 70px;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.label-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.tick-input:focus,
+.label-input:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+action-button {
+  flex-shrink: 0;
+}

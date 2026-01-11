@@ -26,9 +26,7 @@ class EntityCreator extends ExtendedHtmlElement {
 
     // Listen for open event from entity list
     document.addEventListener('open-entity-creator', () => {
-      this.#modal.open();
-      // Focus name input after modal opens
-      setTimeout(() => this.#nameField.focus(), 100);
+      this.#modal.openAndFocus(this.#nameField);
     });
 
     // Setup form submit handler (handles Enter key in form fields)

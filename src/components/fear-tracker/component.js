@@ -1,11 +1,11 @@
 import ExtendedHtmlElement from '../extended-html-element.js';
-const { invoke } = window.__TAURI__.core;
-const { listen } = window.__TAURI__.event;
+import { CampaignAwareMixin } from '../../helpers/campaign-aware-mixin.js';
 
-class FearTracker extends ExtendedHtmlElement {
+const { invoke } = window.__TAURI__.core;
+
+class FearTracker extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
   #counter;
-  #currentCampaignId = null;
   fearLevel = 0;
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -18,8 +18,16 @@ class FearTracker extends ExtendedHtmlElement {
       this.#counter.setAttribute('display-only', '');
     }
 
-    // Load initial state
-    await this.loadFearLevel();
+    // Setup campaign awareness
+    await this.setupCampaignAwareness({
+      loadData: () => this.loadFearLevel(),
+      events: {
+        'fear-level-updated': (payload) => {
+          this.fearLevel = payload.level;
+          this.#counter.value = this.fearLevel;
+        }
+      }
+    });
 
     // Listen for counter changes (only if controls are enabled)
     if (!this.getBoolAttr('no-controls')) {
@@ -27,27 +35,10 @@ class FearTracker extends ExtendedHtmlElement {
         this.changeFearLevel(e.detail.delta);
       });
     }
-
-    // Listen for backend updates
-    await listen('fear-level-updated', event => {
-      // Only accept updates for the current campaign
-      if (event.payload.campaign_id === this.#currentCampaignId) {
-        this.fearLevel = event.payload.level;
-        this.#counter.value = this.fearLevel;
-      }
-    });
-
-    // Listen for campaign changes to reload data
-    window.addEventListener('campaign-changed', async () => {
-      await this.loadFearLevel();
-    });
   }
 
   async loadFearLevel() {
     try {
-      const campaign = await invoke('get_current_campaign');
-      this.#currentCampaignId = campaign?.id;
-
       this.fearLevel = await invoke('get_fear_level');
       this.#counter.value = this.fearLevel;
     } catch (error) {

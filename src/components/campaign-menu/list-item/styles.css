@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.campaign-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  gap: 0.5rem;
+}
+
+.campaign-item:hover {
+  background: #f5f5f5;
+}
+
+:host([current]) .campaign-item {
+  background: #e3f2fd;
+}
+
+.campaign-item-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.campaign-item-name.selectable {
+  cursor: pointer;
+}
+
+.campaign-item-name.selectable:hover {
+  color: #1976d2;
+}
+
+:host([current]) .campaign-item-name {
+  font-weight: 700;
+  cursor: default;
+}
+
+.current-indicator {
+  font-size: 0.75rem;
+  color: #1976d2;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.delete-campaign-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 1rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.delete-campaign-btn:hover {
+  opacity: 1;
+}

@@ -1,9 +1,9 @@
 import ExtendedHtmlElement from '../../extended-html-element.js';
+import { CampaignAwareMixin } from '../../../helpers/campaign-aware-mixin.js';
 
 const { invoke } = window.__TAURI__.core;
-const { listen } = window.__TAURI__.event;
 
-class CountdownEditor extends ExtendedHtmlElement {
+class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
   #modal;
   #nameField;
@@ -15,7 +15,6 @@ class CountdownEditor extends ExtendedHtmlElement {
   #tickLabelsContainer;
   #addTickLabelBtn;
   #tickLabelEntries = [];
-  #currentCampaignId = null;
   trackers = [];
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -36,12 +35,19 @@ class CountdownEditor extends ExtendedHtmlElement {
 
     // Open modal handler
     openBtn.addEventListener('action-click', () => {
-      this.#modal.open();
-      setTimeout(() => this.#nameField.focus(), 100);
+      this.#modal.openAndFocus(this.#nameField);
     });
 
-    // Load existing trackers
-    await this.loadTrackers();
+    // Setup campaign awareness
+    await this.setupCampaignAwareness({
+      loadData: () => this.loadTrackers(),
+      events: {
+        'trackers-updated': (payload) => {
+          this.trackers = payload.trackers;
+          this.renderTrackers();
+        }
+      }
+    });
 
     // Setup event listeners
     this.#createButton.addEventListener('action-click', () => this.createTracker());
@@ -53,20 +59,6 @@ class CountdownEditor extends ExtendedHtmlElement {
     // Add first tick label entry by default
     this.addTickLabelEntry();
 
-    // Listen for tracker updates from other windows
-    await listen('trackers-updated', event => {
-      // Only accept updates for the current campaign
-      if (event.payload.campaign_id === this.#currentCampaignId) {
-        this.trackers = event.payload.trackers;
-        this.renderTrackers();
-      }
-    });
-
-    // Listen for campaign changes to reload data
-    window.addEventListener('campaign-changed', () => {
-      this.loadTrackers();
-    });
-
     // Listen for events from countdown-item components
     this.addEventListener('value-change', this.handleValueChange.bind(this));
     this.addEventListener('visibility-change', this.handleVisibilityChange.bind(this));
@@ -76,10 +68,6 @@ class CountdownEditor extends ExtendedHtmlElement {
 
   async loadTrackers() {
     try {
-      // Get current campaign first
-      const campaign = await invoke('get_current_campaign');
-      this.#currentCampaignId = campaign?.id;
-
       this.trackers = await invoke('get_trackers', { visibleOnly: false });
       this.renderTrackers();
     } catch (error) {
@@ -96,16 +84,11 @@ class CountdownEditor extends ExtendedHtmlElement {
     }
 
     const entryId = Date.now();
-    const entry = document.createElement('div');
-    entry.className = 'tick-label-entry';
+    const entry = document.createElement('tick-label-entry');
+    entry.setAttribute('max', max);
     entry.dataset.id = entryId;
-    entry.innerHTML = `
-      <input type="number" class="tick-input" placeholder="Tick" min="0" max="${max}" required>
-      <input type="text" class="label-input" placeholder="Label" required>
-      <action-button type="button" variant="danger" size="small" class="remove-tick-label" data-id="${entryId}">×</action-button>
-    `;
 
-    entry.querySelector('.remove-tick-label').addEventListener('action-click', () => {
+    entry.addEventListener('remove', () => {
       this.removeTickLabelEntry(entryId);
     });
 
@@ -125,8 +108,8 @@ class CountdownEditor extends ExtendedHtmlElement {
 
   updateTickLabelLimit() {
     const max = parseInt(this.#maxField.value) || 10;
-    this.$$('.tick-input').forEach(input => {
-      input.max = max;
+    this.$$('tick-label-entry').forEach(entry => {
+      entry.setAttribute('max', max);
     });
     this.updateAddButtonState();
   }
@@ -143,14 +126,9 @@ class CountdownEditor extends ExtendedHtmlElement {
 
   getTickLabels() {
     const labels = {};
-    this.$$('.tick-label-entry').forEach(entry => {
-      const tickInput = entry.querySelector('.tick-input');
-      const labelInput = entry.querySelector('.label-input');
-      const tick = parseInt(tickInput.value);
-      const label = labelInput.value.trim();
-
-      if (!isNaN(tick) && label) {
-        labels[tick] = label;
+    this.$$('tick-label-entry').forEach(entry => {
+      if (entry.isValid) {
+        labels[entry.tick] = entry.label;
       }
     });
     return labels;

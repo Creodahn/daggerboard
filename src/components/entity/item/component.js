@@ -1,12 +1,21 @@
 import ExtendedHtmlElement from '../../extended-html-element.js';
+import { debounce } from '../../../helpers/debounce.js';
 
 class EntityItem extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #entity = null;
-  #nameUpdateTimeout = null;
   #hasRendered = false;
+  #emitNameChange;
   stylesPath = './styles.css';
   templatePath = './template.html';
+
+  constructor() {
+    super();
+    // Create debounced name change emitter
+    this.#emitNameChange = debounce((id, name) => {
+      this.emit('name-change', { id, name });
+    }, 500);
+  }
 
   set entity(value) {
     const oldEntity = this.#entity;
@@ -40,6 +49,10 @@ class EntityItem extends ExtendedHtmlElement {
     if (this.#entity) {
       this.render();
     }
+  }
+
+  cleanup() {
+    this.#emitNameChange.cancel();
   }
 
   updateValues() {
@@ -162,14 +175,9 @@ class EntityItem extends ExtendedHtmlElement {
       }
     });
 
-    // Name input
+    // Name input - using debounced emitter
     container.querySelector('.entity-name-input').addEventListener('input', e => {
-      if (this.#nameUpdateTimeout) {
-        clearTimeout(this.#nameUpdateTimeout);
-      }
-      this.#nameUpdateTimeout = setTimeout(() => {
-        this.emit('name-change', { id: this.#entity.id, name: e.target.value });
-      }, 500);
+      this.#emitNameChange(this.#entity.id, e.target.value);
     });
 
     // Visibility toggle - event bubbles up from visibility-toggle component

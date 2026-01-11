@@ -1,12 +1,11 @@
 import ExtendedHtmlElement from '../../extended-html-element.js';
+import { CampaignAwareMixin } from '../../../helpers/campaign-aware-mixin.js';
 
 const { invoke } = window.__TAURI__.core;
-const { listen } = window.__TAURI__.event;
 
-class EntityList extends ExtendedHtmlElement {
+class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
   #entitiesList;
-  #currentCampaignId = null;
   entities = [];
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -26,30 +25,20 @@ class EntityList extends ExtendedHtmlElement {
     this.addEventListener('visibility-change', this.handleVisibilityChange.bind(this));
     this.addEventListener('delete', this.handleDelete.bind(this));
 
-    // Load existing entities
-    await this.loadEntities();
-
-    // Listen for entity updates from backend
-    await listen('entities-updated', event => {
-      // Only accept updates for the current campaign
-      if (event.payload.campaign_id === this.#currentCampaignId) {
-        this.entities = event.payload.entities;
-        this.renderEntities();
+    // Setup campaign awareness
+    await this.setupCampaignAwareness({
+      loadData: () => this.loadEntities(),
+      events: {
+        'entities-updated': (payload) => {
+          this.entities = payload.entities;
+          this.renderEntities();
+        }
       }
-    });
-
-    // Listen for campaign changes to reload data
-    window.addEventListener('campaign-changed', () => {
-      this.loadEntities();
     });
   }
 
   async loadEntities() {
     try {
-      // Get current campaign first
-      const campaign = await invoke('get_current_campaign');
-      this.#currentCampaignId = campaign?.id;
-
       this.entities = await invoke('get_entities', { visibleOnly: false });
       this.renderEntities();
     } catch (error) {

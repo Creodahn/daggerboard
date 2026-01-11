@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.entity-item {
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.entity-name {
+  font-weight: 500;
+  color: #333;
+}
+
+/* NPC health-based styling */
+.npc-item.health-good {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-color: #a5d6a7;
+}
+
+.npc-item.health-fair {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border-color: #ffe082;
+}
+
+.npc-item.health-poor {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-color: #ffcc80;
+}
+
+.npc-item.health-critical {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-color: #ef9a9a;
+}
+
+.npc-item.health-dead {
+  background: linear-gradient(135deg, #424242 0%, #616161 100%);
+  border-color: #757575;
+}
+
+.npc-item.health-dead .entity-name {
+  color: #fff;
+  text-decoration: line-through;
+}

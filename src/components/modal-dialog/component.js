@@ -62,6 +62,18 @@ class ModalDialog extends ExtendedHtmlElement {
   }
 
   /**
+   * Open the modal and focus an element after it's rendered
+   * @param {HTMLElement|null} elementToFocus - Element to focus after opening
+   * @param {number} delay - Delay before focusing (default: 100ms)
+   */
+  openAndFocus(elementToFocus, delay = 100) {
+    this.open();
+    if (elementToFocus) {
+      setTimeout(() => elementToFocus.focus(), delay);
+    }
+  }
+
+  /**
    * Close the modal dialog
    */
   close() {

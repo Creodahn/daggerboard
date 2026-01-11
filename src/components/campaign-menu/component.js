@@ -127,28 +127,23 @@ class CampaignMenu extends ExtendedHtmlElement {
       return;
     }
 
+    // Listen for events from campaign-list-item components
+    list.addEventListener('campaign-select', (e) => {
+      this.selectCampaign(e.detail.id);
+    });
+
+    list.addEventListener('campaign-delete', (e) => {
+      this.showDeleteConfirmation(e.detail.id, e.detail.name);
+    });
+
     this.#campaigns.forEach(campaign => {
       const isCurrent = this.#currentCampaign?.id === campaign.id;
-      const item = document.createElement('div');
-      item.className = `campaign-item ${isCurrent ? 'current' : ''}`;
-      item.innerHTML = `
-        <span class="campaign-item-name">${campaign.name}</span>
-        ${isCurrent ? '<span class="current-indicator">Current</span>' : `
-          <button class="delete-campaign-btn" data-id="${campaign.id}" data-name="${campaign.name}" title="Delete campaign">🗑️</button>
-        `}
-      `;
-
-      if (!isCurrent) {
-        const nameSpan = item.querySelector('.campaign-item-name');
-        nameSpan.addEventListener('click', () => this.selectCampaign(campaign.id));
-
-        const deleteBtn = item.querySelector('.delete-campaign-btn');
-        deleteBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.showDeleteConfirmation(campaign.id, campaign.name);
-        });
+      const item = document.createElement('campaign-list-item');
+      item.setAttribute('campaign-id', campaign.id);
+      item.setAttribute('name', campaign.name);
+      if (isCurrent) {
+        item.setAttribute('current', '');
       }
-
       list.appendChild(item);
     });
   }
@@ -165,9 +160,7 @@ class CampaignMenu extends ExtendedHtmlElement {
     modal.dataset.campaignId = id;
     modal.dataset.campaignName = name;
 
-    modal.open();
-    // Focus after a tick to ensure modal is fully rendered
-    setTimeout(() => input.focus(), 50);
+    modal.openAndFocus(input);
   }
 
   handleDeleteInputChange(e) {
