@@ -1,11 +1,19 @@
-import '../../components/extended-html-element.js';
-import '../../components/page-container/component.js';
-import '../../components/counter-control/component.js';
-import '../../components/empty-state/component.js';
-import '../../components/flash-container/component.js';
-import '../../components/pulse-container/component.js';
-import '../../components/countdown/player-item/component.js';
-import '../../components/countdown/display/component.js';
-import '../../components/entity/player-item/component.js';
-import '../../components/entity/player-display/component.js';
-import '../../components/fear-tracker/component.js';
+import '../../components/base/extended-html-element.js';
+
+// Layout components
+import '../../components/layout/page-container/component.js';
+
+// UI components
+import '../../components/ui/counter-control/component.js';
+import '../../components/ui/empty-state/component.js';
+
+// Feedback components
+import '../../components/feedback/flash-container/component.js';
+import '../../components/feedback/pulse-container/component.js';
+
+// Feature components
+import '../../components/features/countdown/player-item/component.js';
+import '../../components/features/countdown/display/component.js';
+import '../../components/features/entity/player-item/component.js';
+import '../../components/features/entity/player-display/component.js';
+import '../../components/features/fear-tracker/component.js';
