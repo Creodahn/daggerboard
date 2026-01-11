@@ -23,23 +23,23 @@
     </div>
   </dropdown-menu>
 
-  <dialog class="delete-campaign-modal">
+  <modal-dialog class="delete-campaign-modal" title="Delete Campaign">
     <div class="delete-modal-content">
-      <div class="delete-modal-header">
+      <div class="delete-warning-header">
         <span class="delete-warning-icon">⚠️</span>
-        <h3>Delete Campaign</h3>
+        <span class="delete-warning-title">This action cannot be undone</span>
       </div>
       <p class="delete-warning-text">
-        This will permanently delete the campaign <strong class="delete-campaign-name"></strong> and all its data including entities, trackers, and fear level. This cannot be undone.
+        This will permanently delete the campaign <strong class="delete-campaign-name"></strong> and all its data including entities, trackers, and fear level.
       </p>
       <p class="delete-confirm-text">
         Type the campaign name to confirm:
       </p>
       <input type="text" class="delete-confirm-input" placeholder="Campaign name" autocomplete="off" />
       <div class="delete-modal-actions">
-        <button class="delete-cancel-btn">Cancel</button>
-        <button class="delete-confirm-btn" disabled>Delete Campaign</button>
+        <action-button class="delete-cancel-btn" variant="secondary">Cancel</action-button>
+        <action-button class="delete-confirm-btn" variant="danger" disabled>Delete Campaign</action-button>
       </div>
     </div>
-  </dialog>
+  </modal-dialog>
 </div>

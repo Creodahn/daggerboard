@@ -211,43 +211,35 @@
 }
 
 /* Delete campaign modal */
-.delete-campaign-modal {
-  border: none;
-  border-radius: 12px;
-  padding: 0;
-  max-width: 420px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.delete-campaign-modal::backdrop {
-  background: rgba(0, 0, 0, 0.5);
-}
-
 .delete-modal-content {
-  padding: 1.5rem;
+  min-width: 350px;
 }
 
-.delete-modal-header {
+.delete-warning-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
   margin-bottom: 1rem;
 }
 
 .delete-warning-icon {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
-.delete-modal-header h3 {
-  margin: 0;
-  color: #dc3545;
-  font-size: 1.25rem;
+.delete-warning-title {
+  font-weight: 600;
+  color: #856404;
+  font-size: 0.9rem;
 }
 
 .delete-warning-text {
   color: #555;
   line-height: 1.5;
-  margin-bottom: 1rem;
+  margin: 0 0 1rem 0;
 }
 
 .delete-warning-text strong {
@@ -257,7 +249,7 @@
 .delete-confirm-text {
   color: #666;
   font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem 0;
 }
 
 .delete-confirm-input {
@@ -279,40 +271,4 @@
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
-}
-
-.delete-cancel-btn {
-  padding: 0.6rem 1.25rem;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: #555;
-  transition: all 0.2s;
-}
-
-.delete-cancel-btn:hover {
-  background: #e9ecef;
-}
-
-.delete-confirm-btn {
-  padding: 0.6rem 1.25rem;
-  background: #dc3545;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  color: white;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.delete-confirm-btn:hover:not(:disabled) {
-  background: #c82333;
-}
-
-.delete-confirm-btn:disabled {
-  background: #e9a0a7;
-  cursor: not-allowed;
 }

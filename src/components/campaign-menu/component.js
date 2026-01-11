@@ -63,20 +63,13 @@ class CampaignMenu extends ExtendedHtmlElement {
 
     // Setup delete campaign modal
     const deleteModal = this.shadowRoot.querySelector('.delete-campaign-modal');
-    const deleteInput = deleteModal.querySelector('.delete-confirm-input');
-    const deleteBtn = deleteModal.querySelector('.delete-confirm-btn');
-    const cancelBtn = deleteModal.querySelector('.delete-cancel-btn');
+    const deleteInput = this.shadowRoot.querySelector('.delete-confirm-input');
+    const deleteBtn = this.shadowRoot.querySelector('.delete-confirm-btn');
+    const cancelBtn = this.shadowRoot.querySelector('.delete-cancel-btn');
 
     deleteInput.addEventListener('input', (e) => this.handleDeleteInputChange(e));
-    deleteBtn.addEventListener('click', () => this.confirmDeleteCampaign());
-    cancelBtn.addEventListener('click', () => this.closeDeleteModal());
-
-    // Close modal on backdrop click
-    deleteModal.addEventListener('click', (e) => {
-      if (e.target === deleteModal) {
-        this.closeDeleteModal();
-      }
-    });
+    deleteBtn.addEventListener('action-click', () => this.confirmDeleteCampaign());
+    cancelBtn.addEventListener('action-click', () => this.closeDeleteModal());
 
     // Poll for player view window state
     setInterval(() => this.checkPlayerViewState(), 1000);
@@ -163,10 +156,9 @@ class CampaignMenu extends ExtendedHtmlElement {
 
   showDeleteConfirmation(id, name) {
     const modal = this.shadowRoot.querySelector('.delete-campaign-modal');
-    const nameDisplay = modal.querySelector('.delete-campaign-name');
-    const input = modal.querySelector('.delete-confirm-input');
-    const deleteBtn = modal.querySelector('.delete-confirm-btn');
-    const cancelBtn = modal.querySelector('.delete-cancel-btn');
+    const nameDisplay = this.shadowRoot.querySelector('.delete-campaign-name');
+    const input = this.shadowRoot.querySelector('.delete-confirm-input');
+    const deleteBtn = this.shadowRoot.querySelector('.delete-confirm-btn');
 
     nameDisplay.textContent = name;
     input.value = '';
@@ -174,14 +166,15 @@ class CampaignMenu extends ExtendedHtmlElement {
     modal.dataset.campaignId = id;
     modal.dataset.campaignName = name;
 
-    modal.showModal();
-    input.focus();
+    modal.open();
+    // Focus after a tick to ensure modal is fully rendered
+    setTimeout(() => input.focus(), 50);
   }
 
   handleDeleteInputChange(e) {
     const modal = this.shadowRoot.querySelector('.delete-campaign-modal');
     const expectedName = modal.dataset.campaignName;
-    const deleteBtn = modal.querySelector('.delete-confirm-btn');
+    const deleteBtn = this.shadowRoot.querySelector('.delete-confirm-btn');
 
     deleteBtn.disabled = e.target.value !== expectedName;
   }
@@ -200,8 +193,7 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   closeDeleteModal() {
-    const modal = this.shadowRoot.querySelector('.delete-campaign-modal');
-    modal.close();
+    this.shadowRoot.querySelector('.delete-campaign-modal').close();
   }
 
   async selectCampaign(id) {
