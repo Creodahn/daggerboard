@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{Emitter, State};
 use uuid::Uuid;
 
+use super::campaign::get_current_campaign_id;
 use super::database::Database;
 use super::error::{AppError, AppResult};
 
@@ -13,6 +14,7 @@ use super::error::{AppError, AppResult};
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Entity {
     pub id: String,
+    pub campaign_id: String,
     pub name: String,
     pub hp_current: i32,
     pub hp_max: i32,
@@ -56,6 +58,7 @@ pub struct DamageThresholds {
 #[derive(Clone, Serialize)]
 struct EntitiesPayload {
     entities: Vec<Entity>,
+    campaign_id: String,
 }
 
 #[derive(Clone, Serialize)]
@@ -72,27 +75,28 @@ pub struct DamageResult {
 fn row_to_entity(row: &Row) -> rusqlite::Result<Entity> {
     Ok(Entity {
         id: row.get(0)?,
-        name: row.get(1)?,
-        hp_current: row.get(2)?,
-        hp_max: row.get(3)?,
+        campaign_id: row.get(1)?,
+        name: row.get(2)?,
+        hp_current: row.get(3)?,
+        hp_max: row.get(4)?,
         thresholds: DamageThresholds {
-            minor: row.get(4)?,
-            major: row.get(5)?,
-            severe: row.get(6)?,
+            minor: row.get(5)?,
+            major: row.get(6)?,
+            severe: row.get(7)?,
         },
-        visible_to_players: row.get::<_, i32>(7)? != 0,
-        entity_type: EntityType::from_str(&row.get::<_, String>(8)?),
+        visible_to_players: row.get::<_, i32>(8)? != 0,
+        entity_type: EntityType::from_str(&row.get::<_, String>(9)?),
     })
 }
 
-fn get_all_entities(conn: &Connection) -> AppResult<Vec<Entity>> {
+fn get_entities_for_campaign(conn: &Connection, campaign_id: &str) -> AppResult<Vec<Entity>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
-         FROM entities"
+        "SELECT id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
+         FROM entities WHERE campaign_id = ?1"
     )?;
 
     let entities = stmt
-        .query_map([], |row| row_to_entity(row))?
+        .query_map([campaign_id], |row| row_to_entity(row))?
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(entities)
@@ -100,7 +104,7 @@ fn get_all_entities(conn: &Connection) -> AppResult<Vec<Entity>> {
 
 fn get_entity_by_id(conn: &Connection, id: &str) -> AppResult<Entity> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
+        "SELECT id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
          FROM entities WHERE id = ?1"
     )?;
 
@@ -108,9 +112,14 @@ fn get_entity_by_id(conn: &Connection, id: &str) -> AppResult<Entity> {
         .map_err(|_| AppError::EntityNotFound(id.to_string()))
 }
 
-fn emit_entities_update(app: &tauri::AppHandle, conn: &Connection) -> AppResult<()> {
-    let entities = get_all_entities(conn)?;
-    app.emit("entities-updated", EntitiesPayload { entities })
+fn get_required_campaign_id(conn: &Connection) -> AppResult<String> {
+    get_current_campaign_id(conn)?
+        .ok_or_else(|| AppError::InvalidOperation("No campaign selected".to_string()))
+}
+
+fn emit_entities_update(app: &tauri::AppHandle, conn: &Connection, campaign_id: &str) -> AppResult<()> {
+    let entities = get_entities_for_campaign(conn, campaign_id)?;
+    app.emit("entities-updated", EntitiesPayload { entities, campaign_id: campaign_id.to_string() })
         .map_err(|e| AppError::EmitError(e.to_string()))
 }
 
@@ -130,11 +139,14 @@ pub fn create_entity(
     let id = Uuid::new_v4().to_string();
 
     db.with_conn(|conn| {
+        let campaign_id = get_required_campaign_id(conn)?;
+
         conn.execute(
-            "INSERT INTO entities (id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+            "INSERT INTO entities (id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             params![
                 id,
+                campaign_id,
                 name,
                 hp_max,
                 hp_max,
@@ -148,6 +160,7 @@ pub fn create_entity(
 
         let entity = Entity {
             id,
+            campaign_id: campaign_id.clone(),
             name,
             hp_current: hp_max,
             hp_max,
@@ -156,7 +169,7 @@ pub fn create_entity(
             entity_type,
         };
 
-        emit_entities_update(&app, conn)?;
+        emit_entities_update(&app, conn, &campaign_id)?;
         Ok(entity)
     })
 }
@@ -164,13 +177,16 @@ pub fn create_entity(
 #[tauri::command]
 pub fn delete_entity(db: State<Database>, app: tauri::AppHandle, id: String) -> AppResult<()> {
     db.with_conn(|conn| {
+        let entity = get_entity_by_id(conn, &id)?;
+        let campaign_id = entity.campaign_id.clone();
+
         let rows_affected = conn.execute("DELETE FROM entities WHERE id = ?1", [&id])?;
 
         if rows_affected == 0 {
             return Err(AppError::EntityNotFound(id));
         }
 
-        emit_entities_update(&app, conn)?;
+        emit_entities_update(&app, conn, &campaign_id)?;
         Ok(())
     })
 }
@@ -178,20 +194,22 @@ pub fn delete_entity(db: State<Database>, app: tauri::AppHandle, id: String) -> 
 #[tauri::command]
 pub fn get_entities(db: State<Database>, visible_only: bool) -> AppResult<Vec<Entity>> {
     db.with_conn(|conn| {
+        let campaign_id = get_required_campaign_id(conn)?;
+
         let mut stmt = if visible_only {
             conn.prepare(
-                "SELECT id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
-                 FROM entities WHERE visible_to_players = 1"
+                "SELECT id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
+                 FROM entities WHERE campaign_id = ?1 AND visible_to_players = 1"
             )?
         } else {
             conn.prepare(
-                "SELECT id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
-                 FROM entities"
+                "SELECT id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
+                 FROM entities WHERE campaign_id = ?1"
             )?
         };
 
         let entities = stmt
-            .query_map([], |row| row_to_entity(row))?
+            .query_map([&campaign_id], |row| row_to_entity(row))?
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(entities)
@@ -210,13 +228,9 @@ pub fn update_entity_hp(
     amount: i32,
 ) -> AppResult<Entity> {
     db.with_conn(|conn| {
-        // Get current entity
         let entity = get_entity_by_id(conn, &id)?;
-
-        // Calculate new HP
         let new_hp = (entity.hp_current + amount).clamp(0, entity.hp_max);
 
-        // Update in database
         conn.execute(
             "UPDATE entities SET hp_current = ?1 WHERE id = ?2",
             params![new_hp, id],
@@ -227,7 +241,7 @@ pub fn update_entity_hp(
             ..entity
         };
 
-        emit_entities_update(&app, conn)?;
+        emit_entities_update(&app, conn, &updated_entity.campaign_id)?;
         Ok(updated_entity)
     })
 }
@@ -253,7 +267,7 @@ pub fn set_entity_hp(
             ..entity
         };
 
-        emit_entities_update(&app, conn)?;
+        emit_entities_update(&app, conn, &updated_entity.campaign_id)?;
         Ok(updated_entity)
     })
 }
@@ -268,7 +282,6 @@ pub fn apply_damage(
     db.with_conn(|conn| {
         let entity = get_entity_by_id(conn, &id)?;
 
-        // Calculate HP loss based on threshold hit
         let massive_threshold = entity.thresholds.severe * 2;
         let (threshold_hit, hp_loss) = if damage >= massive_threshold {
             (Some("massive".to_string()), 4)
@@ -282,7 +295,6 @@ pub fn apply_damage(
             (None, 0)
         };
 
-        // Apply HP loss (capped at current HP)
         let actual_hp_loss = hp_loss.min(entity.hp_current);
         let new_hp = entity.hp_current - actual_hp_loss;
 
@@ -296,7 +308,7 @@ pub fn apply_damage(
             ..entity
         };
 
-        emit_entities_update(&app, conn)?;
+        emit_entities_update(&app, conn, &updated_entity.campaign_id)?;
 
         Ok(DamageResult {
             entity: updated_entity,
@@ -330,7 +342,7 @@ pub fn update_entity_thresholds(
             ..entity
         };
 
-        emit_entities_update(&app, conn)?;
+        emit_entities_update(&app, conn, &updated_entity.campaign_id)?;
         Ok(updated_entity)
     })
 }
@@ -352,7 +364,7 @@ pub fn update_entity_name(
 
         let updated_entity = Entity { name, ..entity };
 
-        emit_entities_update(&app, conn)?;
+        emit_entities_update(&app, conn, &updated_entity.campaign_id)?;
         Ok(updated_entity)
     })
 }
@@ -377,7 +389,7 @@ pub fn toggle_entity_visibility(
             ..entity
         };
 
-        emit_entities_update(&app, conn)?;
+        emit_entities_update(&app, conn, &updated_entity.campaign_id)?;
         Ok(updated_entity)
     })
 }
@@ -393,42 +405,15 @@ pub fn set_all_entities_visibility(
     visible: bool,
 ) -> AppResult<Vec<Entity>> {
     db.with_conn(|conn| {
+        let campaign_id = get_required_campaign_id(conn)?;
+
         conn.execute(
-            "UPDATE entities SET visible_to_players = ?1",
-            params![visible as i32],
+            "UPDATE entities SET visible_to_players = ?1 WHERE campaign_id = ?2",
+            params![visible as i32, campaign_id],
         )?;
 
-        let entities = get_all_entities(conn)?;
-        emit_entities_update(&app, conn)?;
+        let entities = get_entities_for_campaign(conn, &campaign_id)?;
+        emit_entities_update(&app, conn, &campaign_id)?;
         Ok(entities)
     })
-}
-
-// ============================================================================
-// Migration
-// ============================================================================
-
-/// Migrate entities from the old store to SQLite
-pub fn migrate_from_store(
-    conn: &Connection,
-    entities: Vec<Entity>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    for entity in entities {
-        conn.execute(
-            "INSERT OR IGNORE INTO entities (id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
-            params![
-                entity.id,
-                entity.name,
-                entity.hp_current,
-                entity.hp_max,
-                entity.thresholds.minor,
-                entity.thresholds.major,
-                entity.thresholds.severe,
-                entity.visible_to_players as i32,
-                entity.entity_type.as_str()
-            ],
-        )?;
-    }
-    Ok(())
 }

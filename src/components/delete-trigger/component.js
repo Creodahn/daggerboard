@@ -26,32 +26,54 @@ class DeleteTrigger extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
 
   #confirmDialog;
-  #triggerEl;
+  #isSetup = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
-  async setup() {
-    this.#confirmDialog = this.shadowRoot.querySelector('confirm-dialog');
-    this.#triggerEl = this.shadowRoot.querySelector('.delete-trigger');
+  constructor() {
+    super();
 
-    // Handle click on trigger (either slotted or default)
-    this.#triggerEl.addEventListener('click', async e => {
-      // Don't trigger if clicking inside the confirm dialog
-      if (e.target.closest('confirm-dialog')) return;
+    // Register click handler in constructor - before ANY async operations
+    this._clickHandler = async e => {
+      const path = e.composedPath();
 
+      // Check if this delete-trigger is in the click path
+      if (!path.includes(this)) return;
+
+      // Get the dialog element (might not be ready yet on first call)
+      const dialog = this.#confirmDialog || this.shadowRoot?.querySelector('confirm-dialog');
+
+      // IMPORTANT: Don't intercept clicks on the confirm-dialog or its contents
+      const clickedOnDialog = dialog && path.some(el =>
+        el === dialog ||
+        (el instanceof Element && el.closest?.('confirm-dialog'))
+      );
+
+      if (clickedOnDialog) {
+        // Let the dialog handle its own clicks
+        return;
+      }
+
+      // This is a click on the trigger - show confirmation
+      e.stopPropagation();
+      e.preventDefault();
       await this.showConfirmation();
-    });
+    };
 
-    // Also listen for clicks on slotted content
-    this.shadowRoot.querySelector('slot[name="trigger"]').addEventListener('slotchange', () => {
-      const slottedElements = this.shadowRoot.querySelector('slot[name="trigger"]').assignedElements();
-      slottedElements.forEach(el => {
-        el.addEventListener('click', async e => {
-          e.stopPropagation();
-          await this.showConfirmation();
-        });
-      });
-    });
+    document.addEventListener('click', this._clickHandler, true);
+  }
+
+  async setup() {
+    // Async initialization - get references after template is loaded
+    await customElements.whenDefined('confirm-dialog');
+    this.#confirmDialog = this.shadowRoot.querySelector('confirm-dialog');
+    this.#isSetup = true;
+  }
+
+  disconnectedCallback() {
+    if (this._clickHandler) {
+      document.removeEventListener('click', this._clickHandler, true);
+    }
   }
 
   async showConfirmation() {
@@ -62,6 +84,14 @@ class DeleteTrigger extends ExtendedHtmlElement {
     const cancelText = this.getAttribute('cancel-text') || 'Cancel';
 
     const message = customMessage || `Are you sure you want to delete "${itemName}"?`;
+
+    // Wait for dialog to be ready if it isn't yet
+    if (!this.#confirmDialog) {
+      await customElements.whenDefined('confirm-dialog');
+      this.#confirmDialog = this.shadowRoot.querySelector('confirm-dialog');
+      // Wait for dialog's setup to complete
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
 
     const confirmed = await this.#confirmDialog.show({
       message,

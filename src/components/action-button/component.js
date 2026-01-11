@@ -22,6 +22,18 @@ class ActionButton extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+
+    // Attach click listener immediately in constructor
+    // This ensures clicks are captured even before connectedCallback runs
+    this.addEventListener('click', e => {
+      if (!this.disabled) {
+        e.stopPropagation();
+        this.dispatchEvent(new CustomEvent('action-click', {
+          bubbles: true,
+          composed: true
+        }));
+      }
+    });
   }
 
   get disabled() {
@@ -38,14 +50,6 @@ class ActionButton extends HTMLElement {
 
   connectedCallback() {
     this.render();
-    this.shadowRoot.querySelector('button').addEventListener('click', e => {
-      if (!this.disabled) {
-        this.dispatchEvent(new CustomEvent('action-click', {
-          bubbles: true,
-          composed: true
-        }));
-      }
-    });
   }
 
   attributeChangedCallback() {

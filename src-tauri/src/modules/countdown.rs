@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use tauri::{Emitter, State};
 use uuid::Uuid;
 
+use super::campaign::get_current_campaign_id;
 use super::database::Database;
 use super::error::{AppError, AppResult};
 
@@ -14,6 +15,7 @@ use super::error::{AppError, AppResult};
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct CountdownTracker {
     pub id: String,
+    pub campaign_id: String,
     pub name: String,
     pub current: i32,
     pub max: i32,
@@ -51,6 +53,7 @@ impl TrackerType {
 #[derive(Clone, Serialize)]
 struct TrackersPayload {
     trackers: Vec<CountdownTracker>,
+    campaign_id: String,
 }
 
 // ============================================================================
@@ -60,13 +63,14 @@ struct TrackersPayload {
 fn row_to_tracker(row: &Row) -> rusqlite::Result<CountdownTracker> {
     Ok(CountdownTracker {
         id: row.get(0)?,
-        name: row.get(1)?,
-        current: row.get(2)?,
-        max: row.get(3)?,
-        visible_to_players: row.get::<_, i32>(4)? != 0,
-        hide_name_from_players: row.get::<_, i32>(5)? != 0,
-        tracker_type: TrackerType::from_str(&row.get::<_, String>(6)?),
-        tick_labels: None, // Will be populated separately for complex trackers
+        campaign_id: row.get(1)?,
+        name: row.get(2)?,
+        current: row.get(3)?,
+        max: row.get(4)?,
+        visible_to_players: row.get::<_, i32>(5)? != 0,
+        hide_name_from_players: row.get::<_, i32>(6)? != 0,
+        tracker_type: TrackerType::from_str(&row.get::<_, String>(7)?),
+        tick_labels: None,
     })
 }
 
@@ -80,17 +84,16 @@ fn get_tick_labels(conn: &Connection, tracker_id: &str) -> AppResult<HashMap<i32
     Ok(labels)
 }
 
-fn get_all_trackers(conn: &Connection) -> AppResult<Vec<CountdownTracker>> {
+fn get_trackers_for_campaign(conn: &Connection, campaign_id: &str) -> AppResult<Vec<CountdownTracker>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, current, max, visible_to_players, hide_name_from_players, tracker_type
-         FROM countdown_trackers",
+        "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type
+         FROM countdown_trackers WHERE campaign_id = ?1",
     )?;
 
     let mut trackers: Vec<CountdownTracker> = stmt
-        .query_map([], |row| row_to_tracker(row))?
+        .query_map([campaign_id], |row| row_to_tracker(row))?
         .collect::<Result<Vec<_>, _>>()?;
 
-    // Load tick labels for complex trackers
     for tracker in &mut trackers {
         if tracker.tracker_type == TrackerType::Complex {
             tracker.tick_labels = Some(get_tick_labels(conn, &tracker.id)?);
@@ -102,7 +105,7 @@ fn get_all_trackers(conn: &Connection) -> AppResult<Vec<CountdownTracker>> {
 
 fn get_tracker_by_id(conn: &Connection, id: &str) -> AppResult<CountdownTracker> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, current, max, visible_to_players, hide_name_from_players, tracker_type
+        "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type
          FROM countdown_trackers WHERE id = ?1",
     )?;
 
@@ -110,7 +113,6 @@ fn get_tracker_by_id(conn: &Connection, id: &str) -> AppResult<CountdownTracker>
         .query_row([id], |row| row_to_tracker(row))
         .map_err(|_| AppError::TrackerNotFound(id.to_string()))?;
 
-    // Load tick labels for complex trackers
     if tracker.tracker_type == TrackerType::Complex {
         tracker.tick_labels = Some(get_tick_labels(conn, id)?);
     }
@@ -118,9 +120,14 @@ fn get_tracker_by_id(conn: &Connection, id: &str) -> AppResult<CountdownTracker>
     Ok(tracker)
 }
 
-fn emit_trackers_update(app: &tauri::AppHandle, conn: &Connection) -> AppResult<()> {
-    let trackers = get_all_trackers(conn)?;
-    app.emit("trackers-updated", TrackersPayload { trackers })
+fn get_required_campaign_id(conn: &Connection) -> AppResult<String> {
+    get_current_campaign_id(conn)?
+        .ok_or_else(|| AppError::InvalidOperation("No campaign selected".to_string()))
+}
+
+fn emit_trackers_update(app: &tauri::AppHandle, conn: &Connection, campaign_id: &str) -> AppResult<()> {
+    let trackers = get_trackers_for_campaign(conn, campaign_id)?;
+    app.emit("trackers-updated", TrackersPayload { trackers, campaign_id: campaign_id.to_string() })
         .map_err(|e| AppError::EmitError(e.to_string()))
 }
 
@@ -143,11 +150,14 @@ pub fn create_tracker(
     let hide_name = hide_name_from_players.unwrap_or(false);
 
     db.with_conn(|conn| {
+        let campaign_id = get_required_campaign_id(conn)?;
+
         conn.execute(
-            "INSERT INTO countdown_trackers (id, name, current, max, visible_to_players, hide_name_from_players, tracker_type)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            "INSERT INTO countdown_trackers (id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             params![
                 id,
+                campaign_id,
                 name,
                 max,
                 max,
@@ -159,6 +169,7 @@ pub fn create_tracker(
 
         let tracker = CountdownTracker {
             id,
+            campaign_id: campaign_id.clone(),
             name,
             current: max,
             max,
@@ -172,7 +183,7 @@ pub fn create_tracker(
             },
         };
 
-        emit_trackers_update(&app, conn)?;
+        emit_trackers_update(&app, conn, &campaign_id)?;
         Ok(tracker)
     })
 }
@@ -180,16 +191,17 @@ pub fn create_tracker(
 #[tauri::command]
 pub fn delete_tracker(db: State<Database>, app: tauri::AppHandle, id: String) -> AppResult<()> {
     db.with_conn(|conn| {
-        // Delete tick labels first (foreign key constraint)
-        conn.execute("DELETE FROM tick_labels WHERE tracker_id = ?1", [&id])?;
+        let tracker = get_tracker_by_id(conn, &id)?;
+        let campaign_id = tracker.campaign_id.clone();
 
+        conn.execute("DELETE FROM tick_labels WHERE tracker_id = ?1", [&id])?;
         let rows_affected = conn.execute("DELETE FROM countdown_trackers WHERE id = ?1", [&id])?;
 
         if rows_affected == 0 {
             return Err(AppError::TrackerNotFound(id));
         }
 
-        emit_trackers_update(&app, conn)?;
+        emit_trackers_update(&app, conn, &campaign_id)?;
         Ok(())
     })
 }
@@ -197,23 +209,24 @@ pub fn delete_tracker(db: State<Database>, app: tauri::AppHandle, id: String) ->
 #[tauri::command]
 pub fn get_trackers(db: State<Database>, visible_only: bool) -> AppResult<Vec<CountdownTracker>> {
     db.with_conn(|conn| {
+        let campaign_id = get_required_campaign_id(conn)?;
+
         let mut stmt = if visible_only {
             conn.prepare(
-                "SELECT id, name, current, max, visible_to_players, hide_name_from_players, tracker_type
-                 FROM countdown_trackers WHERE visible_to_players = 1",
+                "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type
+                 FROM countdown_trackers WHERE campaign_id = ?1 AND visible_to_players = 1",
             )?
         } else {
             conn.prepare(
-                "SELECT id, name, current, max, visible_to_players, hide_name_from_players, tracker_type
-                 FROM countdown_trackers",
+                "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type
+                 FROM countdown_trackers WHERE campaign_id = ?1",
             )?
         };
 
         let mut trackers: Vec<CountdownTracker> = stmt
-            .query_map([], |row| row_to_tracker(row))?
+            .query_map([&campaign_id], |row| row_to_tracker(row))?
             .collect::<Result<Vec<_>, _>>()?;
 
-        // Load tick labels for complex trackers
         for tracker in &mut trackers {
             if tracker.tracker_type == TrackerType::Complex {
                 tracker.tick_labels = Some(get_tick_labels(conn, &tracker.id)?);
@@ -249,7 +262,7 @@ pub fn update_tracker_value(
             ..tracker
         };
 
-        emit_trackers_update(&app, conn)?;
+        emit_trackers_update(&app, conn, &updated_tracker.campaign_id)?;
         Ok(updated_tracker)
     })
 }
@@ -275,7 +288,7 @@ pub fn set_tracker_value(
             ..tracker
         };
 
-        emit_trackers_update(&app, conn)?;
+        emit_trackers_update(&app, conn, &updated_tracker.campaign_id)?;
         Ok(updated_tracker)
     })
 }
@@ -304,7 +317,7 @@ pub fn toggle_tracker_visibility(
             ..tracker
         };
 
-        emit_trackers_update(&app, conn)?;
+        emit_trackers_update(&app, conn, &updated_tracker.campaign_id)?;
         Ok(updated_tracker)
     })
 }
@@ -329,7 +342,7 @@ pub fn toggle_tracker_name_visibility(
             ..tracker
         };
 
-        emit_trackers_update(&app, conn)?;
+        emit_trackers_update(&app, conn, &updated_tracker.campaign_id)?;
         Ok(updated_tracker)
     })
 }
@@ -345,13 +358,15 @@ pub fn set_all_trackers_visibility(
     visible: bool,
 ) -> AppResult<Vec<CountdownTracker>> {
     db.with_conn(|conn| {
+        let campaign_id = get_required_campaign_id(conn)?;
+
         conn.execute(
-            "UPDATE countdown_trackers SET visible_to_players = ?1",
-            params![visible as i32],
+            "UPDATE countdown_trackers SET visible_to_players = ?1 WHERE campaign_id = ?2",
+            params![visible as i32, campaign_id],
         )?;
 
-        let trackers = get_all_trackers(conn)?;
-        emit_trackers_update(&app, conn)?;
+        let trackers = get_trackers_for_campaign(conn, &campaign_id)?;
+        emit_trackers_update(&app, conn, &campaign_id)?;
         Ok(trackers)
     })
 }
@@ -384,16 +399,14 @@ pub fn set_tick_label(
             )));
         }
 
-        // Insert or replace the tick label
         conn.execute(
             "INSERT OR REPLACE INTO tick_labels (tracker_id, tick, label) VALUES (?1, ?2, ?3)",
             params![id, tick, text],
         )?;
 
-        // Reload tracker with updated labels
         let updated_tracker = get_tracker_by_id(conn, &id)?;
 
-        emit_trackers_update(&app, conn)?;
+        emit_trackers_update(&app, conn, &updated_tracker.campaign_id)?;
         Ok(updated_tracker)
     })
 }
@@ -406,7 +419,6 @@ pub fn remove_tick_label(
     tick: i32,
 ) -> AppResult<CountdownTracker> {
     db.with_conn(|conn| {
-        // Verify tracker exists
         let _tracker = get_tracker_by_id(conn, &id)?;
 
         conn.execute(
@@ -414,47 +426,9 @@ pub fn remove_tick_label(
             params![id, tick],
         )?;
 
-        // Reload tracker with updated labels
         let updated_tracker = get_tracker_by_id(conn, &id)?;
 
-        emit_trackers_update(&app, conn)?;
+        emit_trackers_update(&app, conn, &updated_tracker.campaign_id)?;
         Ok(updated_tracker)
     })
-}
-
-// ============================================================================
-// Migration
-// ============================================================================
-
-/// Migrate countdown trackers from the old store to SQLite
-pub fn migrate_from_store(
-    conn: &Connection,
-    trackers: Vec<CountdownTracker>,
-) -> Result<(), Box<dyn std::error::Error>> {
-    for tracker in trackers {
-        conn.execute(
-            "INSERT OR IGNORE INTO countdown_trackers (id, name, current, max, visible_to_players, hide_name_from_players, tracker_type)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            params![
-                tracker.id,
-                tracker.name,
-                tracker.current,
-                tracker.max,
-                tracker.visible_to_players as i32,
-                tracker.hide_name_from_players as i32,
-                tracker.tracker_type.as_str()
-            ],
-        )?;
-
-        // Migrate tick labels if present
-        if let Some(labels) = tracker.tick_labels {
-            for (tick, label) in labels {
-                conn.execute(
-                    "INSERT OR IGNORE INTO tick_labels (tracker_id, tick, label) VALUES (?1, ?2, ?3)",
-                    params![tracker.id, tick, label],
-                )?;
-            }
-        }
-    }
-    Ok(())
 }

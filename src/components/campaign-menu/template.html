@@ -1,0 +1,45 @@
+<div class="campaign-menu">
+  <dropdown-menu>
+    <button slot="trigger" class="campaign-trigger">
+      <span class="campaign-name">Loading...</span>
+      <span class="dropdown-arrow">▼</span>
+    </button>
+    <div slot="content" class="campaign-dropdown-content">
+      <div class="menu-section">
+        <div class="section-title">Campaigns</div>
+        <div class="campaign-list"></div>
+        <div class="create-campaign-section">
+          <input type="text" class="create-campaign-input" placeholder="New campaign name..." />
+          <button class="create-campaign-btn" title="Create campaign">Create</button>
+        </div>
+      </div>
+      <div class="menu-divider"></div>
+      <div class="menu-section">
+        <button class="player-view-btn">
+          <span class="player-view-icon">👁️</span>
+          <span class="player-view-text">Open Player View</span>
+        </button>
+      </div>
+    </div>
+  </dropdown-menu>
+
+  <dialog class="delete-campaign-modal">
+    <div class="delete-modal-content">
+      <div class="delete-modal-header">
+        <span class="delete-warning-icon">⚠️</span>
+        <h3>Delete Campaign</h3>
+      </div>
+      <p class="delete-warning-text">
+        This will permanently delete the campaign <strong class="delete-campaign-name"></strong> and all its data including entities, trackers, and fear level. This cannot be undone.
+      </p>
+      <p class="delete-confirm-text">
+        Type the campaign name to confirm:
+      </p>
+      <input type="text" class="delete-confirm-input" placeholder="Campaign name" autocomplete="off" />
+      <div class="delete-modal-actions">
+        <button class="delete-cancel-btn">Cancel</button>
+        <button class="delete-confirm-btn" disabled>Delete Campaign</button>
+      </div>
+    </div>
+  </dialog>
+</div>

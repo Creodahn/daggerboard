@@ -5,6 +5,7 @@ const { listen } = window.__TAURI__.event;
 class FearTracker extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #counter;
+  #currentCampaignId = null;
   fearLevel = 0;
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -17,9 +18,8 @@ class FearTracker extends ExtendedHtmlElement {
       this.#counter.setAttribute('display-only', '');
     }
 
-    // Load initial state from Rust
-    this.fearLevel = await invoke('get_fear_level');
-    this.#counter.value = this.fearLevel;
+    // Load initial state
+    await this.loadFearLevel();
 
     // Listen for counter changes (only if controls are enabled)
     if (!this.hasAttribute('no-controls')) {
@@ -30,9 +30,29 @@ class FearTracker extends ExtendedHtmlElement {
 
     // Listen for backend updates
     await listen('fear-level-updated', event => {
-      this.fearLevel = event.payload.level;
-      this.#counter.value = this.fearLevel;
+      // Only accept updates for the current campaign
+      if (event.payload.campaign_id === this.#currentCampaignId) {
+        this.fearLevel = event.payload.level;
+        this.#counter.value = this.fearLevel;
+      }
     });
+
+    // Listen for campaign changes to reload data
+    window.addEventListener('campaign-changed', async () => {
+      await this.loadFearLevel();
+    });
+  }
+
+  async loadFearLevel() {
+    try {
+      const campaign = await invoke('get_current_campaign');
+      this.#currentCampaignId = campaign?.id;
+
+      this.fearLevel = await invoke('get_fear_level');
+      this.#counter.value = this.fearLevel;
+    } catch (error) {
+      console.error('Failed to load fear level:', error);
+    }
   }
 
   changeFearLevel(amount) {

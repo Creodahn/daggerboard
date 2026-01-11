@@ -15,6 +15,7 @@ class CountdownEditor extends ExtendedHtmlElement {
   #tickLabelsContainer;
   #addTickLabelBtn;
   #tickLabelEntries = [];
+  #currentCampaignId = null;
   trackers = [];
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -54,8 +55,16 @@ class CountdownEditor extends ExtendedHtmlElement {
 
     // Listen for tracker updates from other windows
     await listen('trackers-updated', event => {
-      this.trackers = event.payload.trackers;
-      this.renderTrackers();
+      // Only accept updates for the current campaign
+      if (event.payload.campaign_id === this.#currentCampaignId) {
+        this.trackers = event.payload.trackers;
+        this.renderTrackers();
+      }
+    });
+
+    // Listen for campaign changes to reload data
+    window.addEventListener('campaign-changed', () => {
+      this.loadTrackers();
     });
 
     // Listen for events from countdown-item components
@@ -67,6 +76,10 @@ class CountdownEditor extends ExtendedHtmlElement {
 
   async loadTrackers() {
     try {
+      // Get current campaign first
+      const campaign = await invoke('get_current_campaign');
+      this.#currentCampaignId = campaign?.id;
+
       this.trackers = await invoke('get_trackers', { visibleOnly: false });
       this.renderTrackers();
     } catch (error) {

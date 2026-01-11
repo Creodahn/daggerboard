@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{countdown, database::Database, entity, fear_tracker, migration};
+use modules::{campaign, countdown, database::Database, entity, fear_tracker};
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -11,12 +11,12 @@ pub fn run() {
             // Get app data directory for database
             let app_data_dir = app.path().app_data_dir()?;
 
-            // Initialize SQLite database
+            // Initialize SQLite database (handles migrations)
             let db = Database::new(app_data_dir)?;
 
-            // Run migration from old store.json if needed
+            // Ensure a campaign exists and is selected
             db.with_conn(|conn| {
-                migration::migrate_if_needed(app, conn)
+                campaign::ensure_campaign_exists(conn)
                     .map_err(|e| modules::error::AppError::PersistenceError(e.to_string()))
             })?;
 
@@ -26,6 +26,13 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            // Campaign commands
+            campaign::create_campaign,
+            campaign::get_campaigns,
+            campaign::get_current_campaign,
+            campaign::set_current_campaign,
+            campaign::rename_campaign,
+            campaign::delete_campaign,
             // Fear tracker commands
             fear_tracker::get_fear_level,
             fear_tracker::set_fear_level,

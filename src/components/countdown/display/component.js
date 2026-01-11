@@ -7,6 +7,7 @@ const { listen } = window.__TAURI__.event;
 class CountdownDisplay extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #countdownsList;
+  #currentCampaignId = null;
   trackers = [];
   stylesPath = './styles.css';
   templatePath = './template.html';
@@ -19,13 +20,25 @@ class CountdownDisplay extends ExtendedHtmlElement {
 
     // Listen for tracker updates
     await listen('trackers-updated', event => {
-      this.trackers = event.payload.trackers.filter(t => t.visible_to_players);
-      this.renderTrackers();
+      // Only accept updates for the current campaign
+      if (event.payload.campaign_id === this.#currentCampaignId) {
+        this.trackers = event.payload.trackers.filter(t => t.visible_to_players);
+        this.renderTrackers();
+      }
+    });
+
+    // Listen for campaign changes to reload data
+    window.addEventListener('campaign-changed', () => {
+      this.loadTrackers();
     });
   }
 
   async loadTrackers() {
     try {
+      // Get current campaign first
+      const campaign = await invoke('get_current_campaign');
+      this.#currentCampaignId = campaign?.id;
+
       this.trackers = await invoke('get_trackers', { visibleOnly: true });
       this.renderTrackers();
     } catch (error) {

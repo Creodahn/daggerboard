@@ -42,6 +42,56 @@ class CountdownItem extends ExtendedHtmlElement {
 
   async setup() {
     this.#isReady = true;
+
+    // Attach delegated event listeners (setup is only called once)
+    this.shadowRoot.addEventListener('counter-change', e => {
+      e.stopPropagation();
+      this.dispatchEvent(
+        new CustomEvent('value-change', {
+          bubbles: true,
+          composed: true,
+          detail: { id: this.#tracker.id, delta: e.detail.delta },
+        })
+      );
+    });
+
+    this.shadowRoot.addEventListener('visibility-change', e => {
+      e.stopPropagation();
+      this.dispatchEvent(
+        new CustomEvent('visibility-change', {
+          bubbles: true,
+          composed: true,
+          detail: { id: e.detail.entityId, visible: e.detail.checked },
+        })
+      );
+    });
+
+    // Hide name toggle - only handle toggle-change from hide-name switch
+    this.shadowRoot.addEventListener('toggle-change', e => {
+      if (e.target.closest('visibility-toggle')) return;
+      e.stopPropagation();
+      this.dispatchEvent(
+        new CustomEvent('name-visibility-change', {
+          bubbles: true,
+          composed: true,
+          detail: { id: this.#tracker.id, hidden: e.detail.checked },
+        })
+      );
+    });
+
+    this.shadowRoot.addEventListener('delete-confirmed', async e => {
+      e.stopPropagation();
+      const container = this.shadowRoot.querySelector('card-container');
+      await container.fadeOut();
+      this.dispatchEvent(
+        new CustomEvent('delete', {
+          bubbles: true,
+          composed: true,
+          detail: { id: e.detail.id, name: e.detail.name },
+        })
+      );
+    });
+
     if (this.#tracker) {
       this.render();
     }
@@ -123,7 +173,7 @@ class CountdownItem extends ExtendedHtmlElement {
             <dropdown-menu-item slot="content" keep-open>
               <toggle-switch name="hide-name" label="🙈 Hide Name from Players" ${tracker.hide_name_from_players ? 'checked' : ''} label-first></toggle-switch>
             </dropdown-menu-item>
-            <dropdown-menu-item slot="content" variant="delete">
+            <dropdown-menu-item slot="content" variant="delete" keep-open>
               <delete-trigger item-name="${tracker.name}" item-id="${tracker.id}">
                 <span slot="trigger">🗑️ Delete Tracker</span>
               </delete-trigger>
@@ -135,63 +185,6 @@ class CountdownItem extends ExtendedHtmlElement {
     `;
 
     this.#hasRendered = true;
-    this.attachEventListeners();
-  }
-
-  attachEventListeners() {
-    const container = this.shadowRoot.querySelector('card-container');
-    if (!container) return;
-
-    // Counter control
-    this.shadowRoot.addEventListener('counter-change', e => {
-      e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent('value-change', {
-          bubbles: true,
-          composed: true,
-          detail: { id: this.#tracker.id, delta: e.detail.delta },
-        })
-      );
-    });
-
-    // Visibility toggle
-    this.shadowRoot.addEventListener('visibility-change', e => {
-      e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent('visibility-change', {
-          bubbles: true,
-          composed: true,
-          detail: { id: e.detail.entityId, visible: e.detail.checked },
-        })
-      );
-    });
-
-    // Hide name toggle - only handle toggle-change from hide-name switch
-    this.shadowRoot.addEventListener('toggle-change', e => {
-      // Only handle if it's from the hide-name toggle, not visibility-toggle's internal toggle
-      if (e.target.closest('visibility-toggle')) return;
-      e.stopPropagation();
-      this.dispatchEvent(
-        new CustomEvent('name-visibility-change', {
-          bubbles: true,
-          composed: true,
-          detail: { id: this.#tracker.id, hidden: e.detail.checked },
-        })
-      );
-    });
-
-    // Delete trigger
-    this.shadowRoot.addEventListener('delete-confirmed', async e => {
-      e.stopPropagation();
-      await container.fadeOut();
-      this.dispatchEvent(
-        new CustomEvent('delete', {
-          bubbles: true,
-          composed: true,
-          detail: { id: e.detail.id, name: e.detail.name },
-        })
-      );
-    });
   }
 }
 

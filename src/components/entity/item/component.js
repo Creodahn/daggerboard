@@ -30,6 +30,19 @@ class EntityItem extends ExtendedHtmlElement {
 
   async setup() {
     this.#isReady = true;
+
+    // Attach delegated event listeners (setup is only called once)
+    this.shadowRoot.addEventListener('delete-confirmed', async e => {
+      e.stopPropagation();
+      const container = this.shadowRoot.querySelector('card-container');
+      await container.fadeOut();
+      this.dispatchEvent(new CustomEvent('delete', {
+        bubbles: true,
+        composed: true,
+        detail: { id: e.detail.id, name: e.detail.name }
+      }));
+    });
+
     // Render now that template is ready (if entity was already set)
     if (this.#entity) {
       this.render();
@@ -116,7 +129,7 @@ class EntityItem extends ExtendedHtmlElement {
           <dropdown-menu-item slot="content" keep-open>
             <visibility-toggle entity-id="${entity.id}" ${entity.visible_to_players ? 'checked' : ''} compact></visibility-toggle>
           </dropdown-menu-item>
-          <dropdown-menu-item slot="content" variant="delete">
+          <dropdown-menu-item slot="content" variant="delete" keep-open>
             <delete-trigger item-name="${entity.name}" item-id="${entity.id}">
               <span slot="trigger">🗑️ Delete Entity</span>
             </delete-trigger>
@@ -180,16 +193,7 @@ class EntityItem extends ExtendedHtmlElement {
 
     // Visibility toggle - event bubbles up from visibility-toggle component
     // The visibility-change event is already dispatched by the component with entityId
-
-    // Delete trigger - bubbles up from delete-trigger component
-    container.querySelector('delete-trigger').addEventListener('delete-confirmed', async e => {
-      await container.fadeOut();
-      this.dispatchEvent(new CustomEvent('delete', {
-        bubbles: true,
-        composed: true,
-        detail: { id: e.detail.id, name: e.detail.name }
-      }));
-    });
+    // Delete trigger is handled in attachGlobalListeners
   }
 }
 

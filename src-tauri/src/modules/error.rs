@@ -23,6 +23,9 @@ pub enum AppError {
 
     #[error("Event emission error: {0}")]
     EmitError(String),
+
+    #[error("Validation error: {0}")]
+    Validation(String),
 }
 
 /// Result type alias for commands

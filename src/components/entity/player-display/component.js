@@ -11,6 +11,7 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
   entities = [];
   #previousHp = new Map();
   #pendingFlashes = new Map();
+  #currentCampaignId = null;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
@@ -22,6 +23,10 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
 
   async loadEntities() {
     try {
+      // Get current campaign first
+      const campaign = await invoke('get_current_campaign');
+      this.#currentCampaignId = campaign?.id;
+
       const newEntities = await invoke('get_entities', { visibleOnly: true });
       this.detectHpChanges(newEntities);
       this.entities = newEntities;
@@ -54,8 +59,22 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
   }
 
   setupEventListener() {
-    listen('entities-updated', async () => {
-      await this.loadEntities();
+    listen('entities-updated', async (event) => {
+      // Only accept updates for the current campaign
+      if (event.payload.campaign_id === this.#currentCampaignId) {
+        const newEntities = event.payload.entities.filter(e => e.visible_to_players);
+        this.detectHpChanges(newEntities);
+        this.entities = newEntities;
+        this.render();
+        this.applyFlashAnimations();
+      }
+    });
+
+    // Listen for campaign changes to reload data
+    window.addEventListener('campaign-changed', () => {
+      this.#previousHp.clear();
+      this.#pendingFlashes.clear();
+      this.loadEntities();
     });
   }
 

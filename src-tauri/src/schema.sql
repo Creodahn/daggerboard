@@ -1,6 +1,15 @@
+-- Campaigns table
+CREATE TABLE IF NOT EXISTS campaigns (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    fear_level INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Entities table
 CREATE TABLE IF NOT EXISTS entities (
     id TEXT PRIMARY KEY,
+    campaign_id TEXT NOT NULL,
     name TEXT NOT NULL,
     hp_current INTEGER NOT NULL,
     hp_max INTEGER NOT NULL,
@@ -8,18 +17,21 @@ CREATE TABLE IF NOT EXISTS entities (
     threshold_major INTEGER NOT NULL,
     threshold_severe INTEGER NOT NULL,
     visible_to_players INTEGER NOT NULL DEFAULT 0,
-    entity_type TEXT NOT NULL DEFAULT 'enemy'
+    entity_type TEXT NOT NULL DEFAULT 'enemy',
+    FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
 
 -- Countdown trackers table
 CREATE TABLE IF NOT EXISTS countdown_trackers (
     id TEXT PRIMARY KEY,
+    campaign_id TEXT NOT NULL,
     name TEXT NOT NULL,
     current INTEGER NOT NULL,
     max INTEGER NOT NULL,
     visible_to_players INTEGER NOT NULL DEFAULT 0,
     hide_name_from_players INTEGER NOT NULL DEFAULT 0,
-    tracker_type TEXT NOT NULL
+    tracker_type TEXT NOT NULL,
+    FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
 
 -- Tick labels for complex trackers
@@ -31,8 +43,17 @@ CREATE TABLE IF NOT EXISTS tick_labels (
     FOREIGN KEY (tracker_id) REFERENCES countdown_trackers(id) ON DELETE CASCADE
 );
 
--- App state for simple key-value storage (fear level, etc.)
+-- App state for simple key-value storage (fear level, current campaign, etc.)
+-- Now scoped to campaigns where applicable
 CREATE TABLE IF NOT EXISTS app_state (
-    key TEXT PRIMARY KEY,
-    value TEXT NOT NULL
+    key TEXT NOT NULL,
+    campaign_id TEXT,
+    value TEXT NOT NULL,
+    PRIMARY KEY (key, campaign_id),
+    FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
+
+-- Index for faster campaign-scoped queries
+CREATE INDEX IF NOT EXISTS idx_entities_campaign ON entities(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_trackers_campaign ON countdown_trackers(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_app_state_campaign ON app_state(campaign_id);
