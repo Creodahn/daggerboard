@@ -64,29 +64,29 @@ class DeleteTrigger extends ExtendedHtmlElement {
 
   async setup() {
     // Get reference to confirm-dialog after template is loaded
-    this.#confirmDialog = this.shadowRoot.querySelector('confirm-dialog');
+    this.#confirmDialog = this.$('confirm-dialog');
     // Wait for confirm-dialog to be ready
     await this.#confirmDialog.ready;
   }
 
-  disconnectedCallback() {
+  cleanup() {
     if (this._clickHandler) {
       document.removeEventListener('click', this._clickHandler, true);
     }
   }
 
   async showConfirmation() {
-    const itemName = this.getAttribute('item-name') || 'this item';
-    const itemId = this.getAttribute('item-id');
-    const customMessage = this.getAttribute('message');
-    const confirmText = this.getAttribute('confirm-text') || 'Delete';
-    const cancelText = this.getAttribute('cancel-text') || 'Cancel';
+    const itemName = this.getStringAttr('item-name', 'this item');
+    const itemId = this.getStringAttr('item-id');
+    const customMessage = this.getStringAttr('message');
+    const confirmText = this.getStringAttr('confirm-text', 'Delete');
+    const cancelText = this.getStringAttr('cancel-text', 'Cancel');
 
     const message = customMessage || `Are you sure you want to delete "${itemName}"?`;
 
     // Wait for dialog to be ready if it isn't yet
     if (!this.#confirmDialog) {
-      this.#confirmDialog = this.shadowRoot.querySelector('confirm-dialog');
+      this.#confirmDialog = this.$('confirm-dialog');
     }
     await this.#confirmDialog.ready;
 
@@ -98,14 +98,10 @@ class DeleteTrigger extends ExtendedHtmlElement {
     });
 
     if (confirmed) {
-      this.dispatchEvent(new CustomEvent('delete-confirmed', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          id: itemId,
-          name: itemName
-        }
-      }));
+      this.emit('delete-confirmed', {
+        id: itemId,
+        name: itemName
+      });
     }
   }
 }

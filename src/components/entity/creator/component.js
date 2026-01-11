@@ -16,13 +16,13 @@ class EntityCreator extends ExtendedHtmlElement {
 
   async setup() {
     // Get DOM elements
-    this.#modal = this.shadowRoot.querySelector('modal-dialog');
-    this.#nameField = this.shadowRoot.querySelector('form-field[name="name"]');
-    this.#entityTypeSelect = this.shadowRoot.querySelector('select[name="entity-type"]');
-    this.#hpMaxField = this.shadowRoot.querySelector('form-field[name="hp-max"]');
-    this.#minorField = this.shadowRoot.querySelector('form-field[name="minor"]');
-    this.#majorField = this.shadowRoot.querySelector('form-field[name="major"]');
-    this.#severeField = this.shadowRoot.querySelector('form-field[name="severe"]');
+    this.#modal = this.$('modal-dialog');
+    this.#nameField = this.$('form-field[name="name"]');
+    this.#entityTypeSelect = this.$('select[name="entity-type"]');
+    this.#hpMaxField = this.$('form-field[name="hp-max"]');
+    this.#minorField = this.$('form-field[name="minor"]');
+    this.#majorField = this.$('form-field[name="major"]');
+    this.#severeField = this.$('form-field[name="severe"]');
 
     // Listen for open event from entity list
     document.addEventListener('open-entity-creator', () => {
@@ -32,13 +32,13 @@ class EntityCreator extends ExtendedHtmlElement {
     });
 
     // Setup form submit handler (handles Enter key in form fields)
-    this.shadowRoot.querySelector('form').addEventListener('submit', e => {
+    this.$('form').addEventListener('submit', e => {
       e.preventDefault();
       this.createEntity();
     });
 
     // Handle action-button click (button is in shadow DOM so can't trigger form submit)
-    this.shadowRoot.querySelector('action-button.create').addEventListener('action-click', () => {
+    this.$('action-button.create').addEventListener('action-click', () => {
       this.createEntity();
     });
   }

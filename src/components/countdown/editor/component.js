@@ -22,17 +22,17 @@ class CountdownEditor extends ExtendedHtmlElement {
 
   async setup() {
     // Get DOM elements
-    this.#modal = this.shadowRoot.querySelector('modal-dialog');
-    this.#nameField = this.shadowRoot.querySelector('form-field[name="name"]');
-    this.#maxField = this.shadowRoot.querySelector('form-field[name="max"]');
-    this.#visibleToggle = this.shadowRoot.querySelector('visibility-toggle[name="visibleToPlayers"]');
-    this.#hideNameToggle = this.shadowRoot.querySelector('toggle-switch[name="hideNameFromPlayers"]');
-    this.#createButton = this.shadowRoot.querySelector('action-button.create');
-    this.#trackersList = this.shadowRoot.querySelector('stack-list.trackers-list');
-    this.#tickLabelsContainer = this.shadowRoot.querySelector('.tick-labels-container');
-    this.#addTickLabelBtn = this.shadowRoot.querySelector('.add-tick-label');
+    this.#modal = this.$('modal-dialog');
+    this.#nameField = this.$('form-field[name="name"]');
+    this.#maxField = this.$('form-field[name="max"]');
+    this.#visibleToggle = this.$('visibility-toggle[name="visibleToPlayers"]');
+    this.#hideNameToggle = this.$('toggle-switch[name="hideNameFromPlayers"]');
+    this.#createButton = this.$('action-button.create');
+    this.#trackersList = this.$('stack-list.trackers-list');
+    this.#tickLabelsContainer = this.$('.tick-labels-container');
+    this.#addTickLabelBtn = this.$('.add-tick-label');
 
-    const openBtn = this.shadowRoot.querySelector('.open-creator');
+    const openBtn = this.$('.open-creator');
 
     // Open modal handler
     openBtn.addEventListener('action-click', () => {
@@ -115,7 +115,7 @@ class CountdownEditor extends ExtendedHtmlElement {
   }
 
   removeTickLabelEntry(entryId) {
-    const entry = this.shadowRoot.querySelector(`[data-id="${entryId}"]`);
+    const entry = this.$(`[data-id="${entryId}"]`);
     if (entry) {
       entry.remove();
       this.#tickLabelEntries = this.#tickLabelEntries.filter(id => id !== entryId);
@@ -125,7 +125,7 @@ class CountdownEditor extends ExtendedHtmlElement {
 
   updateTickLabelLimit() {
     const max = parseInt(this.#maxField.value) || 10;
-    this.shadowRoot.querySelectorAll('.tick-input').forEach(input => {
+    this.$$('.tick-input').forEach(input => {
       input.max = max;
     });
     this.updateAddButtonState();
@@ -143,7 +143,7 @@ class CountdownEditor extends ExtendedHtmlElement {
 
   getTickLabels() {
     const labels = {};
-    this.shadowRoot.querySelectorAll('.tick-label-entry').forEach(entry => {
+    this.$$('.tick-label-entry').forEach(entry => {
       const tickInput = entry.querySelector('.tick-input');
       const labelInput = entry.querySelector('.label-input');
       const tick = parseInt(tickInput.value);

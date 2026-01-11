@@ -3,6 +3,7 @@ import ExtendedHtmlElement from '../extended-html-element.js';
 class ModalDialog extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   static observedAttributes = ['title'];
+
   #dialog;
   #titleEl;
   #closeBtn;
@@ -10,13 +11,14 @@ class ModalDialog extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#dialog = this.shadowRoot.querySelector('.modal-dialog');
-    this.#titleEl = this.shadowRoot.querySelector('.modal-title');
-    this.#closeBtn = this.shadowRoot.querySelector('.close-btn');
+    this.#dialog = this.$('.modal-dialog');
+    this.#titleEl = this.$('.modal-title');
+    this.#closeBtn = this.$('.close-btn');
 
     // Set initial title from attribute
-    if (this.hasAttribute('title')) {
-      this.#titleEl.textContent = this.getAttribute('title');
+    const title = this.getStringAttr('title');
+    if (title) {
+      this.#titleEl.textContent = title;
     }
 
     // Close button handler
@@ -44,7 +46,7 @@ class ModalDialog extends ExtendedHtmlElement {
   }
 
   updateHeaderVisibility() {
-    const header = this.shadowRoot.querySelector('.modal-header');
+    const header = this.$('.modal-header');
     if (header) {
       const title = this.#titleEl?.textContent?.trim();
       header.classList.toggle('hidden', !title);
@@ -56,10 +58,7 @@ class ModalDialog extends ExtendedHtmlElement {
    */
   open() {
     this.#dialog.showModal();
-    this.dispatchEvent(new CustomEvent('modal-open', {
-      bubbles: true,
-      composed: true
-    }));
+    this.emit('modal-open');
   }
 
   /**
@@ -67,10 +66,7 @@ class ModalDialog extends ExtendedHtmlElement {
    */
   close() {
     this.#dialog.close();
-    this.dispatchEvent(new CustomEvent('modal-close', {
-      bubbles: true,
-      composed: true
-    }));
+    this.emit('modal-close');
   }
 
   /**

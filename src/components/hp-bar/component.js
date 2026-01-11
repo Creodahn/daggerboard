@@ -25,7 +25,7 @@ class HpBar extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   get current() {
-    return parseInt(this.getAttribute('current')) || 0;
+    return this.getIntAttr('current', 0);
   }
 
   set current(value) {
@@ -33,7 +33,7 @@ class HpBar extends ExtendedHtmlElement {
   }
 
   get max() {
-    return parseInt(this.getAttribute('max')) || 1;
+    return this.getIntAttr('max', 1);
   }
 
   set max(value) {
@@ -41,9 +41,9 @@ class HpBar extends ExtendedHtmlElement {
   }
 
   setup() {
-    this.#container = this.shadowRoot.querySelector('.hp-bar-container');
-    this.#bar = this.shadowRoot.querySelector('.hp-bar');
-    this.#text = this.shadowRoot.querySelector('.hp-text');
+    this.#container = this.$('.hp-bar-container');
+    this.#bar = this.$('.hp-bar');
+    this.#text = this.$('.hp-text');
 
     this.update();
   }
@@ -57,7 +57,7 @@ class HpBar extends ExtendedHtmlElement {
   update() {
     const current = this.current;
     const max = this.max;
-    const showText = this.hasAttribute('show-text');
+    const showText = this.getBoolAttr('show-text');
 
     const percentage = getHealthPercentage(current, max);
     const healthClass = getHealthBarClass(percentage);

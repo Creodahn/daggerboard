@@ -23,7 +23,7 @@ class StackList extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#list = this.shadowRoot.querySelector('.stack-list');
+    this.#list = this.$('.stack-list');
     this.updateList();
   }
 
@@ -36,9 +36,9 @@ class StackList extends ExtendedHtmlElement {
   updateList() {
     if (!this.#list) return;
 
-    const gap = this.getAttribute('gap') || 'medium';
-    const scrollable = this.hasAttribute('scrollable');
-    const maxHeight = this.getAttribute('max-height') || '350px';
+    const gap = this.getStringAttr('gap', 'medium');
+    const scrollable = this.getBoolAttr('scrollable');
+    const maxHeight = this.getStringAttr('max-height', '350px');
 
     this.#list.className = `stack-list gap-${gap} ${scrollable ? 'scrollable' : ''}`;
     this.#list.style.maxHeight = scrollable ? maxHeight : '';

@@ -8,11 +8,11 @@ class DropdownMenuItem extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#isKeepOpen = this.hasAttribute('keep-open');
+    this.#isKeepOpen = this.getBoolAttr('keep-open');
 
     // If keep-open is set, replace button with div
     if (this.#isKeepOpen) {
-      const button = this.shadowRoot.querySelector('button');
+      const button = this.$('button');
       const div = document.createElement('div');
       div.className = button.className;
       div.setAttribute('part', button.getAttribute('part'));
@@ -20,15 +20,9 @@ class DropdownMenuItem extends ExtendedHtmlElement {
       button.replaceWith(div);
     } else {
       // Only dispatch menu-item-click for button items (not keep-open items)
-      const item = this.shadowRoot.querySelector('.menu-item');
+      const item = this.$('.menu-item');
       item.addEventListener('click', e => {
-        this.dispatchEvent(
-          new CustomEvent('menu-item-click', {
-            bubbles: true,
-            composed: true,
-            detail: { originalEvent: e },
-          })
-        );
+        this.emit('menu-item-click', { originalEvent: e });
       });
     }
   }

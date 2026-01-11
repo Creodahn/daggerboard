@@ -40,8 +40,9 @@ class CounterControl extends ExtendedHtmlElement {
 
   set value(val) {
     const num = parseInt(val) || 0;
-    const min = parseInt(this.getAttribute('min')) || 0;
-    const max = this.getAttribute('max') ? parseInt(this.getAttribute('max')) : null;
+    const min = this.getIntAttr('min', 0);
+    const maxAttr = this.getAttribute('max');
+    const max = maxAttr !== null ? parseInt(maxAttr) : null;
 
     // Clamp value to min/max
     let clamped = Math.max(min, num);
@@ -55,15 +56,15 @@ class CounterControl extends ExtendedHtmlElement {
   }
 
   setup() {
-    this.#valueEl = this.shadowRoot.querySelector('.value');
-    this.#labelEl = this.shadowRoot.querySelector('.label');
-    this.#decrementBtn = this.shadowRoot.querySelector('.decrement');
-    this.#incrementBtn = this.shadowRoot.querySelector('.increment');
+    this.#valueEl = this.$('.value');
+    this.#labelEl = this.$('.label');
+    this.#decrementBtn = this.$('.decrement');
+    this.#incrementBtn = this.$('.increment');
 
-    this.#value = parseInt(this.getAttribute('value')) || 0;
+    this.#value = this.getIntAttr('value', 0);
 
     // Set initial label
-    const label = this.getAttribute('label') || '';
+    const label = this.getStringAttr('label');
     this.#labelEl.textContent = label;
     this.#labelEl.style.display = label ? '' : 'none';
 
@@ -92,7 +93,7 @@ class CounterControl extends ExtendedHtmlElement {
   updateDisplay() {
     if (!this.#valueEl) return;
 
-    const showMax = this.getAttribute('show-max');
+    const showMax = this.getStringAttr('show-max');
     if (showMax) {
       this.#valueEl.textContent = `${this.#value} / ${showMax}`;
     } else {
@@ -105,49 +106,34 @@ class CounterControl extends ExtendedHtmlElement {
   updateButtonStates() {
     if (!this.#decrementBtn || !this.#incrementBtn) return;
 
-    const readonly = this.hasAttribute('readonly');
-    const min = parseInt(this.getAttribute('min')) || 0;
-    const max = this.getAttribute('max') ? parseInt(this.getAttribute('max')) : null;
+    const readonly = this.getBoolAttr('readonly');
+    const min = this.getIntAttr('min', 0);
+    const maxAttr = this.getAttribute('max');
+    const max = maxAttr !== null ? parseInt(maxAttr) : null;
 
     this.#decrementBtn.disabled = readonly || this.#value <= min;
     this.#incrementBtn.disabled = readonly || (max !== null && this.#value >= max);
   }
 
   increment() {
-    const step = parseInt(this.getAttribute('step')) || 1;
+    const step = this.getIntAttr('step', 1);
     const oldValue = this.#value;
     this.value = this.#value + step;
 
     if (this.#value !== oldValue) {
-      this.dispatchEvent(new CustomEvent('counter-increment', {
-        bubbles: true,
-        composed: true,
-        detail: { value: this.#value }
-      }));
-      this.dispatchEvent(new CustomEvent('counter-change', {
-        bubbles: true,
-        composed: true,
-        detail: { value: this.#value, delta: step }
-      }));
+      this.emit('counter-increment', { value: this.#value });
+      this.emit('counter-change', { value: this.#value, delta: step });
     }
   }
 
   decrement() {
-    const step = parseInt(this.getAttribute('step')) || 1;
+    const step = this.getIntAttr('step', 1);
     const oldValue = this.#value;
     this.value = this.#value - step;
 
     if (this.#value !== oldValue) {
-      this.dispatchEvent(new CustomEvent('counter-decrement', {
-        bubbles: true,
-        composed: true,
-        detail: { value: this.#value }
-      }));
-      this.dispatchEvent(new CustomEvent('counter-change', {
-        bubbles: true,
-        composed: true,
-        detail: { value: this.#value, delta: -step }
-      }));
+      this.emit('counter-decrement', { value: this.#value });
+      this.emit('counter-change', { value: this.#value, delta: -step });
     }
   }
 }

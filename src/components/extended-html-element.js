@@ -31,6 +31,85 @@ export default class ExtendedHtmlElement extends HTMLElement {
     this.#readyResolve();
   }
 
+  disconnectedCallback() {
+    this.cleanup?.();
+  }
+
+  // ============================================================================
+  // Query Helpers
+  // ============================================================================
+
+  /**
+   * Shorthand for this.shadowRoot.querySelector()
+   * @param {string} selector - CSS selector
+   * @returns {Element|null}
+   */
+  $(selector) {
+    return this.shadowRoot.querySelector(selector);
+  }
+
+  /**
+   * Shorthand for this.shadowRoot.querySelectorAll()
+   * @param {string} selector - CSS selector
+   * @returns {NodeList}
+   */
+  $$(selector) {
+    return this.shadowRoot.querySelectorAll(selector);
+  }
+
+  // ============================================================================
+  // Event Helpers
+  // ============================================================================
+
+  /**
+   * Dispatch a custom event with bubbles and composed set to true
+   * @param {string} name - Event name
+   * @param {Object} detail - Event detail object
+   */
+  emit(name, detail = {}) {
+    this.dispatchEvent(new CustomEvent(name, {
+      bubbles: true,
+      composed: true,
+      detail
+    }));
+  }
+
+  // ============================================================================
+  // Attribute Helpers
+  // ============================================================================
+
+  /**
+   * Get an attribute as a string with optional default
+   * @param {string} name - Attribute name
+   * @param {string} defaultValue - Default value if attribute is not set
+   * @returns {string}
+   */
+  getStringAttr(name, defaultValue = '') {
+    return this.getAttribute(name) ?? defaultValue;
+  }
+
+  /**
+   * Get an attribute as an integer with optional default
+   * @param {string} name - Attribute name
+   * @param {number} defaultValue - Default value if attribute is not set or invalid
+   * @returns {number}
+   */
+  getIntAttr(name, defaultValue = 0) {
+    const value = this.getAttribute(name);
+    if (value === null) return defaultValue;
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? defaultValue : parsed;
+  }
+
+  /**
+   * Get an attribute as a boolean (true if attribute exists)
+   * @param {string} name - Attribute name
+   * @returns {boolean}
+   */
+  getBoolAttr(name) {
+    return this.hasAttribute(name);
+  }
+
   /**
    * Get the cache key for this component class
    */

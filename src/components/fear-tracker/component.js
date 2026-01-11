@@ -11,10 +11,10 @@ class FearTracker extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#counter = this.shadowRoot.querySelector('counter-control');
+    this.#counter = this.$('counter-control');
 
     // If no-controls mode, set counter to display-only
-    if (this.hasAttribute('no-controls')) {
+    if (this.getBoolAttr('no-controls')) {
       this.#counter.setAttribute('display-only', '');
     }
 
@@ -22,7 +22,7 @@ class FearTracker extends ExtendedHtmlElement {
     await this.loadFearLevel();
 
     // Listen for counter changes (only if controls are enabled)
-    if (!this.hasAttribute('no-controls')) {
+    if (!this.getBoolAttr('no-controls')) {
       this.#counter.addEventListener('counter-change', e => {
         this.changeFearLevel(e.detail.delta);
       });

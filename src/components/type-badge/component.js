@@ -9,7 +9,7 @@ class TypeBadge extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#badge = this.shadowRoot.querySelector('.badge');
+    this.#badge = this.$('.badge');
     this.updateBadge();
   }
 
@@ -22,10 +22,10 @@ class TypeBadge extends ExtendedHtmlElement {
   updateBadge() {
     if (!this.#badge) return;
 
-    const type = this.getAttribute('type') || '';
-    const label = this.getAttribute('label') || this.textContent || type.toUpperCase();
+    const type = this.getStringAttr('type');
+    const label = this.getStringAttr('label') || this.textContent || type?.toUpperCase() || '';
 
-    this.#badge.className = `badge ${type}`;
+    this.#badge.className = `badge ${type || ''}`;
     this.#badge.textContent = label;
   }
 }

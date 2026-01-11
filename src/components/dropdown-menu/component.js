@@ -10,8 +10,8 @@ class DropdownMenu extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#trigger = this.shadowRoot.querySelector('.dropdown-trigger');
-    this.#content = this.shadowRoot.querySelector('.dropdown-content');
+    this.#trigger = this.$('.dropdown-trigger');
+    this.#content = this.$('.dropdown-content');
     this.#boundHandleDocumentClick = this.#handleDocumentClick.bind(this);
 
     // Toggle dropdown on trigger click
@@ -102,7 +102,7 @@ class DropdownMenu extends ExtendedHtmlElement {
     }
   }
 
-  disconnectedCallback() {
+  cleanup() {
     document.removeEventListener('click', this.#boundHandleDocumentClick);
   }
 }

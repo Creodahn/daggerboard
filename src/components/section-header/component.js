@@ -9,16 +9,13 @@ class SectionHeader extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#titleEl = this.shadowRoot.querySelector('.section-title');
+    this.#titleEl = this.$('.section-title');
     this.updateTitle();
 
     // Listen for action button clicks
-    this.shadowRoot.querySelector('.action-slot').addEventListener('click', e => {
+    this.$('.action-slot').addEventListener('click', e => {
       if (e.target.closest('[slot="action"]')) {
-        this.dispatchEvent(new CustomEvent('action-click', {
-          bubbles: true,
-          composed: true
-        }));
+        this.emit('action-click');
       }
     });
   }
@@ -31,7 +28,7 @@ class SectionHeader extends ExtendedHtmlElement {
 
   updateTitle() {
     if (this.#titleEl) {
-      this.#titleEl.textContent = this.getAttribute('title') || '';
+      this.#titleEl.textContent = this.getStringAttr('title');
     }
   }
 }

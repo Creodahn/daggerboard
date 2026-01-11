@@ -24,7 +24,7 @@ class CollapseToggle extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   get expanded() {
-    return this.hasAttribute('expanded');
+    return this.getBoolAttr('expanded');
   }
 
   set expanded(value) {
@@ -36,16 +36,12 @@ class CollapseToggle extends ExtendedHtmlElement {
   }
 
   setup() {
-    this.#button = this.shadowRoot.querySelector('button');
-    this.#icon = this.shadowRoot.querySelector('.caret-icon');
+    this.#button = this.$('button');
+    this.#icon = this.$('.caret-icon');
 
     this.#button.addEventListener('click', () => {
       this.expanded = !this.expanded;
-      this.dispatchEvent(new CustomEvent('collapse-toggle', {
-        bubbles: true,
-        composed: true,
-        detail: { expanded: this.expanded }
-      }));
+      this.emit('collapse-toggle', { expanded: this.expanded });
     });
 
     this.updateSize();
@@ -60,7 +56,7 @@ class CollapseToggle extends ExtendedHtmlElement {
   updateSize() {
     if (!this.#icon) return;
 
-    const size = this.getAttribute('size') || 'medium';
+    const size = this.getStringAttr('size', 'medium');
     const sizes = {
       small: '12',
       medium: '16',

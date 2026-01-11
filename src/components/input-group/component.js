@@ -45,8 +45,8 @@ class InputGroup extends ExtendedHtmlElement {
   }
 
   setup() {
-    this.#input = this.shadowRoot.querySelector('input');
-    this.#button = this.shadowRoot.querySelector('button');
+    this.#input = this.$('input');
+    this.#button = this.$('button');
 
     this.updateElements();
     this.attachEventListeners();
@@ -61,13 +61,13 @@ class InputGroup extends ExtendedHtmlElement {
   updateElements() {
     if (!this.#input || !this.#button) return;
 
-    const type = this.getAttribute('type') || 'text';
-    const placeholder = this.getAttribute('placeholder') || '';
-    const value = this.getAttribute('value') || '';
+    const type = this.getStringAttr('type', 'text');
+    const placeholder = this.getStringAttr('placeholder');
+    const value = this.getStringAttr('value');
     const min = this.getAttribute('min');
     const max = this.getAttribute('max');
-    const buttonText = this.getAttribute('button-text') || 'Submit';
-    const disabled = this.hasAttribute('disabled');
+    const buttonText = this.getStringAttr('button-text', 'Submit');
+    const disabled = this.getBoolAttr('disabled');
 
     this.#input.type = type;
     this.#input.placeholder = placeholder;
@@ -84,11 +84,7 @@ class InputGroup extends ExtendedHtmlElement {
 
   attachEventListeners() {
     this.#input.addEventListener('input', e => {
-      this.dispatchEvent(new CustomEvent('input-change', {
-        bubbles: true,
-        composed: true,
-        detail: { value: e.target.value }
-      }));
+      this.emit('input-change', { value: e.target.value });
     });
 
     this.#input.addEventListener('keydown', e => {
@@ -104,11 +100,7 @@ class InputGroup extends ExtendedHtmlElement {
   }
 
   submit() {
-    this.dispatchEvent(new CustomEvent('action-submit', {
-      bubbles: true,
-      composed: true,
-      detail: { value: this.#input?.value || '' }
-    }));
+    this.emit('action-submit', { value: this.#input?.value || '' });
   }
 
   clear() {

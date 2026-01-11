@@ -13,8 +13,8 @@ class TogglePlayerViewButton extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#button = this.shadowRoot.querySelector('button');
-    this.#buttonText = this.shadowRoot.querySelector('.button-text');
+    this.#button = this.$('button');
+    this.#buttonText = this.$('.button-text');
 
     if (!this.#button) return;
 

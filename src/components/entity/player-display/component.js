@@ -50,7 +50,7 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
 
   applyFlashAnimations() {
     for (const [entityId, flashType] of this.#pendingFlashes) {
-      const flashContainer = this.shadowRoot.querySelector(`flash-container[data-entity-id="${entityId}"]`);
+      const flashContainer = this.$(`flash-container[data-entity-id="${entityId}"]`);
       if (flashContainer) {
         flashContainer.flash(flashType);
       }
@@ -79,7 +79,7 @@ export default class EntityPlayerDisplay extends ExtendedHtmlElement {
   }
 
   render() {
-    const container = this.shadowRoot.querySelector('.entities-container');
+    const container = this.$('.entities-container');
     if (!container) return;
 
     const enemies = this.entities.filter(e => e.entity_type === 'enemy');

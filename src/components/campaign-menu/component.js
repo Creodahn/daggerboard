@@ -23,10 +23,10 @@ class CampaignMenu extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#dropdown = this.shadowRoot.querySelector('dropdown-menu');
-    this.#campaignName = this.shadowRoot.querySelector('.campaign-name');
-    this.#playerViewBtn = this.shadowRoot.querySelector('.player-view-btn');
-    this.#playerViewText = this.shadowRoot.querySelector('.player-view-text');
+    this.#dropdown = this.$('dropdown-menu');
+    this.#campaignName = this.$('.campaign-name');
+    this.#playerViewBtn = this.$('.player-view-btn');
+    this.#playerViewText = this.$('.player-view-text');
 
     // Load initial data - current campaign first so list renders correctly
     await this.loadCurrentCampaign();
@@ -34,8 +34,8 @@ class CampaignMenu extends ExtendedHtmlElement {
     await this.checkPlayerViewState();
 
     // Setup create campaign form
-    const createInput = this.shadowRoot.querySelector('.create-campaign-input');
-    const createBtn = this.shadowRoot.querySelector('.create-campaign-btn');
+    const createInput = this.$('.create-campaign-input');
+    const createBtn = this.$('.create-campaign-btn');
 
     createBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -62,10 +62,9 @@ class CampaignMenu extends ExtendedHtmlElement {
     });
 
     // Setup delete campaign modal
-    const deleteModal = this.shadowRoot.querySelector('.delete-campaign-modal');
-    const deleteInput = this.shadowRoot.querySelector('.delete-confirm-input');
-    const deleteBtn = this.shadowRoot.querySelector('.delete-confirm-btn');
-    const cancelBtn = this.shadowRoot.querySelector('.delete-cancel-btn');
+    const deleteInput = this.$('.delete-confirm-input');
+    const deleteBtn = this.$('.delete-confirm-btn');
+    const cancelBtn = this.$('.delete-cancel-btn');
 
     deleteInput.addEventListener('input', (e) => this.handleDeleteInputChange(e));
     deleteBtn.addEventListener('action-click', () => this.confirmDeleteCampaign());
@@ -120,7 +119,7 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   renderCampaignList() {
-    const list = this.shadowRoot.querySelector('.campaign-list');
+    const list = this.$('.campaign-list');
     list.innerHTML = '';
 
     if (this.#campaigns.length === 0) {
@@ -155,10 +154,10 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   showDeleteConfirmation(id, name) {
-    const modal = this.shadowRoot.querySelector('.delete-campaign-modal');
-    const nameDisplay = this.shadowRoot.querySelector('.delete-campaign-name');
-    const input = this.shadowRoot.querySelector('.delete-confirm-input');
-    const deleteBtn = this.shadowRoot.querySelector('.delete-confirm-btn');
+    const modal = this.$('.delete-campaign-modal');
+    const nameDisplay = this.$('.delete-campaign-name');
+    const input = this.$('.delete-confirm-input');
+    const deleteBtn = this.$('.delete-confirm-btn');
 
     nameDisplay.textContent = name;
     input.value = '';
@@ -172,15 +171,15 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   handleDeleteInputChange(e) {
-    const modal = this.shadowRoot.querySelector('.delete-campaign-modal');
+    const modal = this.$('.delete-campaign-modal');
     const expectedName = modal.dataset.campaignName;
-    const deleteBtn = this.shadowRoot.querySelector('.delete-confirm-btn');
+    const deleteBtn = this.$('.delete-confirm-btn');
 
     deleteBtn.disabled = e.target.value !== expectedName;
   }
 
   async confirmDeleteCampaign() {
-    const modal = this.shadowRoot.querySelector('.delete-campaign-modal');
+    const modal = this.$('.delete-campaign-modal');
     const id = modal.dataset.campaignId;
 
     try {
@@ -193,7 +192,7 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   closeDeleteModal() {
-    this.shadowRoot.querySelector('.delete-campaign-modal').close();
+    this.$('.delete-campaign-modal').close();
   }
 
   async selectCampaign(id) {
@@ -208,7 +207,7 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   handleCreateCampaign() {
-    const input = this.shadowRoot.querySelector('.create-campaign-input');
+    const input = this.$('.create-campaign-input');
     const name = input.value.trim();
 
     if (name) {

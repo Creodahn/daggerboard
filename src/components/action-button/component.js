@@ -34,16 +34,13 @@ class ActionButton extends ExtendedHtmlElement {
     this.addEventListener('click', e => {
       if (!this.disabled) {
         e.stopPropagation();
-        this.dispatchEvent(new CustomEvent('action-click', {
-          bubbles: true,
-          composed: true
-        }));
+        this.emit('action-click');
       }
     });
   }
 
   get disabled() {
-    return this.hasAttribute('disabled') || this.hasAttribute('loading');
+    return this.getBoolAttr('disabled') || this.getBoolAttr('loading');
   }
 
   set disabled(value) {
@@ -55,7 +52,7 @@ class ActionButton extends ExtendedHtmlElement {
   }
 
   setup() {
-    this.#button = this.shadowRoot.querySelector('button');
+    this.#button = this.$('button');
     this.updateButton();
   }
 
@@ -68,15 +65,13 @@ class ActionButton extends ExtendedHtmlElement {
   updateButton() {
     if (!this.#button) return;
 
-    const variant = this.getAttribute('variant') || 'primary';
-    const size = this.getAttribute('size') || 'medium';
-    const type = this.getAttribute('type') || 'button';
-    const isDisabled = this.hasAttribute('disabled');
-    const isLoading = this.hasAttribute('loading');
+    const variant = this.getStringAttr('variant', 'primary');
+    const size = this.getStringAttr('size', 'medium');
+    const type = this.getStringAttr('type', 'button');
 
     this.#button.type = type;
     this.#button.className = `${variant} ${size}`;
-    this.#button.disabled = isDisabled || isLoading;
+    this.#button.disabled = this.disabled;
   }
 }
 

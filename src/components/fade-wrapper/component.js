@@ -24,7 +24,7 @@ class FadeWrapper extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#container = this.shadowRoot.querySelector('.fade-wrapper');
+    this.#container = this.$('.fade-wrapper');
   }
 
   /**

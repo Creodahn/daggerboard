@@ -31,13 +31,9 @@ class EntityItem extends ExtendedHtmlElement {
     // Attach delegated event listeners (setup is only called once)
     this.shadowRoot.addEventListener('delete-confirmed', async e => {
       e.stopPropagation();
-      const container = this.shadowRoot.querySelector('card-container');
+      const container = this.$('card-container');
       await container.fadeOut();
-      this.dispatchEvent(new CustomEvent('delete', {
-        bubbles: true,
-        composed: true,
-        detail: { id: e.detail.id, name: e.detail.name }
-      }));
+      this.emit('delete', { id: e.detail.id, name: e.detail.name });
     });
 
     // Render now that template is ready (if entity was already set)
@@ -50,7 +46,7 @@ class EntityItem extends ExtendedHtmlElement {
     if (!this.#entity) return;
 
     const entity = this.#entity;
-    const container = this.shadowRoot.querySelector('card-container');
+    const container = this.$('card-container');
     if (!container) return;
 
     // Update HP bar
@@ -79,7 +75,7 @@ class EntityItem extends ExtendedHtmlElement {
     const entity = this.#entity;
     const massiveThreshold = entity.thresholds.severe * 2;
 
-    const container = this.shadowRoot.querySelector('card-container');
+    const container = this.$('card-container');
     if (!container) return;
 
     container.innerHTML = `
@@ -140,7 +136,7 @@ class EntityItem extends ExtendedHtmlElement {
   }
 
   attachEventListeners() {
-    const container = this.shadowRoot.querySelector('card-container');
+    const container = this.$('card-container');
 
     // Collapse toggle
     container.querySelector('collapse-toggle').addEventListener('collapse-toggle', e => {
@@ -152,11 +148,7 @@ class EntityItem extends ExtendedHtmlElement {
       btn.addEventListener('click', () => {
         const hpLoss = parseInt(btn.dataset.hpLoss);
         const threshold = btn.dataset.threshold;
-        this.dispatchEvent(new CustomEvent('threshold-damage', {
-          bubbles: true,
-          composed: true,
-          detail: { id: this.#entity.id, hpLoss, threshold }
-        }));
+        this.emit('threshold-damage', { id: this.#entity.id, hpLoss, threshold });
       });
     });
 
@@ -165,11 +157,7 @@ class EntityItem extends ExtendedHtmlElement {
     healInputGroup.addEventListener('action-submit', e => {
       const amount = parseInt(e.detail.value);
       if (!isNaN(amount) && amount > 0) {
-        this.dispatchEvent(new CustomEvent('heal', {
-          bubbles: true,
-          composed: true,
-          detail: { id: this.#entity.id, amount }
-        }));
+        this.emit('heal', { id: this.#entity.id, amount });
         healInputGroup.clear();
       }
     });
@@ -180,11 +168,7 @@ class EntityItem extends ExtendedHtmlElement {
         clearTimeout(this.#nameUpdateTimeout);
       }
       this.#nameUpdateTimeout = setTimeout(() => {
-        this.dispatchEvent(new CustomEvent('name-change', {
-          bubbles: true,
-          composed: true,
-          detail: { id: this.#entity.id, name: e.target.value }
-        }));
+        this.emit('name-change', { id: this.#entity.id, name: e.target.value });
       }, 500);
     });
 

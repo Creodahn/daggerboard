@@ -12,7 +12,7 @@ class FormField extends ExtendedHtmlElement {
 
   get value() {
     if (!this.#input) return '';
-    if (this.getAttribute('type') === 'checkbox') {
+    if (this.getStringAttr('type') === 'checkbox') {
       return this.#input.checked;
     }
     return this.#input.value;
@@ -20,7 +20,7 @@ class FormField extends ExtendedHtmlElement {
 
   set value(val) {
     if (!this.#input) return;
-    if (this.getAttribute('type') === 'checkbox') {
+    if (this.getStringAttr('type') === 'checkbox') {
       this.#input.checked = Boolean(val);
     } else {
       this.#input.value = val;
@@ -38,8 +38,8 @@ class FormField extends ExtendedHtmlElement {
   }
 
   async setup() {
-    this.#label = this.shadowRoot.querySelector('label');
-    this.#errorMessage = this.shadowRoot.querySelector('.error-message');
+    this.#label = this.$('label');
+    this.#errorMessage = this.$('.error-message');
 
     this.render();
   }
@@ -51,15 +51,15 @@ class FormField extends ExtendedHtmlElement {
   }
 
   render() {
-    const type = this.getAttribute('type') || 'text';
-    const label = this.getAttribute('label') || '';
-    const name = this.getAttribute('name') || '';
-    const value = this.getAttribute('value') || '';
-    const placeholder = this.getAttribute('placeholder') || '';
-    const required = this.hasAttribute('required');
+    const type = this.getStringAttr('type', 'text');
+    const label = this.getStringAttr('label');
+    const name = this.getStringAttr('name');
+    const value = this.getStringAttr('value');
+    const placeholder = this.getStringAttr('placeholder');
+    const required = this.getBoolAttr('required');
     const min = this.getAttribute('min');
     const max = this.getAttribute('max');
-    const errorMessage = this.getAttribute('error-message') || 'This field is required';
+    const errorMessage = this.getStringAttr('error-message', 'This field is required');
 
     // Update label
     if (this.#label) {
@@ -73,7 +73,7 @@ class FormField extends ExtendedHtmlElement {
     }
 
     // Create input element based on type
-    const inputContainer = this.shadowRoot.querySelector('.input-container');
+    const inputContainer = this.$('.input-container');
     if (!inputContainer) return;
 
     // Check if we need to recreate the input (type changed)
@@ -101,19 +101,11 @@ class FormField extends ExtendedHtmlElement {
       // Attach event listeners
       inputEl.addEventListener('input', () => {
         this.clearError();
-        this.dispatchEvent(new CustomEvent('field-input', {
-          bubbles: true,
-          composed: true,
-          detail: { name, value: this.value }
-        }));
+        this.emit('field-input', { name, value: this.value });
       });
 
       inputEl.addEventListener('change', () => {
-        this.dispatchEvent(new CustomEvent('field-change', {
-          bubbles: true,
-          composed: true,
-          detail: { name, value: this.value }
-        }));
+        this.emit('field-change', { name, value: this.value });
       });
     }
 
@@ -146,14 +138,14 @@ class FormField extends ExtendedHtmlElement {
     }
 
     // Handle checkbox layout
-    const container = this.shadowRoot.querySelector('.form-field');
+    const container = this.$('.form-field');
     if (container) {
       container.classList.toggle('checkbox', type === 'checkbox');
     }
   }
 
   showError(message) {
-    const container = this.shadowRoot.querySelector('.form-field');
+    const container = this.$('.form-field');
     if (container) {
       container.classList.add('has-error');
     }
@@ -166,7 +158,7 @@ class FormField extends ExtendedHtmlElement {
   }
 
   clearError() {
-    const container = this.shadowRoot.querySelector('.form-field');
+    const container = this.$('.form-field');
     if (container) {
       container.classList.remove('has-error');
     }

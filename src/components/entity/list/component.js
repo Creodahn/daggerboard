@@ -12,15 +12,11 @@ class EntityList extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#entitiesList = this.shadowRoot.querySelector('stack-list');
+    this.#entitiesList = this.$('stack-list');
 
     // Setup create button to dispatch event
-    this.shadowRoot.querySelector('.open-creator').addEventListener('action-click', () => {
-      const event = new CustomEvent('open-entity-creator', {
-        bubbles: true,
-        composed: true
-      });
-      this.dispatchEvent(event);
+    this.$('.open-creator').addEventListener('action-click', () => {
+      this.emit('open-entity-creator');
     });
 
     // Listen for events from entity-item components

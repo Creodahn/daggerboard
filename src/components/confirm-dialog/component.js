@@ -11,10 +11,10 @@ class ConfirmDialog extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#modal = this.shadowRoot.querySelector('modal-dialog');
-    this.#messageEl = this.shadowRoot.querySelector('.confirm-message');
-    this.#confirmBtn = this.shadowRoot.querySelector('.btn-confirm');
-    this.#cancelBtn = this.shadowRoot.querySelector('.btn-cancel');
+    this.#modal = this.$('modal-dialog');
+    this.#messageEl = this.$('.confirm-message');
+    this.#confirmBtn = this.$('.btn-confirm');
+    this.#cancelBtn = this.$('.btn-cancel');
 
     this.#confirmBtn.addEventListener('action-click', () => this.close(true));
     this.#cancelBtn.addEventListener('action-click', () => this.close(false));
@@ -68,11 +68,7 @@ class ConfirmDialog extends ExtendedHtmlElement {
 
     this.#modal.close();
 
-    this.dispatchEvent(new CustomEvent('dialog-close', {
-      bubbles: true,
-      composed: true,
-      detail: { confirmed }
-    }));
+    this.emit('dialog-close', { confirmed });
   }
 }
 

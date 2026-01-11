@@ -21,7 +21,7 @@ class PulseContainer extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#container = this.shadowRoot.querySelector('.pulse-container');
+    this.#container = this.$('.pulse-container');
     this.updateUrgency();
   }
 
@@ -34,8 +34,8 @@ class PulseContainer extends ExtendedHtmlElement {
   updateUrgency() {
     if (!this.#container) return;
 
-    const urgency = this.getAttribute('urgency') || 'normal';
-    const disabled = this.hasAttribute('disabled');
+    const urgency = this.getStringAttr('urgency', 'normal');
+    const disabled = this.getBoolAttr('disabled');
 
     this.#container.classList.remove('urgency-warning', 'urgency-urgent', 'urgency-critical');
 

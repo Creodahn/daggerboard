@@ -21,8 +21,8 @@ class SectionLabel extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#labelEl = this.shadowRoot.querySelector('.section-label');
-    this.#iconEl = this.shadowRoot.querySelector('.icon');
+    this.#labelEl = this.$('.section-label');
+    this.#iconEl = this.$('.icon');
 
     this.updateLabel();
   }
@@ -36,8 +36,8 @@ class SectionLabel extends ExtendedHtmlElement {
   updateLabel() {
     if (!this.#labelEl || !this.#iconEl) return;
 
-    const icon = this.getAttribute('icon') || '';
-    const size = this.getAttribute('size') || 'medium';
+    const icon = this.getStringAttr('icon');
+    const size = this.getStringAttr('size', 'medium');
 
     this.#labelEl.className = `section-label size-${size}`;
     this.#iconEl.textContent = icon;

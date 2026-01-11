@@ -27,7 +27,7 @@ class VisibilityToggle extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   get checked() {
-    return this.#toggleSwitch?.checked ?? this.hasAttribute('checked');
+    return this.#toggleSwitch?.checked ?? this.getBoolAttr('checked');
   }
 
   set checked(value) {
@@ -46,24 +46,24 @@ class VisibilityToggle extends ExtendedHtmlElement {
   }
 
   async setup() {
-    this.#toggleSwitch = this.shadowRoot.querySelector('toggle-switch');
+    this.#toggleSwitch = this.$('toggle-switch');
 
     // Wait for the child component to be ready
     await this.#toggleSwitch.ready;
 
     // Set initial attributes
-    const label = this.getAttribute('label') || 'Visible to Players';
-    const name = this.getAttribute('name') || 'visible';
+    const label = this.getStringAttr('label', 'Visible to Players');
+    const name = this.getStringAttr('name', 'visible');
 
     this.#toggleSwitch.setAttribute('name', name);
     this.#toggleSwitch.setAttribute('label', `👁️ ${label}`);
 
-    if (this.hasAttribute('compact')) {
+    if (this.getBoolAttr('compact')) {
       this.#toggleSwitch.setAttribute('compact', '');
     }
 
     // Sync initial checked state
-    if (this.hasAttribute('checked')) {
+    if (this.getBoolAttr('checked')) {
       this.#toggleSwitch.checked = true;
     }
 
@@ -76,20 +76,16 @@ class VisibilityToggle extends ExtendedHtmlElement {
 
       const detail = {
         checked: e.detail.checked,
-        name: this.getAttribute('name')
+        name: this.getStringAttr('name')
       };
 
       // Include entity ID if provided
-      const entityId = this.getAttribute('entity-id');
+      const entityId = this.getStringAttr('entity-id');
       if (entityId) {
         detail.entityId = entityId;
       }
 
-      this.dispatchEvent(new CustomEvent('visibility-change', {
-        bubbles: true,
-        composed: true,
-        detail
-      }));
+      this.emit('visibility-change', detail);
     });
   }
 

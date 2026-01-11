@@ -13,7 +13,7 @@ class CountdownDisplay extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   async setup() {
-    this.#countdownsList = this.shadowRoot.querySelector('.countdowns-list');
+    this.#countdownsList = this.$('.countdowns-list');
 
     // Load visible trackers
     await this.loadTrackers();

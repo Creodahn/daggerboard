@@ -29,18 +29,15 @@ class ToggleSwitch extends ExtendedHtmlElement {
   }
 
   setup() {
-    this.#checkbox = this.shadowRoot.querySelector('input[type="checkbox"]');
-    this.#labelText = this.shadowRoot.querySelector('.label-text');
+    this.#checkbox = this.$('input[type="checkbox"]');
+    this.#labelText = this.$('.label-text');
 
     // Set initial state
-    const name = this.getAttribute('name') || '';
-    const label = this.getAttribute('label') || '';
-
-    this.#checkbox.name = name;
-    this.#labelText.textContent = label;
+    this.#checkbox.name = this.getStringAttr('name');
+    this.#labelText.textContent = this.getStringAttr('label');
 
     // Sync initial checked state
-    if (this.hasAttribute('checked')) {
+    if (this.getBoolAttr('checked')) {
       this.#checkbox.checked = true;
     }
 
@@ -51,14 +48,10 @@ class ToggleSwitch extends ExtendedHtmlElement {
         this.removeAttribute('checked');
       }
 
-      this.dispatchEvent(new CustomEvent('toggle-change', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          checked: e.target.checked,
-          name: this.getAttribute('name')
-        }
-      }));
+      this.emit('toggle-change', {
+        checked: e.target.checked,
+        name: this.getStringAttr('name')
+      });
     });
   }
 

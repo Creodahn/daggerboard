@@ -23,7 +23,7 @@ class PanelSection extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#panel = this.shadowRoot.querySelector('.panel-section');
+    this.#panel = this.$('.panel-section');
     this.updatePanel();
   }
 
@@ -36,8 +36,8 @@ class PanelSection extends ExtendedHtmlElement {
   updatePanel() {
     if (!this.#panel) return;
 
-    const variant = this.getAttribute('variant') || 'default';
-    const padding = this.getAttribute('padding') || 'medium';
+    const variant = this.getStringAttr('variant', 'default');
+    const padding = this.getStringAttr('padding', 'medium');
 
     this.#panel.className = `panel-section padding-${padding} variant-${variant}`;
   }

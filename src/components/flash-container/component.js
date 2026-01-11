@@ -28,10 +28,10 @@ class FlashContainer extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#container = this.shadowRoot.querySelector('.flash-container');
+    this.#container = this.$('.flash-container');
 
     // Auto-flash if flash-type is set
-    const flashType = this.getAttribute('flash-type');
+    const flashType = this.getStringAttr('flash-type');
     if (flashType) {
       this.flash(flashType);
     }

@@ -10,8 +10,8 @@ class EmptyState extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#iconEl = this.shadowRoot.querySelector('.icon');
-    this.#messageEl = this.shadowRoot.querySelector('.message');
+    this.#iconEl = this.$('.icon');
+    this.#messageEl = this.$('.message');
 
     this.updateContent();
   }
@@ -23,8 +23,8 @@ class EmptyState extends ExtendedHtmlElement {
   }
 
   updateContent() {
-    const message = this.getAttribute('message') || this.textContent || 'No items yet';
-    const icon = this.getAttribute('icon') || '';
+    const message = this.getStringAttr('message') || this.textContent || 'No items yet';
+    const icon = this.getStringAttr('icon');
 
     this.#messageEl.textContent = message;
     this.#iconEl.textContent = icon;

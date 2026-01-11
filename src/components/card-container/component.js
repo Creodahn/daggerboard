@@ -25,7 +25,7 @@ class CardContainer extends ExtendedHtmlElement {
   templatePath = './template.html';
 
   setup() {
-    this.#card = this.shadowRoot.querySelector('.card');
+    this.#card = this.$('.card');
     this.updateCard();
   }
 
@@ -38,8 +38,8 @@ class CardContainer extends ExtendedHtmlElement {
   updateCard() {
     if (!this.#card) return;
 
-    const variant = this.getAttribute('variant') || 'default';
-    const padding = this.getAttribute('padding') || 'medium';
+    const variant = this.getStringAttr('variant', 'default');
+    const padding = this.getStringAttr('padding', 'medium');
 
     this.#card.className = `card variant-${variant} padding-${padding}`;
   }
