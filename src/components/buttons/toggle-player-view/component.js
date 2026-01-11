@@ -67,7 +67,7 @@ class TogglePlayerViewButton extends ExtendedHtmlElement {
         width: 400,
         height: 600,
         resizable: true,
-        url: '/player-view.html',
+        url: '/pages/player-view/index.html',
       });
       // State will be updated by checkWindowState interval
     }

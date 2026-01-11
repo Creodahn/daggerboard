@@ -222,7 +222,7 @@ class CampaignMenu extends ExtendedHtmlElement {
         width: 400,
         height: 600,
         resizable: true,
-        url: '/player-view.html',
+        url: '/pages/player-view/index.html',
       });
       // State will be updated by checkPlayerViewState interval
     }
@@ -235,7 +235,7 @@ class CampaignMenu extends ExtendedHtmlElement {
       width: 500,
       height: 400,
       resizable: true,
-      url: '/settings-view.html',
+      url: '/pages/settings-view/index.html',
     });
     this.#dropdown.closeDropdown();
   }

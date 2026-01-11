@@ -10,9 +10,10 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "daggerboard",
+        "title": "Daggerheart Dashboard",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "url": "/pages/dashboard/index.html"
       }
     ],
     "security": {
