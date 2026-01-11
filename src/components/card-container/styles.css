@@ -1,0 +1,62 @@
+:host {
+  display: block;
+}
+
+.card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out, box-shadow 0.2s;
+}
+
+/* Padding variants */
+.card.padding-none {
+  padding: 0;
+}
+
+.card.padding-small {
+  padding: 0.5rem;
+}
+
+.card.padding-medium {
+  padding: 1rem;
+}
+
+.card.padding-large {
+  padding: 1.5rem;
+}
+
+/* Style variants */
+.card.variant-elevated {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card.variant-elevated:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card.variant-flat {
+  border: none;
+  background: #f8f9fa;
+}
+
+/* Fade out animation */
+@keyframes fade-out-left {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+.card.fade-out {
+  animation: fade-out-left 0.3s ease-out forwards;
+  pointer-events: none;
+}

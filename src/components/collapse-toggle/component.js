@@ -1,3 +1,5 @@
+import ExtendedHtmlElement from '../extended-html-element.js';
+
 /**
  * A toggle button for collapsing/expanding content.
  *
@@ -12,13 +14,14 @@
  * Events:
  *   - collapse-toggle: { expanded: boolean }
  */
-class CollapseToggle extends HTMLElement {
+class CollapseToggle extends ExtendedHtmlElement {
+  static moduleUrl = import.meta.url;
   static observedAttributes = ['expanded', 'size'];
 
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
+  #button;
+  #icon;
+  stylesPath = './styles.css';
+  templatePath = './template.html';
 
   get expanded() {
     return this.hasAttribute('expanded');
@@ -32,76 +35,41 @@ class CollapseToggle extends HTMLElement {
     }
   }
 
-  connectedCallback() {
-    this.render();
-    this.shadowRoot.querySelector('button').addEventListener('click', () => {
+  setup() {
+    this.#button = this.shadowRoot.querySelector('button');
+    this.#icon = this.shadowRoot.querySelector('.caret-icon');
+
+    this.#button.addEventListener('click', () => {
       this.expanded = !this.expanded;
-      this.updateIcon();
       this.dispatchEvent(new CustomEvent('collapse-toggle', {
         bubbles: true,
         composed: true,
         detail: { expanded: this.expanded }
       }));
     });
+
+    this.updateSize();
   }
 
   attributeChangedCallback(name) {
-    if (name === 'expanded') {
-      this.updateIcon();
+    if (name === 'size' && this.#icon) {
+      this.updateSize();
     }
   }
 
-  updateIcon() {
-    const icon = this.shadowRoot.querySelector('.caret-icon');
-    if (icon) {
-      icon.style.transform = this.expanded ? 'rotate(0deg)' : 'rotate(-90deg)';
-    }
-  }
+  updateSize() {
+    if (!this.#icon) return;
 
-  render() {
     const size = this.getAttribute('size') || 'medium';
     const sizes = {
-      small: { button: '20px', icon: '12' },
-      medium: { button: '24px', icon: '16' },
-      large: { button: '32px', icon: '20' }
+      small: '12',
+      medium: '16',
+      large: '20'
     };
-    const s = sizes[size] || sizes.medium;
+    const iconSize = sizes[size] || sizes.medium;
 
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: inline-flex;
-        }
-
-        button {
-          background: none;
-          border: none;
-          padding: 0;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #666;
-          transition: color 0.2s;
-          width: ${s.button};
-          height: ${s.button};
-        }
-
-        button:hover {
-          color: #333;
-        }
-
-        .caret-icon {
-          transition: transform 0.2s ease;
-          transform: ${this.expanded ? 'rotate(0deg)' : 'rotate(-90deg)'};
-        }
-      </style>
-      <button type="button" aria-label="Toggle expand/collapse">
-        <svg class="caret-icon" width="${s.icon}" height="${s.icon}" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M4 6l4 4 4-4z"/>
-        </svg>
-      </button>
-    `;
+    this.#icon.setAttribute('width', iconSize);
+    this.#icon.setAttribute('height', iconSize);
   }
 }
 

@@ -1,0 +1,37 @@
+:host {
+  display: block;
+}
+
+.panel-section {
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-section.padding-small {
+  padding: 1rem;
+}
+
+.panel-section.padding-medium {
+  padding: 1.5rem;
+}
+
+.panel-section.padding-large {
+  padding: 2rem;
+}
+
+.panel-section.variant-flush {
+  padding: 0;
+  background: transparent;
+}
+
+::slotted([slot="header"]) {
+  margin-bottom: 1rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

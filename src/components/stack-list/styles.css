@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+.stack-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.stack-list.gap-none {
+  gap: 0;
+}
+
+.stack-list.gap-small {
+  gap: 0.5rem;
+}
+
+.stack-list.gap-medium {
+  gap: 1rem;
+}
+
+.stack-list.gap-large {
+  gap: 1.5rem;
+}
+
+.stack-list.scrollable {
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom scrollbar */
+.stack-list.scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.stack-list.scrollable::-webkit-scrollbar-track {
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.stack-list.scrollable::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 4px;
+}
+
+.stack-list.scrollable::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
+}

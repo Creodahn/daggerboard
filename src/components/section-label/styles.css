@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.section-label {
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.section-label.size-small {
+  font-size: 0.65rem;
+}
+
+.section-label.size-medium {
+  font-size: 0.75rem;
+}
+
+.icon {
+  font-size: 1em;
+}

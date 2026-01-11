@@ -4,7 +4,7 @@ import './extended-html-element.js';
 import './modal-dialog/component.js';
 import './confirm-dialog/component.js';
 import './dropdown-menu/component.js';
-import './dropdown-menu/item.js';
+import './dropdown-menu/item/component.js';
 import './form-field/component.js';
 import './section-header/component.js';
 import './type-badge/component.js';

@@ -1,3 +1,5 @@
+import ExtendedHtmlElement from '../extended-html-element.js';
+
 /**
  * A reusable visibility toggle component for controlling player visibility.
  * Wraps the toggle-switch component with visibility-specific styling.
@@ -16,15 +18,13 @@
  * Events:
  *   - visibility-change: { checked: boolean, entityId?: string }
  */
-class VisibilityToggle extends HTMLElement {
-  static observedAttributes = ['checked', 'label', 'name', 'entity-id'];
+class VisibilityToggle extends ExtendedHtmlElement {
+  static moduleUrl = import.meta.url;
+  static observedAttributes = ['checked', 'label', 'name', 'entity-id', 'compact'];
 
   #toggleSwitch;
-
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
+  stylesPath = './styles.css';
+  templatePath = './template.html';
 
   get checked() {
     return this.#toggleSwitch?.checked ?? this.hasAttribute('checked');
@@ -45,9 +45,22 @@ class VisibilityToggle extends HTMLElement {
     return this.checked;
   }
 
-  connectedCallback() {
-    this.render();
+  async setup() {
+    // Wait for toggle-switch to be defined
+    await customElements.whenDefined('toggle-switch');
+
     this.#toggleSwitch = this.shadowRoot.querySelector('toggle-switch');
+
+    // Set initial attributes
+    const label = this.getAttribute('label') || 'Visible to Players';
+    const name = this.getAttribute('name') || 'visible';
+
+    this.#toggleSwitch.setAttribute('name', name);
+    this.#toggleSwitch.setAttribute('label', `👁️ ${label}`);
+
+    if (this.hasAttribute('compact')) {
+      this.#toggleSwitch.setAttribute('compact', '');
+    }
 
     // Sync initial checked state
     if (this.hasAttribute('checked')) {
@@ -87,30 +100,15 @@ class VisibilityToggle extends HTMLElement {
       this.#toggleSwitch.checked = newValue !== null;
     }
     if (name === 'label') {
-      this.#toggleSwitch.setAttribute('label', newValue || 'Visible to Players');
+      this.#toggleSwitch.setAttribute('label', `👁️ ${newValue || 'Visible to Players'}`);
     }
-  }
-
-  render() {
-    const label = this.getAttribute('label') || 'Visible to Players';
-    const name = this.getAttribute('name') || 'visible';
-    const isChecked = this.hasAttribute('checked');
-    const isCompact = this.hasAttribute('compact');
-
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: inline-flex;
-        }
-      </style>
-      <toggle-switch
-        name="${name}"
-        label="👁️ ${label}"
-        ${isChecked ? 'checked' : ''}
-        ${isCompact ? 'compact' : ''}
-        label-first
-      ></toggle-switch>
-    `;
+    if (name === 'compact') {
+      if (newValue !== null) {
+        this.#toggleSwitch.setAttribute('compact', '');
+      } else {
+        this.#toggleSwitch.removeAttribute('compact');
+      }
+    }
   }
 }
 

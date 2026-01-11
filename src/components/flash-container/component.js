@@ -1,3 +1,5 @@
+import ExtendedHtmlElement from '../extended-html-element.js';
+
 /**
  * A container component that can flash with visual feedback.
  * Used for indicating state changes like healing or damage.
@@ -17,16 +19,16 @@
  * Methods:
  *   - flash(type): Trigger a flash animation
  */
-class FlashContainer extends HTMLElement {
+class FlashContainer extends ExtendedHtmlElement {
+  static moduleUrl = import.meta.url;
   static observedAttributes = ['flash-type'];
 
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
+  #container;
+  stylesPath = './styles.css';
+  templatePath = './template.html';
 
-  connectedCallback() {
-    this.render();
+  setup() {
+    this.#container = this.shadowRoot.querySelector('.flash-container');
 
     // Auto-flash if flash-type is set
     const flashType = this.getAttribute('flash-type');
@@ -36,7 +38,7 @@ class FlashContainer extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'flash-type' && newValue && newValue !== oldValue) {
+    if (name === 'flash-type' && newValue && newValue !== oldValue && this.#container) {
       this.flash(newValue);
     }
   }
@@ -46,8 +48,7 @@ class FlashContainer extends HTMLElement {
    * @param {'heal' | 'damage' | 'success' | 'error'} type - Type of flash
    */
   flash(type) {
-    const container = this.shadowRoot?.querySelector('.flash-container');
-    if (!container) return;
+    if (!this.#container) return;
 
     // Map type to class
     const classMap = {
@@ -60,74 +61,19 @@ class FlashContainer extends HTMLElement {
     const flashClass = classMap[type] || 'flash-heal';
 
     // Remove any existing flash classes
-    container.classList.remove('flash-heal', 'flash-damage');
+    this.#container.classList.remove('flash-heal', 'flash-damage');
 
     // Force reflow to restart animation
-    void container.offsetWidth;
+    void this.#container.offsetWidth;
 
     // Add the flash class
-    container.classList.add(flashClass);
+    this.#container.classList.add(flashClass);
 
     // Remove class after animation completes
-    container.addEventListener('animationend', () => {
-      container.classList.remove(flashClass);
+    this.#container.addEventListener('animationend', () => {
+      this.#container.classList.remove(flashClass);
       this.removeAttribute('flash-type');
     }, { once: true });
-  }
-
-  render() {
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-        }
-
-        .flash-container {
-          position: relative;
-        }
-
-        @keyframes flash-heal {
-          0% {
-            background-color: transparent;
-            box-shadow: none;
-          }
-          15% {
-            background-color: rgba(40, 167, 69, 0.5);
-            box-shadow: 0 0 20px rgba(40, 167, 69, 0.8), inset 0 0 15px rgba(40, 167, 69, 0.3);
-          }
-          100% {
-            background-color: transparent;
-            box-shadow: none;
-          }
-        }
-
-        @keyframes flash-damage {
-          0% {
-            background-color: transparent;
-            box-shadow: none;
-          }
-          15% {
-            background-color: rgba(220, 53, 69, 0.5);
-            box-shadow: 0 0 20px rgba(220, 53, 69, 0.8), inset 0 0 15px rgba(220, 53, 69, 0.3);
-          }
-          100% {
-            background-color: transparent;
-            box-shadow: none;
-          }
-        }
-
-        .flash-container.flash-heal {
-          animation: flash-heal 0.75s ease-out forwards;
-        }
-
-        .flash-container.flash-damage {
-          animation: flash-damage 0.75s ease-out forwards;
-        }
-      </style>
-      <div class="flash-container">
-        <slot></slot>
-      </div>
-    `;
   }
 }
 

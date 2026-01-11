@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.pulse-container {
+  transition: transform 0.2s;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulse-urgent {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulse-critical {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.85;
+  }
+}
+
+.pulse-container.urgency-warning {
+  animation: pulse-warning 2s ease-in-out infinite;
+}
+
+.pulse-container.urgency-urgent {
+  animation: pulse-urgent 1s ease-in-out infinite;
+}
+
+.pulse-container.urgency-critical {
+  animation: pulse-critical 0.5s ease-in-out infinite;
+}

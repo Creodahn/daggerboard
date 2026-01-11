@@ -1,3 +1,5 @@
+import ExtendedHtmlElement from '../extended-html-element.js';
+
 /**
  * A small section label component for categorizing content.
  *
@@ -9,61 +11,37 @@
  *   - icon: Optional icon/emoji to display before text
  *   - size: 'small' | 'medium' (default)
  */
-class SectionLabel extends HTMLElement {
+class SectionLabel extends ExtendedHtmlElement {
+  static moduleUrl = import.meta.url;
   static observedAttributes = ['icon', 'size'];
 
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
+  #labelEl;
+  #iconEl;
+  stylesPath = './styles.css';
+  templatePath = './template.html';
 
-  connectedCallback() {
-    this.render();
+  setup() {
+    this.#labelEl = this.shadowRoot.querySelector('.section-label');
+    this.#iconEl = this.shadowRoot.querySelector('.icon');
+
+    this.updateLabel();
   }
 
   attributeChangedCallback() {
-    if (this.shadowRoot.querySelector('.section-label')) {
-      this.render();
+    if (this.#labelEl) {
+      this.updateLabel();
     }
   }
 
-  render() {
+  updateLabel() {
+    if (!this.#labelEl || !this.#iconEl) return;
+
     const icon = this.getAttribute('icon') || '';
     const size = this.getAttribute('size') || 'medium';
 
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-        }
-
-        .section-label {
-          font-weight: 600;
-          color: #666;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          display: flex;
-          align-items: center;
-          gap: 0.35rem;
-        }
-
-        .section-label.size-small {
-          font-size: 0.65rem;
-        }
-
-        .section-label.size-medium {
-          font-size: 0.75rem;
-        }
-
-        .icon {
-          font-size: 1em;
-        }
-      </style>
-      <span class="section-label size-${size}">
-        ${icon ? `<span class="icon">${icon}</span>` : ''}
-        <slot></slot>
-      </span>
-    `;
+    this.#labelEl.className = `section-label size-${size}`;
+    this.#iconEl.textContent = icon;
+    this.#iconEl.style.display = icon ? '' : 'none';
   }
 }
 

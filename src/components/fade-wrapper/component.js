@@ -1,3 +1,5 @@
+import ExtendedHtmlElement from '../extended-html-element.js';
+
 /**
  * A wrapper component that provides fade-out animation for its content.
  *
@@ -14,14 +16,15 @@
  * Methods:
  *   - fadeOut(): Returns a promise that resolves when animation completes
  */
-class FadeWrapper extends HTMLElement {
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
+class FadeWrapper extends ExtendedHtmlElement {
+  static moduleUrl = import.meta.url;
 
-  connectedCallback() {
-    this.render();
+  #container;
+  stylesPath = './styles.css';
+  templatePath = './template.html';
+
+  setup() {
+    this.#container = this.shadowRoot.querySelector('.fade-wrapper');
   }
 
   /**
@@ -30,50 +33,16 @@ class FadeWrapper extends HTMLElement {
    */
   fadeOut() {
     return new Promise(resolve => {
-      const container = this.shadowRoot.querySelector('.fade-wrapper');
-      if (!container) {
+      if (!this.#container) {
         resolve();
         return;
       }
 
-      container.classList.add('fading');
-      container.addEventListener('animationend', () => {
+      this.#container.classList.add('fading');
+      this.#container.addEventListener('animationend', () => {
         resolve();
       }, { once: true });
     });
-  }
-
-  render() {
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-        }
-
-        .fade-wrapper {
-          transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-        }
-
-        @keyframes fade-out-left {
-          0% {
-            opacity: 1;
-            transform: translateX(0);
-          }
-          100% {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-        }
-
-        .fade-wrapper.fading {
-          animation: fade-out-left 0.3s ease-out forwards;
-          pointer-events: none;
-        }
-      </style>
-      <div class="fade-wrapper">
-        <slot></slot>
-      </div>
-    `;
   }
 }
 

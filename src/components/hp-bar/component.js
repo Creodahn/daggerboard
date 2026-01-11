@@ -1,3 +1,4 @@
+import ExtendedHtmlElement from '../extended-html-element.js';
 import { getHealthPercentage, getHealthBarClass } from '../../helpers/health-utils.js';
 
 /**
@@ -13,13 +14,15 @@ import { getHealthPercentage, getHealthBarClass } from '../../helpers/health-uti
  *   - show-text: Show HP text overlay (e.g., "15 / 20 HP")
  *   - compact: Smaller height variant
  */
-class HpBar extends HTMLElement {
+class HpBar extends ExtendedHtmlElement {
+  static moduleUrl = import.meta.url;
   static observedAttributes = ['current', 'max', 'show-text', 'compact'];
 
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
+  #container;
+  #bar;
+  #text;
+  stylesPath = './styles.css';
+  templatePath = './template.html';
 
   get current() {
     return parseInt(this.getAttribute('current')) || 0;
@@ -37,109 +40,38 @@ class HpBar extends HTMLElement {
     this.setAttribute('max', value);
   }
 
-  connectedCallback() {
-    this.render();
+  setup() {
+    this.#container = this.shadowRoot.querySelector('.hp-bar-container');
+    this.#bar = this.shadowRoot.querySelector('.hp-bar');
+    this.#text = this.shadowRoot.querySelector('.hp-text');
+
+    this.update();
   }
 
   attributeChangedCallback() {
-    if (this.shadowRoot.querySelector('.hp-bar-container')) {
-      this.render();
+    if (this.#container) {
+      this.update();
     }
   }
 
-  render() {
+  update() {
     const current = this.current;
     const max = this.max;
     const showText = this.hasAttribute('show-text');
-    const compact = this.hasAttribute('compact');
 
     const percentage = getHealthPercentage(current, max);
     const healthClass = getHealthBarClass(percentage);
 
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-        }
+    // Update container dead state
+    this.#container.classList.toggle('dead-state', healthClass === 'dead');
 
-        .hp-bar-container {
-          position: relative;
-          background: #e9ecef;
-          border-radius: 6px;
-          height: ${compact ? '16px' : '24px'};
-          overflow: hidden;
-          cursor: pointer;
-          transition: box-shadow 0.2s;
-        }
+    // Update bar
+    this.#bar.className = `hp-bar ${healthClass}`;
+    this.#bar.style.width = `${percentage}%`;
 
-        .hp-bar-container:hover {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .hp-bar {
-          height: 100%;
-          transition: width 0.3s ease;
-          border-radius: 6px;
-        }
-
-        .hp-bar.healthy {
-          background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-        }
-
-        .hp-bar.medium {
-          background: linear-gradient(90deg, #ffc107 0%, #fd7e14 100%);
-        }
-
-        .hp-bar.low {
-          background: linear-gradient(90deg, #fd7e14 0%, #dc3545 100%);
-        }
-
-        .hp-bar.critical {
-          background: linear-gradient(90deg, #dc3545 0%, #bd2130 100%);
-          animation: pulse-critical 0.5s ease-in-out infinite;
-        }
-
-        .hp-bar.dead {
-          width: 100% !important;
-          background: #8b0000;
-        }
-
-        .hp-bar-container.dead-state {
-          background: #8b0000;
-          box-shadow: 0 2px 8px rgba(139, 0, 0, 0.5);
-        }
-
-        .hp-text {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          font-weight: 600;
-          font-size: ${compact ? '0.65rem' : '0.75rem'};
-          color: #333;
-          text-shadow: 0 0 3px white;
-          white-space: nowrap;
-        }
-
-        .hp-bar-container.dead-state .hp-text {
-          color: #ffcccc;
-          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        @keyframes pulse-critical {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.7;
-          }
-        }
-      </style>
-      <div class="hp-bar-container ${healthClass === 'dead' ? 'dead-state' : ''}">
-        <div class="hp-bar ${healthClass}" style="width: ${percentage}%"></div>
-        ${showText ? `<span class="hp-text">${current} / ${max} HP</span>` : ''}
-      </div>
-    `;
+    // Update text
+    this.#text.textContent = showText ? `${current} / ${max} HP` : '';
+    this.#text.style.display = showText ? '' : 'none';
   }
 }
 

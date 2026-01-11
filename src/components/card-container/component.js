@@ -1,3 +1,5 @@
+import ExtendedHtmlElement from '../extended-html-element.js';
+
 /**
  * A reusable card container component with consistent styling.
  * Provides a white card with border, padding, and optional fade-out animation.
@@ -14,22 +16,32 @@
  * Methods:
  *   - fadeOut(): Triggers fade-out animation and returns a promise that resolves when complete
  */
-class CardContainer extends HTMLElement {
+class CardContainer extends ExtendedHtmlElement {
+  static moduleUrl = import.meta.url;
   static observedAttributes = ['variant', 'padding'];
 
-  constructor() {
-    super();
-    this.attachShadow({ mode: 'open' });
-  }
+  #card;
+  stylesPath = './styles.css';
+  templatePath = './template.html';
 
-  connectedCallback() {
-    this.render();
+  setup() {
+    this.#card = this.shadowRoot.querySelector('.card');
+    this.updateCard();
   }
 
   attributeChangedCallback() {
-    if (this.shadowRoot.querySelector('.card')) {
-      this.render();
+    if (this.#card) {
+      this.updateCard();
     }
+  }
+
+  updateCard() {
+    if (!this.#card) return;
+
+    const variant = this.getAttribute('variant') || 'default';
+    const padding = this.getAttribute('padding') || 'medium';
+
+    this.#card.className = `card variant-${variant} padding-${padding}`;
   }
 
   /**
@@ -38,92 +50,16 @@ class CardContainer extends HTMLElement {
    */
   fadeOut() {
     return new Promise(resolve => {
-      const card = this.shadowRoot.querySelector('.card');
-      if (!card) {
+      if (!this.#card) {
         resolve();
         return;
       }
 
-      card.classList.add('fade-out');
-      card.addEventListener('animationend', () => {
+      this.#card.classList.add('fade-out');
+      this.#card.addEventListener('animationend', () => {
         resolve();
       }, { once: true });
     });
-  }
-
-  render() {
-    const variant = this.getAttribute('variant') || 'default';
-    const padding = this.getAttribute('padding') || 'medium';
-
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-        }
-
-        .card {
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          transition: opacity 0.3s ease-out, transform 0.3s ease-out, box-shadow 0.2s;
-        }
-
-        /* Padding variants */
-        .card.padding-none {
-          padding: 0;
-        }
-
-        .card.padding-small {
-          padding: 0.5rem;
-        }
-
-        .card.padding-medium {
-          padding: 1rem;
-        }
-
-        .card.padding-large {
-          padding: 1.5rem;
-        }
-
-        /* Style variants */
-        .card.variant-elevated {
-          border: none;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .card.variant-elevated:hover {
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-        }
-
-        .card.variant-flat {
-          border: none;
-          background: #f8f9fa;
-        }
-
-        /* Fade out animation */
-        @keyframes fade-out-left {
-          0% {
-            opacity: 1;
-            transform: translateX(0);
-          }
-          100% {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-        }
-
-        .card.fade-out {
-          animation: fade-out-left 0.3s ease-out forwards;
-          pointer-events: none;
-        }
-      </style>
-      <div class="card variant-${variant} padding-${padding}">
-        <slot></slot>
-      </div>
-    `;
   }
 }
 
