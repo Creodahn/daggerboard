@@ -1,0 +1,210 @@
+/**
+ * Light mode design tokens
+ * These are the default values used when prefers-color-scheme is light or not set.
+ */
+
+:root {
+  /* ========================================
+   * COLORS
+   * ======================================== */
+
+  /* Brand colors */
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-primary-light: rgba(0, 123, 255, 0.1);
+  --color-success: #28a745;
+  --color-success-hover: #218838;
+  --color-success-light: rgba(40, 167, 69, 0.25);
+  --color-danger: #dc3545;
+  --color-danger-hover: #c82333;
+  --color-danger-light: rgba(220, 53, 69, 0.1);
+  --color-warning: #ffc107;
+  --color-warning-hover: #e0a800;
+  --color-secondary: #6c757d;
+  --color-secondary-hover: #5a6268;
+
+  /* Surface colors */
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-hover: #f8f9fa;
+  --color-background: #f5f5f5;
+  --color-background-alt: #f6f6f6;
+  --color-border: #ddd;
+  --color-border-light: #e9ecef;
+  --color-border-input: #ccc;
+
+  /* Text colors */
+  --color-text-primary: #0f0f0f;
+  --color-text-secondary: #555;
+  --color-text-muted: #666;
+  --color-text-placeholder: #999;
+  --color-text-disabled: #aaa;
+  --color-text-inverse: #ffffff;
+
+  /* ========================================
+   * HEALTH & STATUS GRADIENTS
+   * ======================================== */
+
+  /* Health bar gradients */
+  --gradient-health-full: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  --gradient-health-good: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+  --gradient-health-medium: linear-gradient(90deg, #ffc107 0%, #fd7e14 100%);
+  --gradient-health-low: linear-gradient(90deg, #fd7e14 0%, #dc3545 100%);
+  --gradient-health-critical: linear-gradient(90deg, #dc3545 0%, #bd2130 100%);
+  --color-health-dead: #8b0000;
+
+  /* NPC health backgrounds (gradients for static use) */
+  --gradient-npc-good: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  --gradient-npc-warning: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+  --gradient-npc-danger: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
+  --gradient-npc-critical: linear-gradient(135deg, #ffcdd2 0%, #ef5350 100%);
+  --gradient-npc-dead: linear-gradient(135deg, #424242 0%, #616161 100%);
+
+  /* NPC health solid colors (for smooth transitions) */
+  --color-npc-bg-good: #d7ecd9;
+  --color-npc-bg-warning: #fff8dc;
+  --color-npc-bg-danger: #ffe4c4;
+  --color-npc-bg-critical: #f8d0d0;
+  --color-npc-bg-dead: #555555;
+
+  /* NPC health border colors */
+  --color-npc-border-good: #a5d6a7;
+  --color-npc-border-warning: #ffe082;
+  --color-npc-border-danger: #ffcc80;
+  --color-npc-border-critical: #ef9a9a;
+  --color-npc-border-dead: #757575;
+
+  /* Dead state colors */
+  --color-health-dead-dark: #5c0000;
+  --color-health-dead-text: #ffcccc;
+
+  /* Orange threshold color */
+  --color-threshold-major: #fd7e14;
+
+  /* Urgency backgrounds */
+  --gradient-urgency-normal: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --gradient-urgency-warning: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  --gradient-urgency-urgent: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  --gradient-urgency-critical: linear-gradient(135deg, #ffcdd2 0%, #ef5350 100%);
+
+  /* Brand/accent gradients */
+  --gradient-brand: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-brand-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+
+  /* Urgency colors */
+  --color-urgency-normal: #667eea;
+  --color-urgency-normal-hover: #5a6fd6;
+  --color-urgency-warning: #ff9800;
+  --color-urgency-urgent: #f44336;
+  --color-urgency-critical: #b71c1c;
+
+  /* Tick label overlay (semi-transparent for urgency backgrounds) */
+  --color-tick-label-bg: rgba(255, 255, 255, 0.5);
+
+  /* ========================================
+   * TYPOGRAPHY
+   * ======================================== */
+
+  /* Font families */
+  --font-family-base: Inter, Avenir, Helvetica, Arial, sans-serif;
+  --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+
+  /* Font sizes */
+  --text-2xs: 0.65rem;   /* ~10.4px - compact labels */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.85rem;    /* ~13.6px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.75rem;   /* 28px */
+  --text-4xl: 2.5rem;    /* 40px - display text */
+  --text-5xl: 3rem;      /* 48px - large display */
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Line heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* ========================================
+   * SPACING & LAYOUT
+   * ======================================== */
+
+  /* Spacing scale */
+  --space-xs: 0.25rem;   /* 4px */
+  --space-sm: 0.5rem;    /* 8px */
+  --space-md: 0.75rem;   /* 12px */
+  --space-lg: 1rem;      /* 16px */
+  --space-xl: 1.5rem;    /* 24px */
+  --space-2xl: 2rem;     /* 32px */
+  --space-3xl: 3rem;     /* 48px */
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* ========================================
+   * EFFECTS
+   * ======================================== */
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.24);
+  --shadow-header: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.24);
+
+  /* Focus rings */
+  --focus-ring-primary: 0 0 0 3px var(--color-primary-light);
+  --focus-ring-success: 0 0 0 3px var(--color-success-light);
+  --focus-ring-danger: 0 0 0 3px var(--color-danger-light);
+  --focus-ring-offset: 2px;
+
+  /* Transitions */
+  --transition-fast: 0.1s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+  --transition-health: 0.5s ease;
+
+  /* ========================================
+   * Z-INDEX SCALE
+   * ======================================== */
+
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 1000;
+  --z-modal-backdrop: 1100;
+  --z-modal: 1200;
+  --z-popover: 1300;
+  --z-tooltip: 1400;
+
+  /* ========================================
+   * COMPONENT-SPECIFIC TOKENS
+   * ======================================== */
+
+  /* Input defaults */
+  --input-padding-x: 0.5rem;
+  --input-padding-y: 0.5rem;
+  --input-border-color: var(--color-border-input);
+  --input-border-radius: var(--radius-sm);
+  --input-focus-color: var(--color-primary);
+  --input-disabled-bg: #e9ecef;
+
+  /* Button defaults */
+  --button-padding-x: 0.75rem;
+  --button-padding-y: 0.5rem;
+  --button-border-radius: var(--radius-sm);
+  --button-font-weight: var(--font-semibold);
+}

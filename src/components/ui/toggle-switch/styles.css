@@ -5,7 +5,7 @@
 .toggle-switch {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
   cursor: pointer;
   user-select: none;
 }
@@ -23,9 +23,9 @@ input[type="checkbox"] {
   position: relative;
   width: 40px;
   height: 22px;
-  background: #ccc;
+  background: var(--color-border-input);
   border-radius: 11px;
-  transition: background 0.2s;
+  transition: background var(--transition-base);
   flex-shrink: 0;
 }
 
@@ -37,15 +37,15 @@ input[type="checkbox"] {
   left: 2px;
   width: 18px;
   height: 18px;
-  background: white;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s;
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base);
 }
 
 /* Checked state */
 input[type="checkbox"]:checked + .toggle-track {
-  background: #28a745;
+  background: var(--color-success);
 }
 
 input[type="checkbox"]:checked + .toggle-track::after {
@@ -54,21 +54,21 @@ input[type="checkbox"]:checked + .toggle-track::after {
 
 /* Focus state */
 input[type="checkbox"]:focus + .toggle-track {
-  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.25);
+  box-shadow: var(--focus-ring-success);
 }
 
 /* Hover state */
 .toggle-switch:hover .toggle-track {
-  background: #bbb;
+  background: var(--color-secondary);
 }
 
 .toggle-switch:hover input[type="checkbox"]:checked + .toggle-track {
-  background: #218838;
+  background: var(--color-success-hover);
 }
 
 .label-text {
-  font-size: 0.9rem;
-  color: #333;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
   white-space: nowrap;
 }
 
@@ -102,7 +102,7 @@ input[type="checkbox"]:focus + .toggle-track {
 }
 
 :host([compact]) .label-text {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 /* Icon prefix support */

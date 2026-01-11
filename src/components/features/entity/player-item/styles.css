@@ -2,45 +2,51 @@
   display: block;
 }
 
+flash-container {
+  display: block;
+  border-radius: var(--radius-md);
+}
+
 .entity-item {
-  padding: 0.75rem 1rem;
-  background: #fff;
-  border-radius: 6px;
-  border: 1px solid #e0e0e0;
+  padding: var(--space-md) var(--space-lg);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  transition: background-color var(--transition-health), border-color var(--transition-health);
 }
 
 .entity-name {
-  font-weight: 500;
-  color: #333;
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
 }
 
-/* NPC health-based styling */
+/* NPC health-based styling - using solid colors for smooth transitions */
 .npc-item.health-good {
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-  border-color: #a5d6a7;
+  background-color: var(--color-npc-bg-good);
+  border-color: var(--color-npc-border-good);
 }
 
-.npc-item.health-fair {
-  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-  border-color: #ffe082;
+.npc-item.health-warning {
+  background-color: var(--color-npc-bg-warning);
+  border-color: var(--color-npc-border-warning);
 }
 
-.npc-item.health-poor {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-  border-color: #ffcc80;
+.npc-item.health-danger {
+  background-color: var(--color-npc-bg-danger);
+  border-color: var(--color-npc-border-danger);
 }
 
 .npc-item.health-critical {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-  border-color: #ef9a9a;
+  background-color: var(--color-npc-bg-critical);
+  border-color: var(--color-npc-border-critical);
 }
 
 .npc-item.health-dead {
-  background: linear-gradient(135deg, #424242 0%, #616161 100%);
-  border-color: #757575;
+  background-color: var(--color-npc-bg-dead);
+  border-color: var(--color-npc-border-dead);
 }
 
 .npc-item.health-dead .entity-name {
-  color: #fff;
+  color: var(--color-text-inverse);
   text-decoration: line-through;
 }

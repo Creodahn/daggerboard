@@ -23,12 +23,12 @@ class FlashContainer extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   static observedAttributes = ['flash-type'];
 
-  #container;
+  #overlay;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
   setup() {
-    this.#container = this.$('.flash-container');
+    this.#overlay = this.$('.flash-overlay');
 
     // Auto-flash if flash-type is set
     const flashType = this.getStringAttr('flash-type');
@@ -38,7 +38,7 @@ class FlashContainer extends ExtendedHtmlElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'flash-type' && newValue && newValue !== oldValue && this.#container) {
+    if (name === 'flash-type' && newValue && newValue !== oldValue && this.#overlay) {
       this.flash(newValue);
     }
   }
@@ -48,7 +48,7 @@ class FlashContainer extends ExtendedHtmlElement {
    * @param {'heal' | 'damage' | 'success' | 'error'} type - Type of flash
    */
   flash(type) {
-    if (!this.#container) return;
+    if (!this.#overlay) return;
 
     // Map type to class
     const classMap = {
@@ -61,17 +61,17 @@ class FlashContainer extends ExtendedHtmlElement {
     const flashClass = classMap[type] || 'flash-heal';
 
     // Remove any existing flash classes
-    this.#container.classList.remove('flash-heal', 'flash-damage');
+    this.#overlay.classList.remove('flash-heal', 'flash-damage');
 
     // Force reflow to restart animation
-    void this.#container.offsetWidth;
+    void this.#overlay.offsetWidth;
 
     // Add the flash class
-    this.#container.classList.add(flashClass);
+    this.#overlay.classList.add(flashClass);
 
     // Remove class after animation completes
-    this.#container.addEventListener('animationend', () => {
-      this.#container.classList.remove(flashClass);
+    this.#overlay.addEventListener('animationend', () => {
+      this.#overlay.classList.remove(flashClass);
       this.removeAttribute('flash-type');
     }, { once: true });
   }

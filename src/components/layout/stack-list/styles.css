@@ -12,20 +12,20 @@
 }
 
 .stack-list.gap-small {
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .stack-list.gap-medium {
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .stack-list.gap-large {
-  gap: 1.5rem;
+  gap: var(--space-xl);
 }
 
 .stack-list.scrollable {
   overflow-y: auto;
-  padding-right: 0.5rem;
+  padding-right: var(--space-sm);
 }
 
 /* Custom scrollbar */
@@ -34,15 +34,15 @@
 }
 
 .stack-list.scrollable::-webkit-scrollbar-track {
-  background: #e9ecef;
-  border-radius: 4px;
+  background: var(--color-border-light);
+  border-radius: var(--radius-sm);
 }
 
 .stack-list.scrollable::-webkit-scrollbar-thumb {
-  background: #adb5bd;
-  border-radius: 4px;
+  background: var(--color-secondary);
+  border-radius: var(--radius-sm);
 }
 
 .stack-list.scrollable::-webkit-scrollbar-thumb:hover {
-  background: #6c757d;
+  background: var(--color-secondary-hover);
 }

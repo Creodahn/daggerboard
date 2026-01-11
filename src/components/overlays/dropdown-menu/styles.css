@@ -10,8 +10,8 @@
   cursor: pointer;
   display: block;
   width: 100%;
-  color: #666;
-  transition: all 0.2s;
+  color: var(--color-text-muted);
+  transition: all var(--transition-base);
 }
 
 ::slotted(*) {
@@ -20,28 +20,28 @@
 
 /* Style the default icon when no custom trigger is provided */
 .dropdown-trigger > svg {
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   width: 32px;
   height: 32px;
   box-sizing: border-box;
 }
 
 .dropdown-trigger:hover > svg {
-  background: #f8f9fa;
-  border-color: #adb5bd;
-  color: #333;
+  background: var(--color-surface-hover);
+  border-color: var(--color-secondary);
+  color: var(--color-text-primary);
 }
 
 /* Popover content - using top layer */
 .dropdown-content {
   margin: 0;
   padding: 0;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-dropdown);
   min-width: 200px;
   overflow: visible;
 }
@@ -53,7 +53,7 @@
 
 /* Animation for opening */
 .dropdown-content:popover-open {
-  animation: slideDown 0.2s ease-out;
+  animation: slideDown var(--transition-base) ease-out;
 }
 
 @keyframes slideDown {

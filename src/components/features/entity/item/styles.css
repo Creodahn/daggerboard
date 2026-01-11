@@ -12,13 +12,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .entity-name-section {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   min-width: 0;
 }
 
@@ -30,16 +30,16 @@
 }
 
 .hp-menu-content {
-  padding: 0.75rem;
+  padding: var(--space-md);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-md);
 }
 
 .hp-menu-section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 /* Section labels handled by section-label component */
@@ -47,19 +47,20 @@
 .threshold-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-xs);
 }
 
 .threshold {
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-sm) var(--space-md);
   border: none;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
   cursor: pointer;
   text-align: left;
-  transition: all 0.15s;
-  background: #f8f9fa;
+  transition: all var(--transition-fast);
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
 }
 
 .threshold:hover {
@@ -67,36 +68,36 @@
 }
 
 .threshold.minor {
-  border-left: 3px solid #ffc107;
+  border-left: 3px solid var(--color-warning);
 }
 
 .threshold.minor:hover {
-  background: #fff3cd;
+  background: rgba(255, 193, 7, 0.2);
 }
 
 .threshold.major {
-  border-left: 3px solid #fd7e14;
+  border-left: 3px solid var(--color-threshold-major);
 }
 
 .threshold.major:hover {
-  background: #ffe5d0;
+  background: rgba(253, 126, 20, 0.2);
 }
 
 .threshold.severe {
-  border-left: 3px solid #dc3545;
+  border-left: 3px solid var(--color-danger);
 }
 
 .threshold.severe:hover {
-  background: #f8d7da;
+  background: var(--color-danger-light);
 }
 
 .threshold.massive {
-  border-left: 3px solid #343a40;
-  font-weight: 700;
+  border-left: 3px solid var(--color-secondary);
+  font-weight: var(--font-bold);
 }
 
 .threshold.massive:hover {
-  background: #e2e3e5;
+  background: rgba(108, 117, 125, 0.2);
 }
 
 /* Healing controls handled by input-group component */
@@ -106,33 +107,33 @@
 .entity-name-input {
   border: 1px solid transparent;
   background: transparent;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #333;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s;
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-base);
   flex: 1;
   min-width: 150px;
   max-width: 300px;
 }
 
 .entity-name-input:hover {
-  background: #f8f9fa;
-  border-color: #dee2e6;
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-light);
 }
 
 .entity-name-input:focus {
   outline: none;
-  background: white;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring-primary);
 }
 
 dropdown-menu {
   flex-shrink: 0;
   position: relative;
-  z-index: 1;
+  z-index: var(--z-dropdown);
 }
 
 /* Visibility toggle handled by visibility-toggle component */
@@ -143,7 +144,5 @@ hp-bar {
 }
 
 /* Heal input handled by input-group component */
-
-
 
 /* Pulse animation handled by hp-bar component */

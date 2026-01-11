@@ -1,0 +1,95 @@
+/**
+ * Base input styles - shared foundation for all input elements.
+ * Import in component stylesheets that need input styling.
+ *
+ * Usage:
+ *   @import '/styles/base/input.css';
+ *
+ *   input { ... additional styles ... }
+ */
+
+/* Base input reset and styling */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: var(--text-sm, 0.85rem);
+  color: var(--color-text-primary, #333);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--input-border-color, #ccc);
+  border-radius: var(--input-border-radius, 4px);
+  padding: var(--input-padding-y, 0.5rem) var(--input-padding-x, 0.5rem);
+  outline: none;
+  transition: border-color var(--transition-base, 0.2s ease),
+              box-shadow var(--transition-base, 0.2s ease);
+  box-sizing: border-box;
+}
+
+/* Focus state */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--input-focus-color, #007bff);
+  box-shadow: var(--focus-ring-primary, 0 0 0 3px rgba(0, 123, 255, 0.1));
+}
+
+/* Hover state (when not focused) */
+input:hover:not(:focus):not(:disabled),
+textarea:hover:not(:focus):not(:disabled),
+select:hover:not(:focus):not(:disabled) {
+  border-color: var(--color-border, #ddd);
+}
+
+/* Disabled state */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background: var(--input-disabled-bg, #e9ecef);
+  color: var(--color-text-disabled, #aaa);
+  cursor: not-allowed;
+}
+
+/* Placeholder styling */
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-placeholder, #999);
+}
+
+/* Text input variants */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+input[type="tel"] {
+  width: 100%;
+  min-width: 0; /* Allow shrinking in flex containers */
+}
+
+/* Number input - hide spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Textarea */
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Select */
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 2rem;
+}

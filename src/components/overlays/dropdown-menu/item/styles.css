@@ -5,40 +5,41 @@
 .menu-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
   width: 100%;
   border: none;
   background: none;
   text-align: left;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.2s;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  transition: background var(--transition-base);
   font-family: inherit;
   box-sizing: border-box;
 }
 
 .menu-item:hover {
-  background: #f8f9fa;
+  background: var(--color-surface-hover);
 }
 
 :host(:first-child) .menu-item {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
 }
 
 :host(:last-child) .menu-item {
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-md);
 }
 
 :host([variant="delete"]) .menu-item {
-  color: #dc3545;
-  border-top: 1px solid #e9ecef;
+  color: var(--color-danger);
+  border-top: 1px solid var(--color-border-light);
 }
 
 :host([variant="delete"]) .menu-item:hover {
-  background: #fee;
+  background: var(--color-danger-light);
 }
 
 /* Interactive items (keep-open) should not look like buttons */

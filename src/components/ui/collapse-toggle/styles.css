@@ -10,18 +10,18 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
-  transition: color 0.2s;
+  color: var(--color-text-muted);
+  transition: color var(--transition-base);
   width: 24px;
   height: 24px;
 }
 
 button:hover {
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .caret-icon {
-  transition: transform 0.2s ease;
+  transition: transform var(--transition-base);
   transform: rotate(-90deg);
 }
 

@@ -1,6 +1,9 @@
 /**
  * Shared animation keyframes used across multiple components.
  * Import this file in components that need these animations.
+ *
+ * Usage:
+ *   @import '/styles/shared/animations.css';
  */
 
 /* Pulse animations for urgency/status states */

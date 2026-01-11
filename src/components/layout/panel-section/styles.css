@@ -3,22 +3,22 @@
 }
 
 .panel-section {
-  background: #f5f5f5;
-  border-radius: 8px;
+  background: var(--color-surface-hover);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
 }
 
 .panel-section.padding-small {
-  padding: 1rem;
+  padding: var(--space-lg);
 }
 
 .panel-section.padding-medium {
-  padding: 1.5rem;
+  padding: var(--space-xl);
 }
 
 .panel-section.padding-large {
-  padding: 2rem;
+  padding: var(--space-2xl);
 }
 
 .panel-section.variant-flush {
@@ -27,11 +27,11 @@
 }
 
 ::slotted([slot="header"]) {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-lg);
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
 }

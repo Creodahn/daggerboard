@@ -62,8 +62,15 @@ class EntityPlayerItem extends ExtendedHtmlElement {
 
     this.#nameEl.textContent = name;
 
-    // Reset classes
-    this.#itemEl.className = 'entity-item';
+    // Remove only health-related classes to preserve transition
+    this.#itemEl.classList.remove(
+      'npc-item',
+      'health-good',
+      'health-warning',
+      'health-danger',
+      'health-critical',
+      'health-dead'
+    );
 
     if (type === 'npc') {
       this.#itemEl.classList.add('npc-item');

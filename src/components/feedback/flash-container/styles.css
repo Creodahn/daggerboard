@@ -4,6 +4,18 @@
 
 .flash-container {
   position: relative;
+  border-radius: inherit;
+}
+
+/* Flash overlay element - sits on top of slotted content */
+.flash-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-color: transparent;
+  box-shadow: none;
+  z-index: 10;
 }
 
 @keyframes flash-heal {
@@ -11,9 +23,9 @@
     background-color: transparent;
     box-shadow: none;
   }
-  15% {
-    background-color: rgba(40, 167, 69, 0.5);
-    box-shadow: 0 0 20px rgba(40, 167, 69, 0.8), inset 0 0 15px rgba(40, 167, 69, 0.3);
+  20% {
+    background-color: rgba(40, 167, 69, 0.6);
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.8), inset 0 0 15px rgba(40, 167, 69, 0.4);
   }
   100% {
     background-color: transparent;
@@ -26,9 +38,9 @@
     background-color: transparent;
     box-shadow: none;
   }
-  15% {
-    background-color: rgba(220, 53, 69, 0.5);
-    box-shadow: 0 0 20px rgba(220, 53, 69, 0.8), inset 0 0 15px rgba(220, 53, 69, 0.3);
+  20% {
+    background-color: rgba(220, 53, 69, 0.6);
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.8), inset 0 0 15px rgba(220, 53, 69, 0.4);
   }
   100% {
     background-color: transparent;
@@ -36,10 +48,10 @@
   }
 }
 
-.flash-container.flash-heal {
-  animation: flash-heal 0.75s ease-out forwards;
+.flash-overlay.flash-heal {
+  animation: flash-heal 0.6s ease-out forwards;
 }
 
-.flash-container.flash-damage {
-  animation: flash-damage 0.75s ease-out forwards;
+.flash-overlay.flash-damage {
+  animation: flash-damage 0.6s ease-out forwards;
 }

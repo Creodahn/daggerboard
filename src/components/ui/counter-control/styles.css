@@ -1,35 +1,35 @@
 :host {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #333;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
 }
 
 .controls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 button {
   border: none;
-  border-radius: 4px;
-  color: white;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-inverse);
   cursor: pointer;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: opacity var(--transition-base), transform var(--transition-fast);
 }
 
 button:hover:not(:disabled) {
@@ -46,51 +46,51 @@ button:disabled {
 }
 
 .decrement {
-  background-color: #dc3545;
+  background-color: var(--color-danger);
 }
 
 .decrement:hover:not(:disabled) {
-  background-color: #c82333;
+  background-color: var(--color-danger-hover);
 }
 
 .increment {
-  background-color: #28a745;
+  background-color: var(--color-success);
 }
 
 .increment:hover:not(:disabled) {
-  background-color: #218838;
+  background-color: var(--color-success-hover);
 }
 
 .value {
   min-width: 3rem;
   text-align: center;
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--counter-value-color, #333);
+  font-weight: var(--font-semibold);
+  font-size: var(--text-base);
+  color: var(--counter-value-color, var(--color-text-primary));
 }
 
 /* Compact variant */
 :host([compact]) button {
   width: 24px;
   height: 24px;
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 :host([compact]) .value {
   min-width: 2rem;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
 }
 
 /* Large variant */
 :host([size="large"]) button {
   width: 40px;
   height: 40px;
-  font-size: 1.5rem;
+  font-size: var(--text-2xl);
 }
 
 :host([size="large"]) .value {
   min-width: 4rem;
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
 }
 
 /* Vertical layout */
@@ -108,10 +108,10 @@ button:disabled {
 }
 
 :host([display-only]) .value {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
 }
 
 :host([display-only][size="large"]) .value {
-  font-size: 2.5rem;
+  font-size: var(--text-4xl);
 }

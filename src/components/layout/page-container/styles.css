@@ -5,8 +5,8 @@
 .page-container {
   margin: 0 auto;
   max-width: 1200px;
-  padding: 2rem;
+  padding: var(--space-2xl);
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--space-2xl);
 }

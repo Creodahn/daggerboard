@@ -4,35 +4,35 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: var(--z-sticky);
 }
 
 .sticky-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  padding: 1rem 0;
+  background: var(--gradient-brand);
+  color: var(--color-text-inverse);
+  box-shadow: var(--shadow-header);
+  padding: var(--space-lg) 0;
 }
 
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 var(--space-2xl);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .header-title {
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
   margin: 0;
 }
 
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-xl);
 }
 
 /* Style slotted elements */

@@ -6,21 +6,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .tracker-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: var(--space-md);
   flex: 1;
   min-width: 0;
 }
 
 .tracker-info h4 {
   margin: 0;
-  font-size: 1.1rem;
-  color: #333;
+  font-size: var(--text-lg);
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -29,19 +29,19 @@
 .tracker-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   flex-shrink: 0;
 }
 
 .current-label {
-  margin: 0.75rem 0 0 0;
-  padding: 0.75rem;
-  background: #e7f3ff;
-  border-left: 4px solid #007bff;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #004085;
+  margin: var(--space-md) 0 0 0;
+  padding: var(--space-md);
+  background: var(--color-primary-light);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-weight: 600;
+  font-weight: var(--font-semibold);
 }

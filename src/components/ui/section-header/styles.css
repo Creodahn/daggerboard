@@ -6,19 +6,19 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-lg);
 }
 
 .section-title {
   margin: 0;
-  font-size: 1.25rem;
-  color: #333;
+  font-size: var(--text-xl);
+  color: var(--color-text-primary);
 }
 
 .action-slot {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 /* Action buttons handled by action-button component */

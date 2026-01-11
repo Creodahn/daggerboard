@@ -1,0 +1,99 @@
+/**
+ * Base button styles - shared foundation for all button elements.
+ * Import in component stylesheets that need button styling.
+ *
+ * Usage:
+ *   @import '/styles/base/button.css';
+ *
+ *   button { ... additional styles ... }
+ *
+ * This provides a clean reset and base styling. For full-featured
+ * buttons with variants, use the <action-button> component instead.
+ */
+
+/* Base button reset and styling */
+button {
+  font-family: inherit;
+  font-size: var(--text-sm, 0.85rem);
+  font-weight: var(--button-font-weight, 600);
+  color: var(--color-text-primary, #333);
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #ddd);
+  border-radius: var(--button-border-radius, 4px);
+  padding: var(--button-padding-y, 0.5rem) var(--button-padding-x, 0.75rem);
+  cursor: pointer;
+  outline: none;
+  transition: background var(--transition-base, 0.2s ease),
+              border-color var(--transition-base, 0.2s ease),
+              transform var(--transition-fast, 0.1s ease),
+              box-shadow var(--transition-base, 0.2s ease);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm, 0.5rem);
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Hover state */
+button:hover:not(:disabled) {
+  background: var(--color-surface-hover, #f8f9fa);
+  border-color: var(--color-border, #ddd);
+}
+
+/* Active/pressed state */
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* Focus state */
+button:focus-visible {
+  box-shadow: var(--focus-ring-primary, 0 0 0 3px rgba(0, 123, 255, 0.1));
+}
+
+/* Disabled state */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========================================
+ * BUTTON VARIANTS (optional utility classes)
+ * ======================================== */
+
+/* Ghost/minimal button */
+button.ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+button.ghost:hover:not(:disabled) {
+  background: var(--color-surface-hover, #f8f9fa);
+}
+
+/* Icon-only button */
+button.icon-only {
+  padding: var(--space-sm, 0.5rem);
+  aspect-ratio: 1;
+}
+
+/* Full-width button */
+button.full-width {
+  width: 100%;
+}
+
+/* ========================================
+ * SIZE VARIANTS
+ * ======================================== */
+
+button.small {
+  font-size: var(--text-xs, 0.75rem);
+  padding: var(--space-xs, 0.25rem) var(--space-sm, 0.5rem);
+}
+
+button.large {
+  font-size: var(--text-base, 1rem);
+  padding: var(--space-md, 0.75rem) var(--space-lg, 1rem);
+}

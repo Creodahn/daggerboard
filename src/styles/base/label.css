@@ -1,0 +1,50 @@
+/**
+ * Base label styles - shared foundation for form labels.
+ * Import in component stylesheets that need label styling.
+ *
+ * Usage:
+ *   @import '/styles/base/label.css';
+ */
+
+label {
+  font-size: var(--text-sm, 0.85rem);
+  font-weight: var(--font-semibold, 600);
+  color: var(--color-text-secondary, #555);
+  display: block;
+  margin-bottom: var(--space-xs, 0.25rem);
+}
+
+/* Label with required indicator */
+label.required::after {
+  content: ' *';
+  color: var(--color-danger, #dc3545);
+}
+
+/* Inline label (for checkboxes/radios) */
+label.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm, 0.5rem);
+  font-weight: var(--font-normal, 400);
+  cursor: pointer;
+}
+
+/* Disabled label */
+label.disabled {
+  color: var(--color-text-disabled, #aaa);
+  cursor: not-allowed;
+}
+
+/* Small label variant */
+label.small {
+  font-size: var(--text-xs, 0.75rem);
+}
+
+/* Section/group label */
+label.section {
+  font-size: var(--text-xs, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted, #666);
+  margin-bottom: var(--space-sm, 0.5rem);
+}

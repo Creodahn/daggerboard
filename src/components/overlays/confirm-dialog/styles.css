@@ -1,20 +1,20 @@
 .confirm-content {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-xl);
   text-align: center;
 }
 
 .confirm-message {
   margin: 0;
-  font-size: 1rem;
-  color: #333;
-  line-height: 1.5;
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  line-height: var(--leading-normal);
 }
 
 .confirm-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-md);
   justify-content: center;
 }
 

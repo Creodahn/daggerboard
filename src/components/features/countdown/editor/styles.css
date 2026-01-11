@@ -1,7 +1,7 @@
 .countdown-editor {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--space-2xl);
 }
 
 /* Panel and list layout handled by panel-section and stack-list components */
@@ -9,48 +9,50 @@
 .create-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 /* Keep custom styling for tick labels section */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .form-group label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #555;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
 }
 
 .tick-labels-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .tick-label-entry {
   display: grid;
   grid-template-columns: 80px 1fr auto;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   align-items: center;
 }
 
 .tick-label-entry .tick-input,
 .tick-label-entry .label-input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.95rem;
+  padding: var(--input-padding-y) var(--input-padding-x);
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+  font-size: var(--text-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
 .tick-label-entry .tick-input:focus,
 .tick-label-entry .label-input:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 /* Tick label buttons handled by action-button component */
@@ -64,7 +66,7 @@
 
 /* Create button handled by action-button component */
 .create {
-  margin-top: 0.5rem;
+  margin-top: var(--space-sm);
 }
 
 /* Tracker items handled by countdown-item component */

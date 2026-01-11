@@ -3,16 +3,16 @@
 }
 
 .empty-state {
-  color: #999;
+  color: var(--color-text-placeholder);
   font-style: italic;
   text-align: center;
-  padding: 2rem;
+  padding: var(--space-2xl);
   margin: 0;
 }
 
 .icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-sm);
   opacity: 0.5;
 }
 
@@ -22,25 +22,25 @@
 
 /* Size variants */
 :host([size="small"]) .empty-state {
-  padding: 1rem;
+  padding: var(--space-lg);
 }
 
 :host([size="small"]) .icon {
-  font-size: 1.5rem;
+  font-size: var(--text-2xl);
 }
 
 :host([size="small"]) .message {
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
 }
 
 :host([size="large"]) .empty-state {
-  padding: 3rem;
+  padding: var(--space-3xl);
 }
 
 :host([size="large"]) .icon {
-  font-size: 3rem;
+  font-size: var(--text-5xl);
 }
 
 :host([size="large"]) .message {
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
 }

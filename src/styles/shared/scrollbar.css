@@ -2,8 +2,10 @@
  * Shared custom scrollbar styles.
  * Import this in components that need styled scrollbars.
  *
- * Usage in Shadow DOM components:
- * Add these styles to your component's CSS for elements with .custom-scrollbar class
+ * Usage:
+ *   @import '/styles/shared/scrollbar.css';
+ *
+ * Add the .custom-scrollbar class to elements that need styled scrollbars.
  */
 
 .custom-scrollbar {
@@ -15,17 +17,17 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #e9ecef;
-  border-radius: 4px;
+  background: var(--color-border-light, #e9ecef);
+  border-radius: var(--radius-sm, 4px);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #adb5bd;
-  border-radius: 4px;
+  background: var(--color-secondary, #adb5bd);
+  border-radius: var(--radius-sm, 4px);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #6c757d;
+  background: var(--color-secondary-hover, #6c757d);
 }
 
 /* Thin variant */
@@ -35,13 +37,13 @@
 
 /* Dark variant for dark backgrounds */
 .custom-scrollbar-dark::-webkit-scrollbar-track {
-  background: #343a40;
+  background: var(--color-surface-hover, #343a40);
 }
 
 .custom-scrollbar-dark::-webkit-scrollbar-thumb {
-  background: #6c757d;
+  background: var(--color-text-muted, #6c757d);
 }
 
 .custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
-  background: #adb5bd;
+  background: var(--color-text-secondary, #adb5bd);
 }

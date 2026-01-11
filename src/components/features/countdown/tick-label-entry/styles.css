@@ -4,31 +4,40 @@
 
 .tick-label-entry {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-sm);
   align-items: center;
 }
 
 .tick-input {
   width: 70px;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  padding: var(--input-padding-y) var(--input-padding-x);
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+  font-size: var(--text-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
 .label-input {
   flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  padding: var(--input-padding-y) var(--input-padding-x);
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+  font-size: var(--text-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
 }
 
 .tick-input:focus,
 .label-input:focus {
   outline: none;
-  border-color: #1976d2;
-  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring-primary);
+}
+
+.tick-input::placeholder,
+.label-input::placeholder {
+  color: var(--color-text-placeholder);
 }
 
 action-button {

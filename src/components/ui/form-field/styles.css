@@ -5,18 +5,18 @@
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .form-field.checkbox {
   flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-sm);
 }
 
 .form-field.checkbox label {
   order: 2;
-  font-weight: normal;
+  font-weight: var(--font-normal);
   cursor: pointer;
 }
 
@@ -35,20 +35,20 @@
 }
 
 label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #555;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
 }
 
 input,
 select,
 textarea {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: var(--input-padding-y) var(--input-padding-x);
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+  font-size: var(--text-base);
   font-family: inherit;
-  transition: border-color 0.2s;
+  transition: border-color var(--transition-base);
   width: 100%;
   box-sizing: border-box;
 }
@@ -57,14 +57,14 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--input-focus-color);
 }
 
 input.error,
 select.error,
 textarea.error {
-  border-color: #dc3545;
-  background-color: #ffe6e6;
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-light);
 }
 
 textarea {
@@ -73,8 +73,8 @@ textarea {
 }
 
 .error-message {
-  color: #dc3545;
-  font-size: 0.85rem;
+  color: var(--color-danger);
+  font-size: var(--text-sm);
   display: none;
 }
 
@@ -84,5 +84,5 @@ textarea {
 
 /* Slot for select options */
 ::slotted(option) {
-  padding: 0.5rem;
+  padding: var(--input-padding-y);
 }

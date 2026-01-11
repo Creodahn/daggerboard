@@ -3,7 +3,7 @@
 }
 
 .fade-wrapper {
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  transition: opacity var(--transition-slow), transform var(--transition-slow);
 }
 
 @keyframes fade-out-left {

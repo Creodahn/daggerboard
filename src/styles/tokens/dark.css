@@ -1,0 +1,110 @@
+/**
+ * Dark mode design tokens
+ * These override light mode tokens when prefers-color-scheme is dark.
+ */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* ========================================
+     * COLORS
+     * ======================================== */
+
+    /* Brand colors - slightly brighter for dark mode */
+    --color-primary: #4dabf7;
+    --color-primary-hover: #74c0fc;
+    --color-primary-light: rgba(77, 171, 247, 0.2);
+    --color-success: #51cf66;
+    --color-success-hover: #69db7c;
+    --color-success-light: rgba(81, 207, 102, 0.2);
+    --color-danger: #ff6b6b;
+    --color-danger-hover: #ff8787;
+    --color-danger-light: rgba(255, 107, 107, 0.2);
+    --color-warning: #ffd43b;
+    --color-warning-hover: #ffe066;
+    --color-secondary: #868e96;
+    --color-secondary-hover: #adb5bd;
+
+    /* Surface colors - dark variants */
+    --color-surface: #1a1a1a;
+    --color-surface-elevated: #242424;
+    --color-surface-hover: #2a2a2a;
+    --color-background: #121212;
+    --color-background-alt: #2f2f2f;
+    --color-border: #404040;
+    --color-border-light: #333333;
+    --color-border-input: #555555;
+
+    /* Text colors - dark variants */
+    --color-text-primary: #f6f6f6;
+    --color-text-secondary: #cccccc;
+    --color-text-muted: #999999;
+    --color-text-placeholder: #777777;
+    --color-text-disabled: #555555;
+    --color-text-inverse: #0f0f0f;
+
+    /* ========================================
+     * HEALTH & STATUS GRADIENTS
+     * ======================================== */
+
+    /* NPC health backgrounds - dark variants */
+    --gradient-npc-good: linear-gradient(135deg, #1b3d1f 0%, #2d5a32 100%);
+    --gradient-npc-warning: linear-gradient(135deg, #3d3a1b 0%, #5a5332 100%);
+    --gradient-npc-danger: linear-gradient(135deg, #3d2a1b 0%, #5a4032 100%);
+    --gradient-npc-critical: linear-gradient(135deg, #3d1b1b 0%, #5a2020 100%);
+    --gradient-npc-dead: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+
+    /* NPC health solid colors - dark variants (for smooth transitions) */
+    --color-npc-bg-good: #234d28;
+    --color-npc-bg-warning: #4a4528;
+    --color-npc-bg-danger: #4a3528;
+    --color-npc-bg-critical: #4a2828;
+    --color-npc-bg-dead: #333333;
+
+    /* NPC health border colors - dark variants */
+    --color-npc-border-good: #2d5a32;
+    --color-npc-border-warning: #5a5332;
+    --color-npc-border-danger: #5a4032;
+    --color-npc-border-critical: #5a2020;
+    --color-npc-border-dead: #4a4a4a;
+
+    /* Urgency backgrounds - dark variants */
+    --gradient-urgency-normal: linear-gradient(135deg, #1e2433 0%, #2a3548 100%);
+    --gradient-urgency-warning: linear-gradient(135deg, #332b1e 0%, #4a3f2a 100%);
+    --gradient-urgency-urgent: linear-gradient(135deg, #331e1e 0%, #4a2a2a 100%);
+    --gradient-urgency-critical: linear-gradient(135deg, #4a2020 0%, #6b2020 100%);
+
+    /* Urgency colors - brighter for dark mode readability */
+    --color-urgency-normal: #8b9cf7;
+    --color-urgency-normal-hover: #a3b1f9;
+    --color-urgency-warning: #ffb74d;
+    --color-urgency-urgent: #ff7961;
+    --color-urgency-critical: #ff5252;
+
+    /* Brand gradient - adjusted for dark mode */
+    --gradient-brand-light: linear-gradient(135deg, #2a3548 0%, #3d4a5c 100%);
+
+    /* ========================================
+     * EFFECTS
+     * ======================================== */
+
+    /* Shadows - more prominent in dark mode */
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-header: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-dropdown: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-modal: 0 8px 32px rgba(0, 0, 0, 0.6);
+
+    /* ========================================
+     * COMPONENT-SPECIFIC TOKENS
+     * ======================================== */
+
+    /* Tick label overlay - dark variant */
+    --color-tick-label-bg: rgba(0, 0, 0, 0.3);
+
+    /* Input defaults - dark variants */
+    --input-disabled-bg: #333333;
+  }
+}
