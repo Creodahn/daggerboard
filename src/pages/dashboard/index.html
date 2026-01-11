@@ -9,19 +9,14 @@
   </head>
 
   <body>
-    <header class="sticky-header">
-      <div class="header-content">
-        <h1>Daggerheart Dashboard</h1>
-        <div class="header-controls">
-          <fear-tracker inline></fear-tracker>
-          <campaign-menu></campaign-menu>
-        </div>
-      </div>
-    </header>
-    <main class="container">
+    <sticky-header title="Daggerheart Dashboard">
+      <fear-tracker slot="controls" inline></fear-tracker>
+      <campaign-menu slot="controls"></campaign-menu>
+    </sticky-header>
+    <page-container>
       <countdown-editor></countdown-editor>
       <entity-list></entity-list>
       <entity-creator class="modal-creator"></entity-creator>
-    </main>
+    </page-container>
   </body>
 </html>

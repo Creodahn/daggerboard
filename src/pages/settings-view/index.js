@@ -1,5 +1,6 @@
 // Settings view component imports
 import '../../components/extended-html-element.js';
+import '../../components/page-container/component.js';
 import '../../components/toggle-switch/component.js';
 import '../../components/section-header/component.js';
 import '../../components/card-container/component.js';

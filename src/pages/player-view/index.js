@@ -1,4 +1,5 @@
 import '../../components/extended-html-element.js';
+import '../../components/page-container/component.js';
 import '../../components/counter-control/component.js';
 import '../../components/empty-state/component.js';
 import '../../components/flash-container/component.js';

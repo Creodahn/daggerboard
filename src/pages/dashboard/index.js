@@ -24,6 +24,8 @@ import '../../components/pulse-container/component.js';
 import '../../components/panel-section/component.js';
 import '../../components/stack-list/component.js';
 import '../../components/collapse-toggle/component.js';
+import '../../components/sticky-header/component.js';
+import '../../components/page-container/component.js';
 
 // Feature components
 import '../../components/buttons/toggle-player-view/component.js';
