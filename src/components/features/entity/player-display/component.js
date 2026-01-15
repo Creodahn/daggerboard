@@ -59,10 +59,12 @@ export default class EntityPlayerDisplay extends CampaignAwareMixin(ExtendedHtml
     }
   }
 
-  applyFlashAnimations() {
+  async applyFlashAnimations() {
     for (const [entityId, flashType] of this.#pendingFlashes) {
       const item = this.$(`entity-player-item[entity-id="${entityId}"]`);
       if (item) {
+        // Wait for the component to be ready before flashing
+        await item.ready;
         item.flash(flashType);
       }
     }
@@ -76,53 +78,86 @@ export default class EntityPlayerDisplay extends CampaignAwareMixin(ExtendedHtml
     const enemies = this.entities.filter(e => e.entity_type === 'enemy');
     const npcs = this.entities.filter(e => e.entity_type === 'npc');
 
-    container.innerHTML = '';
-
-    if (enemies.length > 0) {
-      const section = document.createElement('div');
-      section.className = 'entity-section';
-      section.innerHTML = '<h3 class="section-header">Enemies</h3>';
-
-      const list = document.createElement('ul');
-      list.className = 'entities-list';
-
-      enemies.forEach(entity => {
-        const item = document.createElement('entity-player-item');
-        item.setAttribute('entity-id', entity.id);
-        item.setAttribute('name', entity.name);
-        item.setAttribute('type', 'enemy');
-        list.appendChild(item);
-      });
-
-      section.appendChild(list);
-      container.appendChild(section);
+    // Clear loading message and empty state on first render with data
+    const loadingMsg = container.querySelector('.empty-message');
+    if (loadingMsg) loadingMsg.remove();
+    const emptyState = container.querySelector('empty-state');
+    if (emptyState && (enemies.length > 0 || npcs.length > 0)) {
+      emptyState.remove();
     }
 
-    if (npcs.length > 0) {
-      const section = document.createElement('div');
-      section.className = 'entity-section';
-      section.innerHTML = '<h3 class="section-header">NPCs</h3>';
+    // Track which entity IDs we're rendering
+    const currentIds = new Set(this.entities.map(e => e.id));
 
-      const list = document.createElement('ul');
-      list.className = 'entities-list';
+    // Remove items that no longer exist
+    const existingItems = this.$$('entity-player-item');
+    existingItems.forEach(item => {
+      const id = item.getAttribute('entity-id');
+      if (!currentIds.has(id)) {
+        item.remove();
+      }
+    });
 
-      npcs.forEach(entity => {
-        const item = document.createElement('entity-player-item');
-        item.setAttribute('entity-id', entity.id);
-        item.setAttribute('name', entity.name);
-        item.setAttribute('type', 'npc');
-        item.setAttribute('hp-current', entity.hp_current);
-        item.setAttribute('hp-max', entity.hp_max);
-        list.appendChild(item);
-      });
+    // Update or create enemy section
+    this.#renderSection(container, 'enemies', 'Enemies', enemies);
 
-      section.appendChild(list);
-      container.appendChild(section);
-    }
+    // Update or create NPC section
+    this.#renderSection(container, 'npcs', 'NPCs', npcs);
 
+    // Show empty state if no entities
     if (enemies.length === 0 && npcs.length === 0) {
+      // Clear sections first
       container.innerHTML = '<empty-state message="No visible entities"></empty-state>';
     }
+  }
+
+  #renderSection(container, sectionId, title, entities) {
+    if (entities.length === 0) {
+      // Remove section if it exists but has no entities
+      const existingSection = this.$(`[data-section="${sectionId}"]`);
+      if (existingSection) {
+        existingSection.remove();
+      }
+      return;
+    }
+
+    // Find or create section
+    let section = this.$(`[data-section="${sectionId}"]`);
+    if (!section) {
+      section = document.createElement('div');
+      section.className = 'entity-section';
+      section.setAttribute('data-section', sectionId);
+      section.innerHTML = `<h3 class="section-header">${title}</h3>`;
+
+      const list = document.createElement('ul');
+      list.className = 'entities-list';
+      section.appendChild(list);
+
+      container.appendChild(section);
+    }
+
+    const list = section.querySelector('.entities-list');
+    const entityType = sectionId === 'npcs' ? 'npc' : 'enemy';
+
+    entities.forEach(entity => {
+      // Find existing item or create new one
+      let item = this.$(`entity-player-item[entity-id="${entity.id}"]`);
+
+      if (!item) {
+        item = document.createElement('entity-player-item');
+        item.setAttribute('entity-id', entity.id);
+        list.appendChild(item);
+      }
+
+      // Update attributes (triggers attributeChangedCallback for transitions)
+      item.setAttribute('name', entity.name);
+      item.setAttribute('type', entityType);
+
+      if (entityType === 'npc') {
+        item.setAttribute('hp-current', entity.hp_current);
+        item.setAttribute('hp-max', entity.hp_max);
+      }
+    });
   }
 }
 

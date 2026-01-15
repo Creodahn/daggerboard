@@ -86,8 +86,12 @@ class EntityPlayerItem extends ExtendedHtmlElement {
    * Trigger a flash animation
    * @param {'heal' | 'damage'} type
    */
-  flash(type) {
-    this.#flashContainer?.flash(type);
+  async flash(type) {
+    if (this.#flashContainer) {
+      // Wait for flash-container to be ready
+      await this.#flashContainer.ready;
+      this.#flashContainer.flash(type);
+    }
   }
 }
 

@@ -65,14 +65,17 @@
   --color-npc-bg-warning: #fff8dc;
   --color-npc-bg-danger: #ffe4c4;
   --color-npc-bg-critical: #f8d0d0;
-  --color-npc-bg-dead: #555555;
+  --color-npc-bg-dead: #8b0000;
 
   /* NPC health border colors */
   --color-npc-border-good: #a5d6a7;
   --color-npc-border-warning: #ffe082;
   --color-npc-border-danger: #ffcc80;
   --color-npc-border-critical: #ef9a9a;
-  --color-npc-border-dead: #757575;
+  --color-npc-border-dead: #5c0000;
+
+  /* NPC dead text color */
+  --color-npc-text-dead: #4a0000;
 
   /* Dead state colors */
   --color-health-dead-dark: #5c0000;

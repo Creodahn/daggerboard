@@ -137,6 +137,7 @@ class EntityItem extends ExtendedHtmlElement {
               <input-group
                 type="number"
                 min="1"
+                value="1"
                 placeholder="Amount"
                 button-text="Heal"
                 button-variant="success"
@@ -179,13 +180,12 @@ class EntityItem extends ExtendedHtmlElement {
       });
     });
 
-    // Heal input-group
+    // Heal input-group - keep value after healing for repeated heals
     const healInputGroup = container.querySelector('.heal-input-group');
     healInputGroup.addEventListener('action-submit', e => {
       const amount = parseInt(e.detail.value);
       if (!isNaN(amount) && amount > 0) {
         this.emit('heal', { id: this.#entity.id, amount });
-        healInputGroup.clear();
       }
     });
 
