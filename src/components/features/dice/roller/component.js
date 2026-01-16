@@ -596,7 +596,27 @@ class DiceRoller extends ExtendedHtmlElement {
     result.textContent = roll.total;
     item.appendChild(result);
 
+    // Delete button (appears on hover)
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'roll-delete-btn';
+    deleteBtn.title = 'Delete this roll';
+    deleteBtn.textContent = '×';
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.deleteRoll(roll.id);
+    });
+    item.appendChild(deleteBtn);
+
     return item;
+  }
+
+  async deleteRoll(rollId) {
+    try {
+      await invoke('delete_dice_roll', { id: rollId });
+      await this.loadRolls();
+    } catch (error) {
+      console.error('Failed to delete roll:', error);
+    }
   }
 
   formatDate(dateStr) {
@@ -627,7 +647,5 @@ class DiceRoller extends ExtendedHtmlElement {
     });
   }
 }
-
-customElements.define('dice-roller', DiceRoller);
 
 customElements.define('dice-roller', DiceRoller);
