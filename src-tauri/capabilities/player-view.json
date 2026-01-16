@@ -12,7 +12,8 @@
       "allow": [
         { "event": "trackers-updated" },
         { "event": "fear-level-updated" },
-        { "event": "entities-updated" }
+        { "event": "entities-updated" },
+        { "event": "dice-roll-shared" }
       ]
     }
   ]

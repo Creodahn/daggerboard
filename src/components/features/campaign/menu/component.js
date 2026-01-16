@@ -257,8 +257,8 @@ class CampaignMenu extends ExtendedHtmlElement {
   async openDiceRoller() {
     await createWindow('dice-view', {
       title: 'Dice Bag',
-      width: 350,
-      height: 500,
+      width: 700,
+      height: 380,
       resizable: true,
       url: '/pages/dice-view/index.html',
     }, { focusIfExists: true });

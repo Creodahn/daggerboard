@@ -17,3 +17,5 @@ import '../../components/features/countdown/display/component.js';
 import '../../components/features/entity/player-item/component.js';
 import '../../components/features/entity/player-display/component.js';
 import '../../components/features/fear-tracker/component.js';
+import '../../components/features/dice/shape/component.js';
+import '../../components/features/dice/result-display/component.js';

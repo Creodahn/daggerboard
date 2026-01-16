@@ -1,5 +1,9 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import '../shape/component.js';
+import '../../../ui/input-group/component.js';
+import '../../../ui/toggle-switch/component.js';
+
+const { emit } = window.__TAURI__.event;
 
 /**
  * Dice bag component with history and custom roll notation support.
@@ -14,6 +18,7 @@ class DiceRoller extends ExtendedHtmlElement {
   #rollInput;
   #dropZone;
   #dropZoneDice;
+  #shareCheckbox;
   #rolls = [];
   #maxHistory = 50;
   #draggingSides = null;
@@ -25,9 +30,10 @@ class DiceRoller extends ExtendedHtmlElement {
 
   async setup() {
     this.#historyList = this.$('.history-list');
-    this.#rollInput = this.$('.roll-input');
+    this.#rollInput = this.$('.roll-input-group');
     this.#dropZone = this.$('.drop-zone');
     this.#dropZoneDice = this.$('.drop-zone-dice');
+    this.#shareCheckbox = this.$('.share-toggle');
 
     // Roll dropped dice button
     this.$('.roll-dropped-btn').addEventListener('click', () => {
@@ -123,14 +129,10 @@ class DiceRoller extends ExtendedHtmlElement {
     });
 
     // Setup custom roll input
-    this.$('.roll-btn').addEventListener('click', () => {
-      this.rollFromInput();
-    });
-
-    this.#rollInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        this.rollFromInput();
+    this.#rollInput.addEventListener('action-submit', (e) => {
+      const notation = e.detail.value.trim();
+      if (notation) {
+        this.roll(notation);
       }
     });
 
@@ -250,6 +252,7 @@ class DiceRoller extends ExtendedHtmlElement {
     }
 
     this.renderHistory();
+    this.maybeShareRoll(rollResult);
 
     // Clear drop zone and reset color index
     this.#droppedDice = [];
@@ -257,10 +260,12 @@ class DiceRoller extends ExtendedHtmlElement {
     this.renderDropZone();
   }
 
-  rollFromInput() {
-    const notation = this.#rollInput.value.trim();
-    if (notation) {
-      this.roll(notation);
+  /**
+   * Share roll with players if sharing is enabled
+   */
+  maybeShareRoll(rollResult) {
+    if (this.#shareCheckbox.checked) {
+      emit('dice-roll-shared', rollResult);
     }
   }
 
@@ -289,12 +294,19 @@ class DiceRoller extends ExtendedHtmlElement {
     const isCrit = sides === 20 && count === 1 && individualRolls[0] === 20;
     const isFumble = sides === 20 && count === 1 && individualRolls[0] === 1;
 
+    // Create diceResults for consistent format
+    const diceResults = individualRolls.map(result => ({
+      sides,
+      result
+    }));
+
     const rollResult = {
       notation,
       count,
       sides,
       modifier,
       individualRolls,
+      diceResults,
       total,
       isCrit,
       isFumble,
@@ -309,6 +321,7 @@ class DiceRoller extends ExtendedHtmlElement {
     }
 
     this.renderHistory();
+    this.maybeShareRoll(rollResult);
   }
 
   /**

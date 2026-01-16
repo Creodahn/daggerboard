@@ -1,5 +1,5 @@
 <div class="dice-roller">
-  <div class="roll-area">
+  <div class="left-panel">
     <div class="drop-zone">
       <div class="drop-zone-empty">
         <span class="drop-zone-text">Drop dice here</span>
@@ -8,39 +8,51 @@
       <div class="drop-zone-dice"></div>
       <button class="roll-dropped-btn">Roll!</button>
     </div>
-    <div class="roll-history">
-      <div class="history-list"></div>
+
+    <div class="roll-controls">
+      <div class="dice-buttons">
+        <button class="dice-btn" data-sides="4" title="d4">
+          <die-shape sides="4"></die-shape>
+        </button>
+        <button class="dice-btn" data-sides="6" title="d6">
+          <die-shape sides="6"></die-shape>
+        </button>
+        <button class="dice-btn" data-sides="8" title="d8">
+          <die-shape sides="8"></die-shape>
+        </button>
+        <button class="dice-btn" data-sides="10" title="d10">
+          <die-shape sides="10"></die-shape>
+        </button>
+        <button class="dice-btn" data-sides="12" title="d12">
+          <die-shape sides="12"></die-shape>
+        </button>
+        <button class="dice-btn" data-sides="20" title="d20">
+          <die-shape sides="20"></die-shape>
+        </button>
+        <button class="dice-btn" data-sides="100" title="d100">
+          <die-shape sides="100"></die-shape>
+        </button>
+      </div>
+
+      <input-group
+        type="text"
+        placeholder="e.g. 2d6+3"
+        button-text="Roll"
+        class="roll-input-group"
+      ></input-group>
     </div>
   </div>
 
-  <div class="roll-controls">
-    <div class="dice-buttons">
-      <button class="dice-btn" data-sides="4" title="d4">
-        <die-shape sides="4"></die-shape>
-      </button>
-      <button class="dice-btn" data-sides="6" title="d6">
-        <die-shape sides="6"></die-shape>
-      </button>
-      <button class="dice-btn" data-sides="8" title="d8">
-        <die-shape sides="8"></die-shape>
-      </button>
-      <button class="dice-btn" data-sides="10" title="d10">
-        <die-shape sides="10"></die-shape>
-      </button>
-      <button class="dice-btn" data-sides="12" title="d12">
-        <die-shape sides="12"></die-shape>
-      </button>
-      <button class="dice-btn" data-sides="20" title="d20">
-        <die-shape sides="20"></die-shape>
-      </button>
-      <button class="dice-btn" data-sides="100" title="d100">
-        <die-shape sides="100"></die-shape>
-      </button>
+  <div class="right-panel">
+    <div class="history-header">
+      <span class="history-title">Roll History</span>
+      <toggle-switch
+        class="share-toggle"
+        label="Share with players"
+      ></toggle-switch>
     </div>
-
-    <div class="custom-roll">
-      <input type="text" class="roll-input" placeholder="e.g. 2d6+3" />
-      <button class="roll-btn">Roll</button>
+    <div class="roll-history">
+      <div class="history-list"></div>
     </div>
   </div>
 </div>

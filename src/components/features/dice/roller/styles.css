@@ -1,12 +1,21 @@
 .dice-roller {
   display: flex;
-  flex-direction: column;
   height: 100%;
   background: var(--color-background);
 }
 
-/* Roll Area */
-.roll-area {
+/* Left Panel - Controls */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  min-width: 280px;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+/* Right Panel - History */
+.right-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -20,12 +29,12 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-sm);
-  padding: var(--space-lg);
+  padding: var(--space-md);
   margin: var(--space-md);
-  min-height: 120px;
+  min-height: 100px;
   border: 2px dashed var(--color-border);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  background: var(--color-background);
   transition: all var(--transition-fast);
 }
 
@@ -131,11 +140,34 @@
   transform: scale(1.05);
 }
 
+/* History Header */
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-surface);
+}
+
+.history-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.share-toggle {
+  font-size: var(--text-xs);
+}
+
 /* Roll History */
 .roll-history {
   flex: 1;
   overflow-y: auto;
-  padding: 0 var(--space-md) var(--space-md);
+  padding: var(--space-md);
 }
 
 .history-list {
@@ -205,12 +237,12 @@
 
 /* Roll Controls */
 .roll-controls {
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  flex: 1;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .dice-buttons {
@@ -250,46 +282,7 @@
   filter: brightness(1.15) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
-.custom-roll {
-  display: flex;
-  gap: var(--space-sm);
-}
-
-.roll-input {
-  flex: 1;
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  font-family: var(--font-family-mono);
-  font-size: var(--text-base);
-}
-
-.roll-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-light);
-}
-
-.roll-input::placeholder {
-  color: var(--color-text-muted);
-}
-
-.roll-btn {
-  padding: var(--space-sm) var(--space-lg);
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: var(--font-semibold);
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.roll-btn:hover {
-  background: var(--color-primary-hover);
-}
-
-.roll-btn:active {
-  transform: scale(0.98);
+/* Roll input handled by input-group component */
+.roll-input-group {
+  width: 100%;
 }

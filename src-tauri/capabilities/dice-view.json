@@ -5,6 +5,7 @@
   "windows": ["dice-view"],
   "permissions": [
     "core:default",
-    "core:window:default"
+    "core:window:default",
+    "core:event:default"
   ]
 }
