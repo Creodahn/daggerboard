@@ -94,6 +94,10 @@ fn run_migrations(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
         migrate_v6_campaign_notes_table(conn)?;
     }
 
+    if current_version < 7 {
+        migrate_v7_dice_rolls_table(conn)?;
+    }
+
     Ok(())
 }
 
@@ -419,6 +423,56 @@ fn migrate_v6_campaign_notes_table(conn: &Connection) -> Result<(), Box<dyn std:
 
     conn.execute(
         "INSERT INTO schema_migrations (version) VALUES (6)",
+        [],
+    )?;
+
+    Ok(())
+}
+
+/// V7: Create dice_rolls table
+fn migrate_v7_dice_rolls_table(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    // Check if dice_rolls table exists
+    let table_exists: bool = conn
+        .query_row(
+            "SELECT COUNT(*) > 0 FROM sqlite_master WHERE type='table' AND name='dice_rolls'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+    if !table_exists {
+        conn.execute(
+            "CREATE TABLE dice_rolls (
+                id TEXT PRIMARY KEY,
+                campaign_id TEXT NOT NULL,
+                notation TEXT NOT NULL,
+                dice_data TEXT NOT NULL,
+                modifier INTEGER NOT NULL DEFAULT 0,
+                total INTEGER NOT NULL,
+                is_crit INTEGER NOT NULL DEFAULT 0,
+                is_fumble INTEGER NOT NULL DEFAULT 0,
+                shared_with_players INTEGER NOT NULL DEFAULT 0,
+                rolled_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
+            )",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE INDEX idx_dice_rolls_campaign ON dice_rolls(campaign_id)",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE INDEX idx_dice_rolls_date ON dice_rolls(rolled_at)",
+            [],
+        )?;
+
+        println!("Created dice_rolls table");
+    }
+
+    conn.execute(
+        "INSERT INTO schema_migrations (version) VALUES (7)",
         [],
     )?;
 

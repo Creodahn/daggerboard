@@ -67,6 +67,24 @@ CREATE TABLE IF NOT EXISTS app_state (
     FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
 
+-- Dice rolls history
+CREATE TABLE IF NOT EXISTS dice_rolls (
+    id TEXT PRIMARY KEY,
+    campaign_id TEXT NOT NULL,
+    notation TEXT NOT NULL,
+    dice_data TEXT NOT NULL,  -- JSON: array of { sides, result, colorIndex }
+    modifier INTEGER NOT NULL DEFAULT 0,
+    total INTEGER NOT NULL,
+    is_crit INTEGER NOT NULL DEFAULT 0,
+    is_fumble INTEGER NOT NULL DEFAULT 0,
+    shared_with_players INTEGER NOT NULL DEFAULT 0,
+    rolled_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_dice_rolls_campaign ON dice_rolls(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_dice_rolls_date ON dice_rolls(rolled_at);
+
 -- Index for faster campaign-scoped queries
 CREATE INDEX IF NOT EXISTS idx_entities_campaign ON entities(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_trackers_campaign ON countdown_trackers(campaign_id);

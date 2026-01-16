@@ -66,10 +66,145 @@
 
 .result-total.crit {
   color: var(--color-success);
+  position: relative;
+  text-shadow: 0 0 20px var(--color-success), 0 0 40px var(--color-success);
+}
+
+/* Sparkle animation for natural 20 */
+.result-total.crit::before,
+.result-total.crit::after {
+  content: '✦';
+  position: absolute;
+  font-size: var(--text-xl);
+  color: gold;
+  animation: sparkle-burst 0.6s ease-out forwards, sparkle 1.5s ease-in-out 0.6s infinite;
+}
+
+.result-total.crit::before {
+  top: -8px;
+  left: -16px;
+  animation-delay: 0s, 0.6s;
+}
+
+.result-total.crit::after {
+  bottom: -8px;
+  right: -16px;
+  animation-delay: 0.15s, 0.75s;
+}
+
+/* Additional sparkles using box-shadow on a pseudo element wrapper */
+.result-total.crit {
+  animation: crit-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes sparkle-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes crit-glow {
+  0%, 100% {
+    text-shadow: 0 0 20px var(--color-success), 0 0 40px var(--color-success);
+  }
+  50% {
+    text-shadow: 0 0 30px var(--color-success), 0 0 60px var(--color-success), 0 0 80px gold;
+  }
 }
 
 .result-total.fumble {
   color: var(--color-danger);
+  position: relative;
+  text-shadow: 0 0 20px var(--color-danger), 0 0 40px var(--color-danger);
+  animation: fumble-shake 0.6s ease-out, fumble-glow 1.5s ease-in-out 0.6s infinite;
+}
+
+/* Fumble animation for natural 1 */
+.result-total.fumble::before,
+.result-total.fumble::after {
+  content: '💀';
+  position: absolute;
+  font-size: var(--text-lg);
+  animation: fumble-drop 0.5s ease-out forwards, fumble-float 2s ease-in-out 0.5s infinite;
+}
+
+.result-total.fumble::before {
+  top: -12px;
+  left: -20px;
+  animation-delay: 0s, 0.5s;
+}
+
+.result-total.fumble::after {
+  bottom: -12px;
+  right: -20px;
+  animation-delay: 0.15s, 0.65s;
+}
+
+@keyframes fumble-float {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(3px) rotate(5deg);
+  }
+}
+
+@keyframes fumble-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) rotate(0deg);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(4px) rotate(-15deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(-5deg);
+  }
+}
+
+@keyframes fumble-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes fumble-glow {
+  0%, 100% {
+    text-shadow: 0 0 20px var(--color-danger), 0 0 40px var(--color-danger);
+  }
+  50% {
+    text-shadow: 0 0 30px var(--color-danger), 0 0 60px var(--color-danger), 0 0 80px darkred;
+  }
 }
 
 /* Animation for new results */

@@ -6,6 +6,8 @@
   "permissions": [
     "core:default",
     "core:window:default",
-    "core:event:default"
+    "core:event:default",
+    "core:event:allow-emit-to",
+    "core:event:allow-listen"
   ]
 }

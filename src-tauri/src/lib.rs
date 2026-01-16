@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{campaign, countdown, database::Database, entity, fear_tracker};
+use modules::{campaign, countdown, database::Database, dice, entity, fear_tracker};
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -67,6 +67,12 @@ pub fn run() {
             entity::update_entity_name,
             entity::toggle_entity_visibility,
             entity::set_all_entities_visibility,
+            // Dice commands
+            dice::save_dice_roll,
+            dice::get_dice_rolls,
+            dice::get_dice_rolls_by_date,
+            dice::delete_dice_roll,
+            dice::clear_dice_history,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
