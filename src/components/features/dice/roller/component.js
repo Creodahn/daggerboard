@@ -19,7 +19,9 @@ class DiceRoller extends ExtendedHtmlElement {
   #draggingSides = null;
   #dragGhost = null;
   #isDragging = false;
-  #droppedDice = []; // Array of sides values for dice in drop zone
+  #droppedDice = []; // Array of { sides, colorIndex } for dice in drop zone
+  #nextColorIndex = 0;
+  #maxColors = 10;
 
   async setup() {
     this.#historyList = this.$('.history-list');
@@ -153,7 +155,9 @@ class DiceRoller extends ExtendedHtmlElement {
   }
 
   addToDropZone(sides) {
-    this.#droppedDice.push(sides);
+    const colorIndex = this.#nextColorIndex;
+    this.#nextColorIndex = (this.#nextColorIndex + 1) % this.#maxColors;
+    this.#droppedDice.push({ sides, colorIndex });
     this.renderDropZone();
   }
 
@@ -169,13 +173,14 @@ class DiceRoller extends ExtendedHtmlElement {
     // Clear and re-render dice
     this.#dropZoneDice.innerHTML = '';
 
-    this.#droppedDice.forEach((sides, index) => {
+    this.#droppedDice.forEach((die, index) => {
       const wrapper = document.createElement('div');
       wrapper.className = 'dropped-die';
       wrapper.dataset.index = index;
 
       const dieShape = document.createElement('die-shape');
-      dieShape.setAttribute('sides', sides);
+      dieShape.setAttribute('sides', die.sides);
+      dieShape.setAttribute('color', die.colorIndex);
       dieShape.style.setProperty('--die-size', '36px');
 
       wrapper.appendChild(dieShape);
@@ -191,17 +196,18 @@ class DiceRoller extends ExtendedHtmlElement {
   rollDroppedDice() {
     if (this.#droppedDice.length === 0) return;
 
-    // Roll each die individually and track results
-    const diceResults = this.#droppedDice.map(sides => ({
-      sides,
-      result: this.rollDie(sides)
+    // Roll each die individually and track results with color
+    const diceResults = this.#droppedDice.map(die => ({
+      sides: die.sides,
+      colorIndex: die.colorIndex,
+      result: this.rollDie(die.sides)
     }));
 
     // Group for notation display (e.g., "2d6 + 1d4")
     const groupedNotation = [];
     const diceGroups = {};
-    this.#droppedDice.forEach(sides => {
-      diceGroups[sides] = (diceGroups[sides] || 0) + 1;
+    this.#droppedDice.forEach(die => {
+      diceGroups[die.sides] = (diceGroups[die.sides] || 0) + 1;
     });
 
     // Sort by sides for consistent display
@@ -220,10 +226,10 @@ class DiceRoller extends ExtendedHtmlElement {
 
     // Check for crits/fumbles (only if single d20)
     const isCrit = this.#droppedDice.length === 1 &&
-                   this.#droppedDice[0] === 20 &&
+                   this.#droppedDice[0].sides === 20 &&
                    diceResults[0].result === 20;
     const isFumble = this.#droppedDice.length === 1 &&
-                     this.#droppedDice[0] === 20 &&
+                     this.#droppedDice[0].sides === 20 &&
                      diceResults[0].result === 1;
 
     const rollResult = {
@@ -245,8 +251,9 @@ class DiceRoller extends ExtendedHtmlElement {
 
     this.renderHistory();
 
-    // Clear drop zone
+    // Clear drop zone and reset color index
     this.#droppedDice = [];
+    this.#nextColorIndex = 0;
     this.renderDropZone();
   }
 
@@ -352,7 +359,7 @@ class DiceRoller extends ExtendedHtmlElement {
       diceDisplay.className = 'roll-dice';
 
       if (roll.isMultiDice && roll.diceResults) {
-        // Multi-dice roll - show each die with its result
+        // Multi-dice roll - show each die with its result and color
         roll.diceResults.forEach((d, i) => {
           if (i > 0) {
             const plus = document.createElement('span');
@@ -363,6 +370,9 @@ class DiceRoller extends ExtendedHtmlElement {
           const die = document.createElement('die-shape');
           die.setAttribute('sides', d.sides);
           die.setAttribute('result', d.result);
+          if (d.colorIndex !== undefined) {
+            die.setAttribute('color', d.colorIndex);
+          }
           die.style.setProperty('--die-size', '28px');
           diceDisplay.appendChild(die);
         });
