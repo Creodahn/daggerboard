@@ -69,6 +69,13 @@ class CampaignMenu extends ExtendedHtmlElement {
       this.openNotepad();
     });
 
+    // Setup dice roller button
+    const diceBtn = this.$('.dice-btn');
+    diceBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openDiceRoller();
+    });
+
     // Setup settings button
     this.#settingsBtn = this.$('.settings-btn');
     this.#settingsBtn.addEventListener('click', (e) => {
@@ -244,6 +251,17 @@ class CampaignMenu extends ExtendedHtmlElement {
       resizable: true,
       url: '/pages/settings-view/index.html',
     });
+    this.#dropdown.closeDropdown();
+  }
+
+  async openDiceRoller() {
+    await createWindow('dice-view', {
+      title: 'Dice Bag',
+      width: 350,
+      height: 500,
+      resizable: true,
+      url: '/pages/dice-view/index.html',
+    }, { focusIfExists: true });
     this.#dropdown.closeDropdown();
   }
 
