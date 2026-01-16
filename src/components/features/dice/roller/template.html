@@ -1,5 +1,5 @@
-<div class="dice-roller">
-  <div class="left-panel">
+<split-panel sidebar-width="280" class="dice-roller">
+  <div slot="sidebar" class="sidebar-content">
     <div class="drop-zone">
       <div class="drop-zone-empty">
         <span class="drop-zone-text">Drop dice here</span>
@@ -43,7 +43,7 @@
     </div>
   </div>
 
-  <div class="right-panel">
+  <div slot="content" class="history-panel">
     <flex-row justify="space-between" align="center" gap="md" class="history-header">
       <span class="history-title">Roll History</span>
       <toggle-switch
@@ -55,4 +55,4 @@
       <div class="history-list"></div>
     </div>
   </div>
-</div>
+</split-panel>

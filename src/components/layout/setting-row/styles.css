@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.setting-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  padding: var(--space-md) 0;
+}
+
+/* Add separator between rows */
+:host(:not(:last-child)) .setting-row {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+/* No separator variant */
+:host([no-separator]) .setting-row {
+  border-bottom: none;
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-label {
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
+}
+
+.setting-description {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-normal);
+}
+
+.setting-control {
+  flex-shrink: 0;
+}
+
+/* Ensure slotted controls don't stretch weirdly */
+::slotted(*) {
+  flex-shrink: 0;
+}
+
+/* Minimum width for common control types */
+::slotted(input-group) {
+  min-width: 200px;
+}

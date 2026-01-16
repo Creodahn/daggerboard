@@ -1,22 +1,16 @@
+/* Layout handled by split-panel component */
 .dice-roller {
-  display: flex;
-  height: 100%;
   background: var(--color-background);
 }
 
-/* Left Panel - Controls */
-.left-panel {
+.sidebar-content {
   display: flex;
   flex-direction: column;
-  width: 280px;
-  min-width: 280px;
-  border-right: 1px solid var(--color-border);
   background: var(--color-surface);
+  height: 100%;
 }
 
-/* Right Panel - History */
-.right-panel {
-  flex: 1;
+.history-panel {
   display: flex;
   flex-direction: column;
   overflow: hidden;

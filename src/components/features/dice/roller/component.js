@@ -3,6 +3,7 @@ import '../shape/component.js';
 import '../../../ui/input-group/component.js';
 import '../../../ui/toggle-switch/component.js';
 import '../../../layout/flex-row/component.js';
+import '../../../layout/split-panel/component.js';
 import { emit } from '../../../../helpers/tauri.js';
 
 /**

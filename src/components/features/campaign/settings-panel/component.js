@@ -2,6 +2,7 @@ import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
 import ToastMessage from '../../../feedback/toast-message/component.js';
 import { invoke } from '../../../../helpers/tauri.js';
+import '../../../layout/setting-row/component.js';
 
 class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
@@ -63,11 +64,9 @@ class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
       <section-header>Campaign Settings</section-header>
 
       <card-container>
-        <div class="setting-row">
-          <div class="setting-info">
-            <span class="setting-label">Campaign Name</span>
-            <span class="setting-description">The name used to identify this campaign.</span>
-          </div>
+        <setting-row
+          label="Campaign Name"
+          description="The name used to identify this campaign.">
           <input-group
             id="campaign-name"
             type="text"
@@ -75,30 +74,27 @@ class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
             button-text="Save"
             button-variant="primary"
           ></input-group>
-        </div>
+        </setting-row>
 
-        <div class="setting-row">
-          <div class="setting-info">
-            <span class="setting-label">Allow Massive Damage</span>
-            <span class="setting-description">When enabled, entities will have a massive damage threshold available for dealing 4× their normal threshold damage.</span>
-          </div>
+        <setting-row
+          label="Allow Massive Damage"
+          description="When enabled, entities will have a massive damage threshold available for dealing 4× their normal threshold damage.">
           <toggle-switch
             id="allow-massive-damage"
             ${this.#settings.allow_massive_damage ? 'checked' : ''}
           ></toggle-switch>
-        </div>
+        </setting-row>
       </card-container>
 
       <section-header>Danger Zone</section-header>
 
       <card-container class="danger-zone">
-        <div class="setting-row">
-          <div class="setting-info">
-            <span class="setting-label">Delete Campaign</span>
-            <span class="setting-description">Permanently delete this campaign and all its data including entities, trackers, and fear level. This action cannot be undone.</span>
-          </div>
+        <setting-row
+          label="Delete Campaign"
+          description="Permanently delete this campaign and all its data including entities, trackers, and fear level. This action cannot be undone."
+          no-separator>
           <action-button id="delete-campaign-btn" variant="danger">Delete Campaign</action-button>
-        </div>
+        </setting-row>
       </card-container>
     `;
 

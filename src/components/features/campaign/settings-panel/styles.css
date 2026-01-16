@@ -17,48 +17,7 @@
   padding: var(--space-2xl);
 }
 
-.setting-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-lg);
-  padding: var(--space-md) 0;
-}
-
-.setting-row:not(:last-child) {
-  border-bottom: 1px solid var(--color-border-light);
-}
-
-.setting-info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  flex: 1;
-}
-
-.setting-label {
-  font-weight: var(--font-semibold);
-  color: var(--color-text-primary);
-}
-
-.setting-description {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  line-height: var(--leading-normal);
-}
-
-toggle-switch {
-  flex-shrink: 0;
-}
-
-input-group {
-  flex-shrink: 0;
-  min-width: 200px;
-}
-
-action-button {
-  flex-shrink: 0;
-}
+/* Setting rows handled by setting-row component */
 
 /* Danger Zone */
 .danger-zone {
