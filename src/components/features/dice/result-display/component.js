@@ -13,6 +13,8 @@ class DiceResultDisplay extends ExtendedHtmlElement {
   #container;
   #diceContainer;
   #totalDisplay;
+  #rollTimeout = null;
+  #rollingDuration = 1200; // Duration of rolling animation in ms
 
   async setup() {
     this.#container = this.$('.dice-result-display');
@@ -21,11 +23,29 @@ class DiceResultDisplay extends ExtendedHtmlElement {
 
     // Listen for shared dice rolls (auto-cleanup via base class)
     await this.listenTauri('dice-roll-shared', (payload) => {
-      this.showResult(payload);
+      this.startRolling(payload);
     });
   }
 
+  startRolling(roll) {
+    // Clear any pending result display
+    if (this.#rollTimeout) {
+      clearTimeout(this.#rollTimeout);
+    }
+
+    // Show rolling state
+    this.#container.classList.remove('has-result');
+    this.#container.classList.add('rolling');
+
+    // After animation, show the result
+    this.#rollTimeout = setTimeout(() => {
+      this.showResult(roll);
+    }, this.#rollingDuration);
+  }
+
   showResult(roll) {
+    // Switch from rolling to result
+    this.#container.classList.remove('rolling');
     this.#container.classList.add('has-result');
 
     // Clear previous dice
@@ -65,7 +85,7 @@ class DiceResultDisplay extends ExtendedHtmlElement {
     this.#totalDisplay.classList.toggle('crit', roll.isCrit);
     this.#totalDisplay.classList.toggle('fumble', roll.isFumble);
 
-    // Re-trigger animation
+    // Re-trigger result animation
     this.#container.classList.remove('has-result');
     void this.#container.offsetHeight;
     this.#container.classList.add('has-result');
