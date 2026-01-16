@@ -13,29 +13,25 @@
 .modal-dialog[open] {
   display: flex;
   flex-direction: column;
-  animation: modal-slide-in var(--transition-slow) ease-out;
+  opacity: 0;
+  transform: translateY(-30px) scale(0.95);
+  transition: opacity var(--transition-slow), transform var(--transition-slow);
+}
+
+.modal-dialog[open].visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .modal-dialog::backdrop {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(3px);
-  animation: backdrop-fade-in var(--transition-fast) ease-out;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
 }
 
-@keyframes modal-slide-in {
-  from {
-    opacity: 0;
-    transform: translateY(-30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes backdrop-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.modal-dialog[open].visible::backdrop {
+  opacity: 1;
 }
 
 .modal-header {

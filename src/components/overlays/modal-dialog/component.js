@@ -58,6 +58,9 @@ class ModalDialog extends ExtendedHtmlElement {
    */
   open() {
     this.#dialog.showModal();
+    // Trigger reflow then add visible class for enter animation
+    void this.#dialog.offsetHeight;
+    this.#dialog.classList.add('visible');
     this.emit('modal-open');
   }
 
@@ -77,8 +80,26 @@ class ModalDialog extends ExtendedHtmlElement {
    * Close the modal dialog
    */
   close() {
-    this.#dialog.close();
-    this.emit('modal-close');
+    // Remove visible class to trigger exit animation
+    this.#dialog.classList.remove('visible');
+
+    const finishClose = () => {
+      if (!this.#dialog.open) return; // Already closed
+      this.#dialog.close();
+      this.emit('modal-close');
+    };
+
+    // Wait for transition to complete before closing
+    // Use opacity as the trigger since it's the primary visual indicator
+    const handler = (e) => {
+      if (e.propertyName === 'opacity') {
+        finishClose();
+      }
+    };
+    this.#dialog.addEventListener('transitionend', handler, { once: true });
+
+    // Fallback timeout in case transitionend doesn't fire
+    setTimeout(finishClose, 350);
   }
 
   /**

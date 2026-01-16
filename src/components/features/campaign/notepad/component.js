@@ -4,8 +4,8 @@ import ToastMessage from '../../../feedback/toast-message/component.js';
 import createWindow from '../../../../helpers/create-window.js';
 
 const { invoke } = window.__TAURI__.core;
-const { listen } = window.__TAURI__.event;
-const { getCurrentWindow } = window.__TAURI__.window;
+const { listen, emitTo } = window.__TAURI__.event;
+const { getCurrentWindow, getAllWindows } = window.__TAURI__.window;
 
 /**
  * Campaign notepad component with multi-note support and auto-save.
@@ -127,6 +127,20 @@ class CampaignNotepad extends ExtendedHtmlElement {
               this.updateDisplay();
             }
           }
+        }
+      })
+    );
+
+    // Listen for toast messages from other windows
+    this.#unlisteners.push(
+      await listen('show-toast', (event) => {
+        const { type, message } = event.payload;
+        if (type === 'success') {
+          ToastMessage.success(message);
+        } else if (type === 'error') {
+          ToastMessage.error(message);
+        } else {
+          ToastMessage.show(message);
         }
       })
     );
@@ -315,6 +329,8 @@ class CampaignNotepad extends ExtendedHtmlElement {
 
     const deletedTitle = this.getNoteDisplayTitle(this.#currentNote);
     const deletedNoteId = this.#currentNote.id;
+    const currentWindow = getCurrentWindow();
+    const currentLabel = currentWindow.label;
 
     try {
       await invoke('delete_note', { noteId: deletedNoteId });
@@ -322,9 +338,24 @@ class CampaignNotepad extends ExtendedHtmlElement {
       // Refresh notes list
       await this.loadNotes();
 
-      // Check if there are remaining notes
-      if (this.#notes.length > 0) {
-        // Load the most recent remaining note
+      // Check if there's another notepad window already open
+      const allWindows = await getAllWindows();
+      const otherNotepadWindow = allWindows.find(win =>
+        win.label.startsWith('notepad-') && win.label !== currentLabel
+      );
+
+      if (otherNotepadWindow) {
+        // Send toast message to the other window, then focus it and close this one
+        await emitTo(otherNotepadWindow.label, 'show-toast', {
+          type: 'success',
+          message: `Deleted "${deletedTitle}"`
+        });
+        await otherNotepadWindow.unminimize();
+        await otherNotepadWindow.show();
+        await otherNotepadWindow.setFocus();
+        await currentWindow.close();
+      } else if (this.#notes.length > 0) {
+        // No other window open - load the most recent remaining note
         await this.loadNote(this.#notes[0].id);
         ToastMessage.success(`Deleted "${deletedTitle}"`);
       } else {

@@ -38,7 +38,10 @@ class ConfirmDialog extends ExtendedHtmlElement {
    * @param {string} [options.variant='danger'] - Visual variant ('danger', 'warning')
    * @returns {Promise<boolean>} - Resolves to true if confirmed, false if cancelled
    */
-  show({ message, confirmText = 'Confirm', cancelText = 'Cancel', variant = 'danger' } = {}) {
+  async show({ message, confirmText = 'Confirm', cancelText = 'Cancel', variant = 'danger' } = {}) {
+    // Ensure modal is fully set up before opening
+    await this.#modal.ready;
+
     this.#messageEl.textContent = message;
     this.#confirmBtn.textContent = confirmText;
     this.#cancelBtn.textContent = cancelText;
