@@ -3,6 +3,7 @@ import { debounce } from '../../../../helpers/debounce.js';
 import ToastMessage from '../../../feedback/toast-message/component.js';
 import createWindow from '../../../../helpers/create-window.js';
 import { invoke, listen, emitTo, getCurrentWindow, getAllWindows } from '../../../../helpers/tauri.js';
+import '../../../ui/action-button/component.js';
 
 /**
  * Campaign notepad component with multi-note support and auto-save.
@@ -76,12 +77,12 @@ class CampaignNotepad extends ExtendedHtmlElement {
     });
 
     // New note button
-    this.$('.new-note-btn').addEventListener('click', () => {
+    this.$('.new-note-btn').addEventListener('action-click', () => {
       this.createNewNote();
     });
 
     // Delete note button
-    this.$('.delete-note-btn').addEventListener('click', () => {
+    this.$('.delete-note-btn').addEventListener('action-click', () => {
       this.confirmDeleteNote();
     });
 

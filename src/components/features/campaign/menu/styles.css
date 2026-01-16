@@ -153,20 +153,9 @@
   color: var(--color-text-placeholder);
 }
 
+/* Create campaign button - styled by action-button component */
 .create-campaign-btn {
-  padding: var(--space-xs) var(--space-md);
-  background: var(--color-urgency-normal);
-  color: var(--color-text-inverse);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
-  cursor: pointer;
-  transition: background var(--transition-base);
   white-space: nowrap;
-}
-
-.create-campaign-btn:hover {
-  background: var(--color-urgency-normal-hover);
 }
 
 .player-view-btn,

@@ -2,6 +2,7 @@ import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import '../shape/component.js';
 import '../../../ui/input-group/component.js';
 import '../../../ui/toggle-switch/component.js';
+import '../../../ui/action-button/component.js';
 import '../../../layout/flex-row/component.js';
 import '../../../layout/split-panel/component.js';
 import { emit } from '../../../../helpers/tauri.js';
@@ -37,7 +38,7 @@ class DiceRoller extends ExtendedHtmlElement {
     this.#shareCheckbox = this.$('.share-toggle');
 
     // Roll dropped dice button
-    this.$('.roll-dropped-btn').addEventListener('click', () => {
+    this.$('.roll-dropped-btn').addEventListener('action-click', () => {
       this.rollDroppedDice();
     });
 

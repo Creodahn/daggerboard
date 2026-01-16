@@ -1,6 +1,7 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import createWindow from '../../../../helpers/create-window.js';
 import { invoke, listen, WebviewWindow } from '../../../../helpers/tauri.js';
+import '../../../ui/action-button/component.js';
 
 /**
  * Campaign menu component for the sticky header.
@@ -35,9 +36,8 @@ class CampaignMenu extends ExtendedHtmlElement {
     const createInput = this.$('.create-campaign-input');
     const createBtn = this.$('.create-campaign-btn');
 
-    createBtn.addEventListener('click', (e) => {
+    createBtn.addEventListener('action-click', (e) => {
       e.stopPropagation();
-      e.preventDefault();
       this.handleCreateCampaign();
     });
 

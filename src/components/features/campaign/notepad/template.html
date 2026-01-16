@@ -9,13 +9,13 @@
         <div slot="content" class="note-dropdown-content">
           <div class="notes-list"></div>
           <div class="note-actions">
-            <button class="new-note-btn">+ New Note</button>
+            <action-button class="new-note-btn" size="small">+ New Note</action-button>
           </div>
         </div>
       </dropdown-menu>
     </div>
     <input type="text" class="note-title-input" placeholder="Untitled Note" />
-    <button class="delete-note-btn" title="Delete this note">🗑️</button>
+    <action-button class="delete-note-btn" variant="ghost-danger" size="small" title="Delete this note">🗑️</action-button>
   </div>
   <div class="notepad-body">
     <textarea class="notepad-content" placeholder="Write your notes here..."></textarea>

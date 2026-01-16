@@ -84,6 +84,36 @@ button.secondary:hover:not(:disabled) {
   background: var(--color-secondary-hover);
 }
 
+/* Ghost variant - transparent with hover effect */
+button.ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+button.ghost:hover:not(:disabled) {
+  opacity: 1;
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Ghost danger - for delete icons */
+button.ghost-danger {
+  background: transparent;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+button.ghost-danger:hover:not(:disabled) {
+  opacity: 1;
+  color: var(--color-danger);
+  background: var(--color-danger-light);
+  transform: none;
+  box-shadow: none;
+}
+
 /* Loading spinner */
 .spinner {
   display: none;
