@@ -1,3 +1,5 @@
+@import '/styles/shared/utilities.css';
+
 :host {
   display: block;
 }
@@ -20,10 +22,9 @@
   flex: 1;
   font-weight: var(--font-medium);
   color: var(--color-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
+
+/* Note: Uses .truncate utility class */
 
 .campaign-item-name.selectable {
   cursor: pointer;

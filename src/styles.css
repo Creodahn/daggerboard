@@ -1,6 +1,7 @@
 @import './styles/theme.css';
 @import './styles/shared/animations.css';
 @import './styles/shared/scrollbar.css';
+@import './styles/shared/utilities.css';
 
 /**
  * Global styles - minimal resets and base typography.

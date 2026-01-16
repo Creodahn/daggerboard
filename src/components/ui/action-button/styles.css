@@ -1,3 +1,5 @@
+@import '/styles/shared/utilities.css';
+
 :host {
   display: inline-block;
 }
@@ -114,7 +116,7 @@ button.ghost-danger:hover:not(:disabled) {
   box-shadow: none;
 }
 
-/* Loading spinner */
+/* Loading spinner - uses spin animation from utilities.css */
 .spinner {
   display: none;
   width: 14px;
@@ -127,8 +129,4 @@ button.ghost-danger:hover:not(:disabled) {
 
 :host([loading]) .spinner {
   display: inline-block;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }

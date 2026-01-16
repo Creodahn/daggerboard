@@ -135,7 +135,7 @@ class CountdownItem extends ExtendedHtmlElement {
     container.innerHTML = `
       <flex-row justify="space-between" align="center" gap="lg" class="tracker-header">
         <flex-row align="center" gap="md" class="tracker-info">
-          <h4>${tracker.name}</h4>
+          <h4 class="truncate">${tracker.name}</h4>
           <type-badge type="${tracker.tracker_type}" label="${tracker.tracker_type.toUpperCase()}"></type-badge>
         </flex-row>
         <flex-row align="center" gap="sm" class="tracker-actions">

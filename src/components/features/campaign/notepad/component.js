@@ -4,6 +4,7 @@ import ToastMessage from '../../../feedback/toast-message/component.js';
 import createWindow from '../../../../helpers/create-window.js';
 import { invoke, listen, emitTo, getCurrentWindow, getAllWindows } from '../../../../helpers/tauri.js';
 import '../../../ui/action-button/component.js';
+import '../../../feedback/loading-spinner/component.js';
 
 /**
  * Campaign notepad component with multi-note support and auto-save.
@@ -240,7 +241,7 @@ class CampaignNotepad extends ExtendedHtmlElement {
 
       return `
         <div class="note-list-item ${isCurrent ? 'current' : ''}" data-note-id="${note.id}">
-          <span class="note-list-item-title">${this.escapeHtml(title)}</span>
+          <span class="note-list-item-title truncate">${this.escapeHtml(title)}</span>
           <span class="note-list-item-date">${dateStr}</span>
         </div>
       `;

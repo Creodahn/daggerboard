@@ -3,7 +3,7 @@
     <div class="note-selector">
       <dropdown-menu>
         <button slot="trigger" class="note-trigger">
-          <span class="note-trigger-title">Select Note</span>
+          <span class="note-trigger-title truncate">Select Note</span>
           <span class="dropdown-arrow">▼</span>
         </button>
         <div slot="content" class="note-dropdown-content">
@@ -20,7 +20,7 @@
   <div class="notepad-body">
     <textarea class="notepad-content" placeholder="Write your notes here..."></textarea>
     <div class="save-indicator">
-      <span class="save-spinner"></span>
+      <loading-spinner size="small"></loading-spinner>
       <span class="save-text"></span>
     </div>
   </div>

@@ -1,0 +1,36 @@
+@import '/styles/shared/utilities.css';
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Size variants */
+:host([size="small"]) .spinner {
+  width: 12px;
+  height: 12px;
+  border-width: 1.5px;
+}
+
+:host([size="large"]) .spinner {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+}
+
+:host([size="xlarge"]) .spinner {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
