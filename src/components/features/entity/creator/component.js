@@ -1,6 +1,5 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
-
-const { invoke } = window.__TAURI__.core;
+import { invoke } from '../../../../helpers/tauri.js';
 
 class EntityCreator extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;

@@ -2,10 +2,7 @@ import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { debounce } from '../../../../helpers/debounce.js';
 import ToastMessage from '../../../feedback/toast-message/component.js';
 import createWindow from '../../../../helpers/create-window.js';
-
-const { invoke } = window.__TAURI__.core;
-const { listen, emitTo } = window.__TAURI__.event;
-const { getCurrentWindow, getAllWindows } = window.__TAURI__.window;
+import { invoke, listen, emitTo, getCurrentWindow, getAllWindows } from '../../../../helpers/tauri.js';
 
 /**
  * Campaign notepad component with multi-note support and auto-save.

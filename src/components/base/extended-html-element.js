@@ -5,6 +5,7 @@ export default class ExtendedHtmlElement extends HTMLElement {
   // Promise that resolves when the component is fully set up
   #readyResolve;
   #isSetup = false;
+  #eventUnlisteners = [];
   ready;
 
   constructor() {
@@ -32,6 +33,13 @@ export default class ExtendedHtmlElement extends HTMLElement {
   }
 
   disconnectedCallback() {
+    // Clean up managed event listeners
+    for (const unlisten of this.#eventUnlisteners) {
+      unlisten();
+    }
+    this.#eventUnlisteners = [];
+
+    // Call component's cleanup method if defined
     this.cleanup?.();
   }
 
@@ -72,6 +80,27 @@ export default class ExtendedHtmlElement extends HTMLElement {
       composed: true,
       detail
     }));
+  }
+
+  /**
+   * Register an unlisten function to be called on disconnect.
+   * Use this to track Tauri event listeners for automatic cleanup.
+   * @param {Function} unlisten - Function to call to unsubscribe from event
+   */
+  addUnlisten(unlisten) {
+    this.#eventUnlisteners.push(unlisten);
+  }
+
+  /**
+   * Register a Tauri event listener with automatic cleanup on disconnect.
+   * @param {string} eventName - The Tauri event name
+   * @param {Function} handler - Event handler function
+   * @returns {Promise<void>}
+   */
+  async listenTauri(eventName, handler) {
+    const { listen } = await import('../../helpers/tauri.js');
+    const unlisten = await listen(eventName, (event) => handler(event.payload, event));
+    this.#eventUnlisteners.push(unlisten);
   }
 
   // ============================================================================

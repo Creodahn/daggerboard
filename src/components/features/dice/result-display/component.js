@@ -1,8 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import '../shape/component.js';
 
-const { listen } = window.__TAURI__.event;
-
 /**
  * Displays the most recent shared dice roll result.
  * Listens for 'dice-roll-shared' events from the dice bag.
@@ -15,19 +13,16 @@ class DiceResultDisplay extends ExtendedHtmlElement {
   #container;
   #diceContainer;
   #totalDisplay;
-  #unlisteners = [];
 
   async setup() {
     this.#container = this.$('.dice-result-display');
     this.#diceContainer = this.$('.result-dice');
     this.#totalDisplay = this.$('.result-total');
 
-    // Listen for shared dice rolls
-    this.#unlisteners.push(
-      await listen('dice-roll-shared', (event) => {
-        this.showResult(event.payload);
-      })
-    );
+    // Listen for shared dice rolls (auto-cleanup via base class)
+    await this.listenTauri('dice-roll-shared', (payload) => {
+      this.showResult(payload);
+    });
   }
 
   showResult(roll) {
@@ -74,12 +69,6 @@ class DiceResultDisplay extends ExtendedHtmlElement {
     this.#container.classList.remove('has-result');
     void this.#container.offsetHeight;
     this.#container.classList.add('has-result');
-  }
-
-  cleanup() {
-    for (const unlisten of this.#unlisteners) {
-      unlisten();
-    }
   }
 }
 

@@ -1,7 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
-
-const { invoke } = window.__TAURI__.core;
+import { invoke } from '../../../../helpers/tauri.js';
 
 class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;

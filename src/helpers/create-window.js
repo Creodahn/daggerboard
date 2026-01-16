@@ -1,3 +1,5 @@
+import { WebviewWindow } from './tauri.js';
+
 // Track window creation count for cascading offset (persisted across windows)
 const CASCADE_OFFSET = 30; // pixels to offset each new window
 const MAX_CASCADE = 10; // reset after this many windows
@@ -30,7 +32,6 @@ function decrementWindowCreationCount() {
  * @param {boolean} behavior.cascade - If true, offset window position for cascading effect (default: true)
  */
 export default async function createWindow(name, options = {}, behavior = {}) {
-  const { WebviewWindow } = window.__TAURI__.webviewWindow;
   const { focusIfExists = false, cascade = true } = behavior;
 
   const existing = await WebviewWindow.getByLabel(name);

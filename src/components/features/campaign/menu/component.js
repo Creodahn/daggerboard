@@ -1,9 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import createWindow from '../../../../helpers/create-window.js';
-
-const { invoke } = window.__TAURI__.core;
-const { listen } = window.__TAURI__.event;
-const { WebviewWindow } = window.__TAURI__.webviewWindow;
+import { invoke, listen, WebviewWindow } from '../../../../helpers/tauri.js';
 
 /**
  * Campaign menu component for the sticky header.

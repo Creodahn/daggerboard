@@ -1,8 +1,7 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
 import { getHpChangeType } from '../../../../helpers/health-utils.js';
-
-const { invoke } = window.__TAURI__.core;
+import { invoke } from '../../../../helpers/tauri.js';
 
 export default class EntityPlayerDisplay extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;

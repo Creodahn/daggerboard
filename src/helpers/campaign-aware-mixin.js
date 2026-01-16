@@ -30,13 +30,11 @@
  *   }
  */
 
-const { invoke } = window.__TAURI__.core;
-const { listen } = window.__TAURI__.event;
+import { invoke, listen } from './tauri.js';
 
 export function CampaignAwareMixin(Base) {
   return class extends Base {
     #currentCampaignId = null;
-    #eventUnlisteners = [];
 
     /**
      * Get the current campaign ID
@@ -70,13 +68,14 @@ export function CampaignAwareMixin(Base) {
       await loadData();
 
       // Setup event listeners with campaign filtering
+      // Uses base class's addUnlisten for automatic cleanup
       for (const [eventName, handler] of Object.entries(events)) {
         const unlisten = await listen(eventName, (event) => {
           if (this.isCurrentCampaign(event.payload)) {
             handler(event.payload);
           }
         });
-        this.#eventUnlisteners.push(unlisten);
+        this.addUnlisten(unlisten);
       }
 
       // Listen for campaign changes
@@ -97,17 +96,6 @@ export function CampaignAwareMixin(Base) {
         console.error('Failed to get current campaign:', error);
         this.#currentCampaignId = null;
       }
-    }
-
-    /**
-     * Cleanup event listeners on disconnect
-     */
-    cleanup() {
-      super.cleanup?.();
-      for (const unlisten of this.#eventUnlisteners) {
-        unlisten();
-      }
-      this.#eventUnlisteners = [];
     }
   };
 }

@@ -2,8 +2,7 @@ import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import '../shape/component.js';
 import '../../../ui/input-group/component.js';
 import '../../../ui/toggle-switch/component.js';
-
-const { emit } = window.__TAURI__.event;
+import { emit } from '../../../../helpers/tauri.js';
 
 /**
  * Dice bag component with history and custom roll notation support.
