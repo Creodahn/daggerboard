@@ -186,6 +186,14 @@ pub fn rename_campaign(
         let campaign = get_campaign_by_id(conn, &id)?;
         emit_campaigns_update(&app, conn)?;
 
+        // If this is the current campaign, also emit current-campaign-changed
+        // so the header menu updates
+        if let Some(current_id) = get_current_campaign_id(conn)? {
+            if current_id == id {
+                emit_current_campaign_update(&app, Some(campaign.clone()))?;
+            }
+        }
+
         Ok(campaign)
     })
 }
@@ -308,4 +316,189 @@ pub fn ensure_campaign_exists(conn: &Connection) -> Result<String, Box<dyn std::
 
     println!("Created default campaign: {}", id);
     Ok(id)
+}
+
+// ============================================================================
+// Notes Commands
+// ============================================================================
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct CampaignNote {
+    pub id: String,
+    pub campaign_id: String,
+    pub title: Option<String>,
+    pub content: String,
+    pub created_at: String,
+    pub updated_at: String,
+}
+
+#[derive(Clone, Serialize)]
+struct NotePayload {
+    note: CampaignNote,
+}
+
+#[derive(Clone, Serialize)]
+struct NotesListPayload {
+    campaign_id: String,
+    notes: Vec<CampaignNote>,
+}
+
+fn row_to_note(row: &Row) -> rusqlite::Result<CampaignNote> {
+    Ok(CampaignNote {
+        id: row.get(0)?,
+        campaign_id: row.get(1)?,
+        title: row.get(2)?,
+        content: row.get(3)?,
+        created_at: row.get(4)?,
+        updated_at: row.get(5)?,
+    })
+}
+
+fn get_notes_for_campaign(conn: &Connection, campaign_id: &str) -> AppResult<Vec<CampaignNote>> {
+    let mut stmt = conn.prepare(
+        "SELECT id, campaign_id, title, content, created_at, updated_at
+         FROM campaign_notes
+         WHERE campaign_id = ?1
+         ORDER BY updated_at DESC"
+    )?;
+
+    let notes = stmt
+        .query_map([campaign_id], row_to_note)?
+        .filter_map(|r| r.ok())
+        .collect();
+
+    Ok(notes)
+}
+
+fn emit_notes_list_update(app: &tauri::AppHandle, conn: &Connection, campaign_id: &str) -> AppResult<()> {
+    let notes = get_notes_for_campaign(conn, campaign_id)?;
+    app.emit(
+        "campaign-notes-list-updated",
+        NotesListPayload {
+            campaign_id: campaign_id.to_string(),
+            notes,
+        },
+    )
+    .map_err(|e| AppError::EmitError(e.to_string()))?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn get_campaign_notes(db: State<Database>, campaign_id: String) -> AppResult<Vec<CampaignNote>> {
+    db.with_conn(|conn| get_notes_for_campaign(conn, &campaign_id))
+}
+
+#[tauri::command]
+pub fn get_note(db: State<Database>, note_id: String) -> AppResult<CampaignNote> {
+    db.with_conn(|conn| {
+        conn.query_row(
+            "SELECT id, campaign_id, title, content, created_at, updated_at
+             FROM campaign_notes WHERE id = ?1",
+            [&note_id],
+            row_to_note,
+        )
+        .map_err(|_| AppError::EntityNotFound(format!("Note not found: {}", note_id)))
+    })
+}
+
+#[tauri::command]
+pub fn create_note(
+    db: State<Database>,
+    app: tauri::AppHandle,
+    campaign_id: String,
+    title: Option<String>,
+) -> AppResult<CampaignNote> {
+    db.with_conn(|conn| {
+        let id = Uuid::new_v4().to_string();
+
+        conn.execute(
+            "INSERT INTO campaign_notes (id, campaign_id, title, content) VALUES (?1, ?2, ?3, '')",
+            params![id, campaign_id, title],
+        )?;
+
+        let note = conn.query_row(
+            "SELECT id, campaign_id, title, content, created_at, updated_at
+             FROM campaign_notes WHERE id = ?1",
+            [&id],
+            row_to_note,
+        )?;
+
+        // Emit note created event
+        app.emit("campaign-note-created", NotePayload { note: note.clone() })
+            .map_err(|e| AppError::EmitError(e.to_string()))?;
+
+        // Emit updated notes list
+        emit_notes_list_update(&app, conn, &campaign_id)?;
+
+        Ok(note)
+    })
+}
+
+#[tauri::command]
+pub fn update_note(
+    db: State<Database>,
+    app: tauri::AppHandle,
+    note_id: String,
+    title: Option<String>,
+    content: String,
+) -> AppResult<CampaignNote> {
+    db.with_conn(|conn| {
+        let rows = conn.execute(
+            "UPDATE campaign_notes SET title = ?1, content = ?2, updated_at = datetime('now') WHERE id = ?3",
+            params![title, content, note_id],
+        )?;
+
+        if rows == 0 {
+            return Err(AppError::EntityNotFound(format!("Note not found: {}", note_id)));
+        }
+
+        let note = conn.query_row(
+            "SELECT id, campaign_id, title, content, created_at, updated_at
+             FROM campaign_notes WHERE id = ?1",
+            [&note_id],
+            row_to_note,
+        )?;
+
+        // Emit note updated event
+        app.emit("campaign-note-updated", NotePayload { note: note.clone() })
+            .map_err(|e| AppError::EmitError(e.to_string()))?;
+
+        // Emit updated notes list
+        emit_notes_list_update(&app, conn, &note.campaign_id)?;
+
+        Ok(note)
+    })
+}
+
+#[tauri::command]
+pub fn delete_note(
+    db: State<Database>,
+    app: tauri::AppHandle,
+    note_id: String,
+) -> AppResult<()> {
+    db.with_conn(|conn| {
+        // Get the campaign_id before deleting
+        let campaign_id: String = conn
+            .query_row(
+                "SELECT campaign_id FROM campaign_notes WHERE id = ?1",
+                [&note_id],
+                |row| row.get(0),
+            )
+            .map_err(|_| AppError::EntityNotFound(format!("Note not found: {}", note_id)))?;
+
+        let rows = conn.execute("DELETE FROM campaign_notes WHERE id = ?1", [&note_id])?;
+
+        if rows == 0 {
+            return Err(AppError::EntityNotFound(format!("Note not found: {}", note_id)));
+        }
+
+        // Emit note deleted event
+        app.emit("campaign-note-deleted", serde_json::json!({ "note_id": note_id, "campaign_id": campaign_id }))
+            .map_err(|e| AppError::EmitError(e.to_string()))?;
+
+        // Emit updated notes list
+        emit_notes_list_update(&app, conn, &campaign_id)?;
+
+        Ok(())
+    })
 }

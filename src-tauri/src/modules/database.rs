@@ -86,6 +86,14 @@ fn run_migrations(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
         migrate_v4_add_campaign_settings(conn)?;
     }
 
+    if current_version < 5 {
+        migrate_v5_add_campaign_notes_column(conn)?;
+    }
+
+    if current_version < 6 {
+        migrate_v6_campaign_notes_table(conn)?;
+    }
+
     Ok(())
 }
 
@@ -321,6 +329,96 @@ fn migrate_v4_add_campaign_settings(conn: &Connection) -> Result<(), Box<dyn std
 
     conn.execute(
         "INSERT INTO schema_migrations (version) VALUES (4)",
+        [],
+    )?;
+
+    Ok(())
+}
+
+/// V5: Add notes column to campaigns (temporary, migrated to separate table in v6)
+fn migrate_v5_add_campaign_notes_column(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    // Check if campaigns table has notes column
+    let has_column: bool = conn
+        .query_row(
+            "SELECT COUNT(*) > 0 FROM pragma_table_info('campaigns') WHERE name='notes'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+    if !has_column {
+        conn.execute(
+            "ALTER TABLE campaigns ADD COLUMN notes TEXT NOT NULL DEFAULT ''",
+            [],
+        )?;
+
+        println!("Added notes column to campaigns");
+    }
+
+    conn.execute(
+        "INSERT INTO schema_migrations (version) VALUES (5)",
+        [],
+    )?;
+
+    Ok(())
+}
+
+/// V6: Create campaign_notes table and migrate existing notes
+fn migrate_v6_campaign_notes_table(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    // Check if campaign_notes table exists
+    let table_exists: bool = conn
+        .query_row(
+            "SELECT COUNT(*) > 0 FROM sqlite_master WHERE type='table' AND name='campaign_notes'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+    if !table_exists {
+        // Create the campaign_notes table
+        conn.execute(
+            "CREATE TABLE campaign_notes (
+                id TEXT PRIMARY KEY,
+                campaign_id TEXT NOT NULL,
+                title TEXT,
+                content TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
+            )",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE INDEX idx_notes_campaign ON campaign_notes(campaign_id)",
+            [],
+        )?;
+
+        // Migrate existing notes from campaigns table
+        // Only migrate if there's actual content
+        let campaigns_with_notes: Vec<(String, String)> = {
+            let mut stmt = conn.prepare(
+                "SELECT id, notes FROM campaigns WHERE notes IS NOT NULL AND notes != ''"
+            )?;
+            let rows = stmt.query_map([], |row| {
+                Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
+            })?;
+            rows.filter_map(|r| r.ok()).collect()
+        };
+
+        for (campaign_id, notes) in campaigns_with_notes {
+            let note_id = Uuid::new_v4().to_string();
+            conn.execute(
+                "INSERT INTO campaign_notes (id, campaign_id, title, content) VALUES (?1, ?2, 'Migrated Notes', ?3)",
+                rusqlite::params![note_id, campaign_id, notes],
+            )?;
+        }
+
+        println!("Created campaign_notes table and migrated existing notes");
+    }
+
+    conn.execute(
+        "INSERT INTO schema_migrations (version) VALUES (6)",
         [],
     )?;
 

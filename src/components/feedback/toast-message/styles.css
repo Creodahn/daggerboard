@@ -1,0 +1,102 @@
+:host {
+  display: contents;
+}
+
+.toast-container {
+  /* Reset popover defaults */
+  border: none;
+  padding: 0;
+  background: transparent;
+
+  /* Positioning */
+  position: fixed;
+  bottom: var(--space-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+
+  /* Styling */
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  box-shadow: var(--shadow-lg);
+  white-space: nowrap;
+}
+
+/* Remove default popover backdrop */
+.toast-container::backdrop {
+  display: none;
+}
+
+/* Variants */
+.toast-container.system {
+  background: var(--color-surface-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.toast-container.success {
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+
+.toast-container.error {
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+.toast-container.warning {
+  background: var(--color-warning);
+  color: var(--color-text-primary);
+}
+
+.toast-container.info {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+/* Only show as flex when popover is open - this is critical!
+   Popover API uses display:none when closed, we must not override it */
+.toast-container:popover-open {
+  display: flex;
+  animation: toastIn 0.3s ease-out;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Fade out class for exit animation */
+.toast-container.fade-out {
+  animation: toastOut 0.3s ease-out forwards;
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+}
+
+/* Icons */
+.toast-icon {
+  font-size: var(--text-base);
+}
+
+.toast-icon:empty {
+  display: none;
+}

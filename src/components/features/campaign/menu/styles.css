@@ -170,6 +170,7 @@
 }
 
 .player-view-btn,
+.notepad-btn,
 .settings-btn {
   display: flex;
   align-items: center;
@@ -186,6 +187,7 @@
 }
 
 .player-view-btn:hover,
+.notepad-btn:hover,
 .settings-btn:hover {
   background: var(--color-border-light);
   border-color: var(--color-border);
@@ -198,10 +200,12 @@
 }
 
 .player-view-icon,
+.notepad-icon,
 .settings-icon {
   font-size: var(--text-base);
 }
 
+.notepad-btn,
 .settings-btn {
   margin-top: var(--space-sm);
 }

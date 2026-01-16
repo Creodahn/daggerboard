@@ -62,6 +62,13 @@ class CampaignMenu extends ExtendedHtmlElement {
       this.togglePlayerView();
     });
 
+    // Setup notepad button
+    const notepadBtn = this.$('.notepad-btn');
+    notepadBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openNotepad();
+    });
+
     // Setup settings button
     this.#settingsBtn = this.$('.settings-btn');
     this.#settingsBtn.addEventListener('click', (e) => {
@@ -237,6 +244,42 @@ class CampaignMenu extends ExtendedHtmlElement {
       resizable: true,
       url: '/pages/settings-view/index.html',
     });
+    this.#dropdown.closeDropdown();
+  }
+
+  async openNotepad(noteId = null) {
+    const title = this.#currentCampaign
+      ? `${this.#currentCampaign.name} Notepad`
+      : 'Campaign Notepad';
+
+    // If no specific note requested, try to get the most recent one
+    let targetNoteId = noteId;
+    if (!targetNoteId && this.#currentCampaign) {
+      try {
+        const notes = await invoke('get_campaign_notes', {
+          campaignId: this.#currentCampaign.id
+        });
+        if (notes.length > 0) {
+          targetNoteId = notes[0].id; // Most recent note
+        }
+      } catch (error) {
+        console.error('Failed to fetch notes:', error);
+      }
+    }
+
+    // Use unique window label for each note, or generic for truly new notepad
+    const windowLabel = targetNoteId ? `notepad-${targetNoteId}` : `notepad-new-${Date.now()}`;
+    const url = targetNoteId
+      ? `/pages/notepad-view/index.html?noteId=${targetNoteId}`
+      : '/pages/notepad-view/index.html';
+
+    await createWindow(windowLabel, {
+      title,
+      width: 500,
+      height: 600,
+      resizable: true,
+      url,
+    }, { focusIfExists: true });
     this.#dropdown.closeDropdown();
   }
 }

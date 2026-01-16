@@ -1,5 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
+import ToastMessage from '../../../feedback/toast-message/component.js';
 
 const { invoke } = window.__TAURI__.core;
 
@@ -130,10 +131,12 @@ class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
             name: newName
           });
           this.#currentCampaign = updated;
+          this.showStatus('Campaign renamed successfully', 'success');
         } catch (error) {
           console.error('Failed to rename campaign:', error);
           // Revert to original name
           nameInput.value = this.#currentCampaign.name;
+          this.showStatus('Failed to rename campaign', 'error');
         }
       });
     }
@@ -196,6 +199,17 @@ class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
 
   closeDeleteModal() {
     this.$('.delete-campaign-modal').close();
+  }
+
+  showStatus(message, type = 'success') {
+    // Use the appropriate convenience method based on type
+    if (type === 'success') {
+      ToastMessage.success(message);
+    } else if (type === 'error') {
+      ToastMessage.error(message);
+    } else {
+      ToastMessage.show(message, type);
+    }
   }
 }
 

@@ -7,6 +7,19 @@ CREATE TABLE IF NOT EXISTS campaigns (
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Campaign notes table
+CREATE TABLE IF NOT EXISTS campaign_notes (
+    id TEXT PRIMARY KEY,
+    campaign_id TEXT NOT NULL,
+    title TEXT,
+    content TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_notes_campaign ON campaign_notes(campaign_id);
+
 -- Entities table
 CREATE TABLE IF NOT EXISTS entities (
     id TEXT PRIMARY KEY,
