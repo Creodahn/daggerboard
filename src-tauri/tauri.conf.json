@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "daggerboard",
+  "productName": "Daggerheart Dashboard",
   "version": "0.1.0",
-  "identifier": "com.justin.daggerboard",
+  "identifier": "com.justin.daggerheart-dashboard",
   "build": {
     "frontendDist": "../src"
   },
