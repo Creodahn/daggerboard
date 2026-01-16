@@ -5,6 +5,7 @@ import '../item/component.js';
 import '../../../ui/section-header/component.js';
 import '../../../ui/action-button/component.js';
 import '../../../ui/empty-state/component.js';
+import '../../../layout/panel-section/component.js';
 import '../../../layout/stack-list/component.js';
 
 class PlayerCharacterList extends CampaignAwareMixin(ExtendedHtmlElement) {

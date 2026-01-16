@@ -1,9 +1,1 @@
-:host {
-  display: block;
-}
-
-.character-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
+/* Panel section and stack-list components handle the layout */

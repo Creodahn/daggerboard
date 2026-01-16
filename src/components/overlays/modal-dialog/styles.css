@@ -1,3 +1,7 @@
+:host {
+  display: contents;
+}
+
 .modal-dialog {
   border: none;
   border-radius: var(--radius-xl);
