@@ -101,6 +101,7 @@
   font-size: var(--text-sm);
   cursor: pointer;
   flex: 1;
+  min-width: 0; /* Allow shrinking for text truncation */
 }
 
 .campaign-item-name:hover {
@@ -135,6 +136,7 @@
 
 .create-campaign-input {
   flex: 1;
+  min-width: 0; /* Allow shrinking */
   padding: var(--space-xs) var(--space-sm);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);

@@ -20,11 +20,11 @@
 
 .campaign-item-name {
   flex: 1;
+  min-width: 0; /* Allow shrinking for text truncation */
   font-weight: var(--font-medium);
   color: var(--color-text-primary);
+  /* Uses .truncate utility class */
 }
-
-/* Note: Uses .truncate utility class */
 
 .campaign-item-name.selectable {
   cursor: pointer;

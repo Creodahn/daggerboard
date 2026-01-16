@@ -60,6 +60,31 @@ textarea:focus {
   border-color: var(--input-focus-color);
 }
 
+/*
+ * Native validation styling using :user-invalid
+ * This only shows errors after user has interacted with the field,
+ * preventing error flash on page load for required fields.
+ */
+input:user-invalid,
+select:user-invalid,
+textarea:user-invalid {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+/*
+ * Show error styling after programmatic validation.
+ * The .validated class is added by reportValidity() calls,
+ * preventing errors from showing on initial focus.
+ */
+:host(.validated) input:invalid,
+:host(.validated) select:invalid,
+:host(.validated) textarea:invalid {
+  border-color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+/* Legacy .error class support for programmatic errors */
 input.error,
 select.error,
 textarea.error {
@@ -78,6 +103,17 @@ textarea {
   display: none;
 }
 
+/* Show error message when input is :user-invalid */
+.input-container:has(:user-invalid) + .error-message {
+  display: block;
+}
+
+/* Show error message after programmatic validation */
+:host(.validated) .input-container:has(:invalid) + .error-message {
+  display: block;
+}
+
+/* Legacy .has-error class support for programmatic errors */
 .form-field.has-error .error-message {
   display: block;
 }

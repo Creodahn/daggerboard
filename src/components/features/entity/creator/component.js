@@ -40,16 +40,17 @@ class EntityCreator extends ExtendedHtmlElement {
     });
   }
 
-  clearAllErrors() {
-    this.#nameField?.clearError();
-    this.#hpMaxField?.clearError();
-    this.#minorField?.clearError();
-    this.#majorField?.clearError();
-    this.#severeField?.clearError();
-  }
-
   async createEntity() {
-    this.clearAllErrors();
+    // Use native form validation for required fields and min/max
+    const fields = [this.#nameField, this.#hpMaxField, this.#minorField, this.#majorField, this.#severeField];
+    const allValid = fields.every(field => field.checkValidity());
+
+    if (!allValid) {
+      // Find first invalid field and show native validation UI
+      const firstInvalid = fields.find(field => !field.checkValidity());
+      firstInvalid?.reportValidity();
+      return;
+    }
 
     const name = this.#nameField.value.trim();
     const entityType = this.#entityTypeSelect.value;
@@ -58,41 +59,12 @@ class EntityCreator extends ExtendedHtmlElement {
     const major = parseInt(this.#majorField.value);
     const severe = parseInt(this.#severeField.value);
 
-    let hasError = false;
-
-    if (!name) {
-      this.#nameField.showError();
-      hasError = true;
+    // Custom validation: thresholds must be in ascending order
+    if (minor >= major || major >= severe) {
+      this.#minorField.setCustomValidity('Thresholds must be in ascending order: Minor < Major < Severe');
+      this.#minorField.reportValidity();
+      return;
     }
-
-    if (isNaN(hpMax) || hpMax <= 0) {
-      this.#hpMaxField.showError();
-      hasError = true;
-    }
-
-    if (isNaN(minor) || minor <= 0) {
-      this.#minorField.showError();
-      hasError = true;
-    }
-
-    if (isNaN(major) || major <= 0) {
-      this.#majorField.showError();
-      hasError = true;
-    }
-
-    if (isNaN(severe) || severe <= 0) {
-      this.#severeField.showError();
-      hasError = true;
-    }
-
-    if (!hasError && (minor >= major || major >= severe)) {
-      this.#minorField.showError('Thresholds must be in ascending order');
-      this.#majorField.showError('Minor < Major < Severe');
-      this.#severeField.showError('Minor < Major < Severe');
-      hasError = true;
-    }
-
-    if (hasError) return;
 
     try {
       await invoke('create_entity', {
@@ -106,12 +78,13 @@ class EntityCreator extends ExtendedHtmlElement {
         entityType,
       });
 
-      // Reset form
+      // Reset form and clear any custom validity
       this.#nameField.value = '';
       this.#hpMaxField.value = '20';
       this.#minorField.value = '5';
       this.#majorField.value = '10';
       this.#severeField.value = '15';
+      this.#minorField.setCustomValidity(''); // Clear threshold ordering error
 
       // Close modal
       this.#modal.close();

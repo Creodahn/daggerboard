@@ -118,11 +118,6 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
     this.#addTickLabelBtn.disabled = this.#tickLabelEntries.length >= max;
   }
 
-  clearAllErrors() {
-    this.#nameField?.clearError();
-    this.#maxField?.clearError();
-  }
-
   getTickLabels() {
     const labels = {};
     this.$$('tick-label-entry').forEach(entry => {
@@ -134,7 +129,16 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
   }
 
   async createTracker() {
-    this.clearAllErrors();
+    // Use native form validation for required fields and min/max
+    const isNameValid = this.#nameField.checkValidity();
+    const isMaxValid = this.#maxField.checkValidity();
+
+    if (!isNameValid || !isMaxValid) {
+      // Trigger native validation UI
+      this.#nameField.reportValidity();
+      this.#maxField.reportValidity();
+      return;
+    }
 
     const name = this.#nameField.value.trim();
     const max = parseInt(this.#maxField.value);
@@ -144,28 +148,14 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
     const hasLabels = Object.keys(tickLabels).length > 0;
     const trackerType = hasLabels ? 'complex' : 'simple';
 
-    let hasError = false;
-
-    if (!name) {
-      this.#nameField.showError();
-      hasError = true;
-    }
-
-    if (isNaN(max) || max <= 0) {
-      this.#maxField.showError();
-      hasError = true;
-    }
-
-    // Validate tick labels are within range
+    // Validate tick labels are within range (custom validation)
     for (const tick of Object.keys(tickLabels)) {
       const tickNum = parseInt(tick);
       if (tickNum < 0 || tickNum > max) {
         alert(`Tick ${tickNum} is out of range (0-${max})`);
-        hasError = true;
+        return;
       }
     }
-
-    if (hasError) return;
 
     try {
       const tracker = await invoke('create_tracker', {

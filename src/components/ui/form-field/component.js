@@ -107,6 +107,11 @@ class FormField extends ExtendedHtmlElement {
       inputEl.addEventListener('change', () => {
         this.emit('field-change', { name, value: this.value });
       });
+
+      // Update error message with native validation message on invalid
+      inputEl.addEventListener('invalid', () => {
+        this.#updateErrorMessage();
+      });
     }
 
     this.#input = inputContainer.querySelector('input, select, textarea');
@@ -144,6 +149,61 @@ class FormField extends ExtendedHtmlElement {
     }
   }
 
+  /**
+   * Check if the field is valid using native validation.
+   * @returns {boolean} True if valid
+   */
+  checkValidity() {
+    const isValid = this.#input?.checkValidity() ?? true;
+    // Mark as validated so CSS can show :invalid styling
+    if (!isValid) {
+      this.classList.add('validated');
+      this.#updateErrorMessage();
+    }
+    return isValid;
+  }
+
+  /**
+   * Check validity and show native validation UI if invalid.
+   * @returns {boolean} True if valid
+   */
+  reportValidity() {
+    const isValid = this.#input?.reportValidity() ?? true;
+    // Mark as validated so CSS can show :invalid styling
+    if (!isValid) {
+      this.classList.add('validated');
+      this.#updateErrorMessage();
+    }
+    return isValid;
+  }
+
+  /**
+   * Set a custom validation message.
+   * @param {string} message - The error message (empty string clears)
+   */
+  setCustomValidity(message) {
+    if (this.#input) {
+      this.#input.setCustomValidity(message);
+      this.#updateErrorMessage();
+    }
+  }
+
+  /**
+   * Update error message element with native validation message.
+   */
+  #updateErrorMessage() {
+    if (this.#errorMessage && this.#input) {
+      // Use native validation message, or fall back to custom error-message attribute
+      const nativeMessage = this.#input.validationMessage;
+      const customMessage = this.getStringAttr('error-message');
+      this.#errorMessage.textContent = nativeMessage || customMessage || 'This field is invalid';
+    }
+  }
+
+  /**
+   * Programmatically show an error (for server-side validation, etc.)
+   * @param {string} message - The error message to display
+   */
   showError(message) {
     const container = this.$('.form-field');
     if (container) {
@@ -151,12 +211,17 @@ class FormField extends ExtendedHtmlElement {
     }
     if (this.#input) {
       this.#input.classList.add('error');
+      // Also set as custom validity so it works with :user-invalid
+      this.#input.setCustomValidity(message);
     }
     if (this.#errorMessage && message) {
       this.#errorMessage.textContent = message;
     }
   }
 
+  /**
+   * Clear programmatic error state.
+   */
   clearError() {
     const container = this.$('.form-field');
     if (container) {
@@ -164,7 +229,10 @@ class FormField extends ExtendedHtmlElement {
     }
     if (this.#input) {
       this.#input.classList.remove('error');
+      this.#input.setCustomValidity(''); // Clear custom validity
     }
+    // Remove validated class so :invalid styling is hidden until next validation
+    this.classList.remove('validated');
   }
 
   focus() {

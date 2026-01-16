@@ -89,9 +89,9 @@
   font-size: var(--text-sm);
   color: var(--color-text-primary);
   flex: 1;
+  min-width: 0; /* Allow shrinking for text truncation */
+  /* Uses .truncate utility from utilities.css */
 }
-
-/* Note: Uses .truncate utility from utilities.css */
 
 .note-list-item.current .note-list-item-title {
   font-weight: var(--font-semibold);

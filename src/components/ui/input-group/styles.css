@@ -12,6 +12,7 @@
 
 input {
   flex: 1;
+  min-width: 0; /* Allow shrinking when container is narrow */
   padding: var(--input-padding-y) var(--input-padding-x);
   border: 1px solid var(--input-group-color, var(--color-primary));
   border-radius: var(--radius-sm) 0 0 var(--radius-sm);

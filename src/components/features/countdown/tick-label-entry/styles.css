@@ -10,6 +10,7 @@
 
 .tick-input {
   width: 70px;
+  flex-shrink: 0; /* Don't shrink the tick number input */
   padding: var(--input-padding-y) var(--input-padding-x);
   border: 1px solid var(--input-border-color);
   border-radius: var(--input-border-radius);
@@ -20,6 +21,7 @@
 
 .label-input {
   flex: 1;
+  min-width: 0; /* Allow shrinking */
   padding: var(--input-padding-y) var(--input-padding-x);
   border: 1px solid var(--input-border-color);
   border-radius: var(--input-border-radius);
