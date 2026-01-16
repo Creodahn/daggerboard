@@ -1,4 +1,5 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
+import '../shape/component.js';
 
 /**
  * Dice bag component with history and custom roll notation support.
@@ -44,56 +45,24 @@ class DiceRoller extends ExtendedHtmlElement {
         hasMoved = false;
         this.#draggingSides = sides;
 
-        // Create drag ghost with inline styles (since it's outside shadow DOM)
-        const shape = btn.querySelector('.die-shape');
-        const computedStyle = getComputedStyle(shape);
-
-        this.#dragGhost = shape.cloneNode(true);
+        // Create drag ghost using die-shape component
+        this.#dragGhost = document.createElement('die-shape');
+        this.#dragGhost.setAttribute('sides', sides);
         Object.assign(this.#dragGhost.style, {
           position: 'fixed',
           pointerEvents: 'none',
           zIndex: '9999',
-          width: '44px',
-          height: '44px',
-          transform: 'translate(-50%, -50%) scale(1.2)',
-          opacity: '0.9',
-          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))',
-          // Copy visual styles from computed
-          background: computedStyle.background,
-          clipPath: computedStyle.clipPath,
-          borderRadius: computedStyle.borderRadius,
-          // Flexbox for centering label
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
+          '--die-size': '52px',
+          transform: 'translate(-50%, -50%)',
+          opacity: '0',
+          filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))'
         });
-
-        // Hide initially with opacity (not display, since we need flex)
-        this.#dragGhost.style.opacity = '0';
         this.#dragGhost._hidden = true;
-
-        // Style the label inside the ghost
-        const label = this.#dragGhost.querySelector('.die-label');
-        if (label) {
-          Object.assign(label.style, {
-            position: 'relative',
-            zIndex: '1',
-            fontSize: '11px',
-            fontWeight: 'bold',
-            color: sides === 8 ? '#1a1a1a' : 'white',
-            textShadow: sides === 8 ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.3)'
-          });
-        }
-
-        // Add padding for triangle shapes to position label correctly
-        if (sides === 4) {
-          this.#dragGhost.style.paddingTop = '12px';
-        }
+        this.#dragGhost._startX = e.clientX;
+        this.#dragGhost._startY = e.clientY;
 
         document.body.appendChild(this.#dragGhost);
         this.updateGhostPosition(e.clientX, e.clientY);
-        this.#dragGhost._startX = e.clientX;
-        this.#dragGhost._startY = e.clientY;
 
         this.#isDragging = true;
         btn.classList.add('dragging');
@@ -197,47 +166,23 @@ class DiceRoller extends ExtendedHtmlElement {
     // Update has-dice class
     this.#dropZone.classList.toggle('has-dice', this.#droppedDice.length > 0);
 
-    // Render dice
-    this.#dropZoneDice.innerHTML = this.#droppedDice.map((sides, index) => {
-      const colors = {
-        4: '#e74c3c',
-        6: '#e67e22',
-        8: '#f1c40f',
-        10: '#27ae60',
-        12: '#3498db',
-        20: '#9b59b6',
-        100: '#e91e63'
-      };
-      const clipPaths = {
-        4: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-        6: 'polygon(10% 10%, 90% 10%, 90% 90%, 10% 90%)',
-        8: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-        10: 'polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%)',
-        12: 'polygon(50% 0%, 98% 35%, 79% 91%, 21% 91%, 2% 35%)',
-        20: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
-        100: 'none'
-      };
-      const label = sides === 100 ? '%' : sides;
-      const isD8 = sides === 8;
-      const borderRadius = sides === 100 ? '50%' : '0';
-      const paddingTop = sides === 4 ? '8px' : '0';
+    // Clear and re-render dice
+    this.#dropZoneDice.innerHTML = '';
 
-      return `
-        <div class="dropped-die ${isD8 ? 'd8' : ''}"
-             data-index="${index}"
-             style="background: ${colors[sides]};
-                    clip-path: ${clipPaths[sides]};
-                    border-radius: ${borderRadius};
-                    padding-top: ${paddingTop};">
-          <span class="die-label">${label}</span>
-        </div>
-      `;
-    }).join('');
+    this.#droppedDice.forEach((sides, index) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'dropped-die';
+      wrapper.dataset.index = index;
 
-    // Add click handlers to remove dice
-    this.#dropZoneDice.querySelectorAll('.dropped-die').forEach(die => {
-      die.addEventListener('click', () => {
-        const index = parseInt(die.dataset.index, 10);
+      const dieShape = document.createElement('die-shape');
+      dieShape.setAttribute('sides', sides);
+      dieShape.style.setProperty('--die-size', '36px');
+
+      wrapper.appendChild(dieShape);
+      this.#dropZoneDice.appendChild(wrapper);
+
+      // Click to remove
+      wrapper.addEventListener('click', () => {
         this.removeFromDropZone(index);
       });
     });
@@ -395,39 +340,69 @@ class DiceRoller extends ExtendedHtmlElement {
       return;
     }
 
-    this.#historyList.innerHTML = this.#rolls.map((roll, index) => {
-      let breakdown = '';
+    // Clear and rebuild
+    this.#historyList.innerHTML = '';
 
-      if (roll.isMultiDice) {
-        // Multi-dice roll from drop zone
-        breakdown = `(${roll.breakdown})`;
-      } else {
-        // Standard single notation roll
-        const modifierStr = roll.modifier > 0
-          ? `+${roll.modifier}`
-          : roll.modifier < 0
-            ? roll.modifier.toString()
-            : '';
+    this.#rolls.forEach((roll, index) => {
+      const item = document.createElement('div');
+      item.className = `history-item${index === 0 ? ' latest' : ''}`;
 
-        breakdown = roll.count > 1 || roll.modifier !== 0
-          ? `[${roll.individualRolls.join('+')}]${modifierStr}`
-          : '';
+      // Dice display section
+      const diceDisplay = document.createElement('div');
+      diceDisplay.className = 'roll-dice';
+
+      if (roll.isMultiDice && roll.diceResults) {
+        // Multi-dice roll - show each die with its result
+        roll.diceResults.forEach((d, i) => {
+          if (i > 0) {
+            const plus = document.createElement('span');
+            plus.className = 'roll-operator';
+            plus.textContent = '+';
+            diceDisplay.appendChild(plus);
+          }
+          const die = document.createElement('die-shape');
+          die.setAttribute('sides', d.sides);
+          die.setAttribute('result', d.result);
+          die.style.setProperty('--die-size', '28px');
+          diceDisplay.appendChild(die);
+        });
+      } else if (roll.individualRolls) {
+        // Standard notation roll - show each die
+        roll.individualRolls.forEach((result, i) => {
+          if (i > 0) {
+            const plus = document.createElement('span');
+            plus.className = 'roll-operator';
+            plus.textContent = '+';
+            diceDisplay.appendChild(plus);
+          }
+          const die = document.createElement('die-shape');
+          die.setAttribute('sides', roll.sides);
+          die.setAttribute('result', result);
+          die.style.setProperty('--die-size', '28px');
+          diceDisplay.appendChild(die);
+        });
+
+        // Show modifier if present
+        if (roll.modifier !== 0) {
+          const mod = document.createElement('span');
+          mod.className = 'roll-modifier';
+          mod.textContent = roll.modifier > 0 ? `+${roll.modifier}` : roll.modifier;
+          diceDisplay.appendChild(mod);
+        }
       }
 
-      let resultClass = 'roll-result';
-      if (roll.isCrit) resultClass += ' crit';
-      if (roll.isFumble) resultClass += ' fumble';
+      item.appendChild(diceDisplay);
 
-      return `
-        <div class="history-item${index === 0 ? ' latest' : ''}">
-          <div>
-            <span class="roll-notation">${roll.notation}</span>
-            ${breakdown ? `<span class="roll-breakdown">${breakdown}</span>` : ''}
-          </div>
-          <span class="${resultClass}">${roll.total}</span>
-        </div>
-      `;
-    }).join('');
+      // Result
+      const result = document.createElement('span');
+      result.className = 'roll-result';
+      if (roll.isCrit) result.classList.add('crit');
+      if (roll.isFumble) result.classList.add('fumble');
+      result.textContent = roll.total;
+      item.appendChild(result);
+
+      this.#historyList.appendChild(item);
+    });
   }
 }
 
