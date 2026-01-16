@@ -1,6 +1,7 @@
 /* no-controls mode handled via display-only attribute on counter-control */
 
 :host {
+  --fear-scale: 1;
   align-items: center;
   border: 1px solid var(--color-danger);
   border-radius: var(--radius-lg);
@@ -10,6 +11,35 @@
   padding: var(--space-lg);
   text-align: center;
   width: fit-content;
+}
+
+/* Scale the counter value based on fear level (player view only) */
+/* Uses --fear-level CSS variable (0-12) set by JS */
+/* Scale formula: 1 + (level * 0.1), so 0 = 1.0x, 12 = 2.2x */
+:host([no-controls]) counter-control {
+  --fear-scale: calc(1 + var(--fear-level, 0) * 0.1);
+  --fear-scale-pulse: calc(var(--fear-scale) * 1.1);
+  transform: scale(var(--fear-scale));
+  transform-origin: center;
+  transition: transform var(--transition-base);
+}
+
+/* Pulse animation for high fear (10+) */
+/* Animation duration: 1.5s at 10, 1s at 11, 0.5s at 12 */
+/* Uses calc to compute duration: 2 - (level - 9) * 0.5 = 1.5, 1, 0.5 */
+:host([no-controls]) counter-control.pulsing {
+  animation: fear-pulse var(--pulse-duration, 1.5s) ease-in-out infinite;
+}
+
+@keyframes fear-pulse {
+  0%, 100% {
+    transform: scale(var(--fear-scale));
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(var(--fear-scale-pulse));
+    filter: brightness(1.2);
+  }
 }
 
 :host([inline]) {

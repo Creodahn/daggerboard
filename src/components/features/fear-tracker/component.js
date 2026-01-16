@@ -25,6 +25,7 @@ class FearTracker extends CampaignAwareMixin(ExtendedHtmlElement) {
         'fear-level-updated': (payload) => {
           this.fearLevel = payload.level;
           this.#counter.value = this.fearLevel;
+          this.updateScale();
         }
       }
     });
@@ -37,10 +38,31 @@ class FearTracker extends CampaignAwareMixin(ExtendedHtmlElement) {
     }
   }
 
+  updateScale() {
+    // Only apply to player view (no-controls mode)
+    if (!this.getBoolAttr('no-controls')) return;
+
+    // Set CSS custom property for CSS-based scaling calculations
+    const level = Math.min(this.fearLevel, 12);
+    this.style.setProperty('--fear-level', level);
+
+    // Animate for any fear > 0, with speed increasing as level rises
+    if (level > 0) {
+      // Duration: 5s at level 1, decreasing to ~0.4s at level 12
+      // Formula: 5 / level, with minimum of 0.3s
+      const duration = Math.max(5 / level, 0.3);
+      this.#counter.style.setProperty('--pulse-duration', `${duration}s`);
+      this.#counter.classList.add('pulsing');
+    } else {
+      this.#counter.classList.remove('pulsing');
+    }
+  }
+
   async loadFearLevel() {
     try {
       this.fearLevel = await invoke('get_fear_level');
       this.#counter.value = this.fearLevel;
+      this.updateScale();
     } catch (error) {
       console.error('Failed to load fear level:', error);
     }
