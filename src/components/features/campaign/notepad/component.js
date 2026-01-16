@@ -83,6 +83,11 @@ class CampaignNotepad extends ExtendedHtmlElement {
       this.createNewNote();
     });
 
+    // Delete note button
+    this.$('.delete-note-btn').addEventListener('click', () => {
+      this.confirmDeleteNote();
+    });
+
     // Listen for note updates
     this.#unlisteners.push(
       await listen('campaign-note-updated', (event) => {
@@ -196,7 +201,10 @@ class CampaignNotepad extends ExtendedHtmlElement {
   }
 
   getDefaultTitle(note) {
-    const date = new Date(note.created_at);
+    // SQLite stores datetime in UTC without timezone indicator
+    // Append 'Z' to parse as UTC, then format in local timezone
+    const dateStr = note.created_at.endsWith('Z') ? note.created_at : note.created_at + 'Z';
+    const date = new Date(dateStr);
     return date.toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
@@ -281,6 +289,56 @@ class CampaignNotepad extends ExtendedHtmlElement {
     } catch (error) {
       console.error('Failed to create note:', error);
       ToastMessage.error('Failed to create note');
+    }
+  }
+
+  async confirmDeleteNote() {
+    if (!this.#currentNote) return;
+
+    const confirmDialog = this.$('.delete-confirm');
+    const noteTitle = this.getNoteDisplayTitle(this.#currentNote);
+
+    const confirmed = await confirmDialog.show({
+      message: `Are you sure you want to delete "${noteTitle}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'danger'
+    });
+
+    if (confirmed) {
+      await this.deleteNote();
+    }
+  }
+
+  async deleteNote() {
+    if (!this.#currentNote) return;
+
+    const deletedTitle = this.getNoteDisplayTitle(this.#currentNote);
+    const deletedNoteId = this.#currentNote.id;
+
+    try {
+      await invoke('delete_note', { noteId: deletedNoteId });
+
+      // Refresh notes list
+      await this.loadNotes();
+
+      // Check if there are remaining notes
+      if (this.#notes.length > 0) {
+        // Load the most recent remaining note
+        await this.loadNote(this.#notes[0].id);
+        ToastMessage.success(`Deleted "${deletedTitle}"`);
+      } else {
+        // No notes left - create a new one
+        const newNote = await invoke('create_note', {
+          campaignId: this.#currentCampaign.id,
+          title: null
+        });
+        await this.loadNote(newNote.id);
+        ToastMessage.success(`Deleted "${deletedTitle}"`);
+      }
+    } catch (error) {
+      console.error('Failed to delete note:', error);
+      ToastMessage.error('Failed to delete note');
     }
   }
 

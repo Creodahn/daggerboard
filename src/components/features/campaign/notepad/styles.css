@@ -136,6 +136,7 @@
 /* Note title input */
 .note-title-input {
   flex: 1;
+  min-width: 0; /* Allow shrinking below content width */
   padding: var(--space-sm) var(--space-md);
   background: transparent;
   border: 1px solid transparent;
@@ -144,6 +145,7 @@
   font-weight: var(--font-semibold);
   color: var(--color-text-primary);
   transition: all var(--transition-base);
+  text-overflow: ellipsis;
 }
 
 .note-title-input:hover {
@@ -159,6 +161,30 @@
 .note-title-input::placeholder {
   color: var(--color-text-placeholder);
   font-weight: var(--font-normal);
+}
+
+/* Delete button */
+.delete-note-btn {
+  flex-shrink: 0;
+  padding: var(--space-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all var(--transition-base);
+}
+
+.delete-note-btn:hover {
+  background: var(--color-danger-light);
+  border-color: var(--color-danger);
+  opacity: 1;
+}
+
+/* Hide delete button when no note is selected */
+.notepad.no-note .delete-note-btn {
+  display: none;
 }
 
 /* Notepad body */
