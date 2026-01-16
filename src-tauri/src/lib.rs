@@ -1,6 +1,6 @@
 mod modules;
 
-use modules::{campaign, countdown, database::Database, dice, entity, fear_tracker};
+use modules::{campaign, countdown, database::Database, dice, entity, fear_tracker, player_character};
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -73,6 +73,16 @@ pub fn run() {
             dice::get_dice_rolls_by_date,
             dice::delete_dice_roll,
             dice::clear_dice_history,
+            // Player character commands
+            player_character::create_player_character,
+            player_character::get_player_characters,
+            player_character::get_player_character,
+            player_character::update_player_character,
+            player_character::delete_player_character,
+            player_character::adjust_player_hp,
+            player_character::adjust_player_hope,
+            player_character::adjust_player_stress,
+            player_character::adjust_player_armor,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

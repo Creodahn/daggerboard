@@ -1,0 +1,117 @@
+<modal-dialog class="character-modal">
+  <form class="character-form">
+    <div class="form-section">
+      <div class="section-title">Basic Information</div>
+
+      <form-field
+        name="name"
+        label="Character Name"
+        type="text"
+        placeholder="e.g., Aldric the Bold"
+        required
+        error-message="Name is required"
+      ></form-field>
+
+      <flex-row gap="md" class="form-row">
+        <form-field
+          name="ancestry"
+          label="Ancestry"
+          type="text"
+          placeholder="e.g., Human, Elf"
+        ></form-field>
+
+        <form-field
+          name="community"
+          label="Community"
+          type="text"
+          placeholder="e.g., Lorehold"
+        ></form-field>
+      </flex-row>
+
+      <flex-row gap="md" class="form-row">
+        <form-field
+          name="class"
+          label="Class"
+          type="text"
+          placeholder="e.g., Guardian"
+          required
+          error-message="Class is required"
+        ></form-field>
+
+        <form-field
+          name="subclass"
+          label="Subclass"
+          type="text"
+          placeholder="e.g., Stalwart"
+          required
+          error-message="Subclass is required"
+        ></form-field>
+      </flex-row>
+
+      <flex-row gap="md" class="form-row">
+        <form-field
+          name="domain"
+          label="Domain"
+          type="text"
+          placeholder="e.g., Blade"
+          required
+          error-message="Domain is required"
+        ></form-field>
+
+        <form-field
+          name="level"
+          label="Level"
+          type="number"
+          value="1"
+          min="1"
+          max="10"
+          required
+          error-message="Level must be 1-10"
+        ></form-field>
+      </flex-row>
+    </div>
+
+    <div class="form-section">
+      <div class="section-title">Attributes</div>
+      <div class="attributes-grid">
+        <form-field name="attr_agility" label="Agility" type="number" value="0" min="-3" max="5" error-message="Must be -3 to +5"></form-field>
+        <form-field name="attr_strength" label="Strength" type="number" value="0" min="-3" max="5" error-message="Must be -3 to +5"></form-field>
+        <form-field name="attr_finesse" label="Finesse" type="number" value="0" min="-3" max="5" error-message="Must be -3 to +5"></form-field>
+        <form-field name="attr_instinct" label="Instinct" type="number" value="0" min="-3" max="5" error-message="Must be -3 to +5"></form-field>
+        <form-field name="attr_presence" label="Presence" type="number" value="0" min="-3" max="5" error-message="Must be -3 to +5"></form-field>
+        <form-field name="attr_knowledge" label="Knowledge" type="number" value="0" min="-3" max="5" error-message="Must be -3 to +5"></form-field>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-title">Health & Defense</div>
+
+      <flex-row gap="md" class="form-row">
+        <form-field name="hp_max" label="Max HP" type="number" value="6" min="1" required error-message="Max HP must be at least 1"></form-field>
+        <form-field name="armor_max" label="Armor Slots" type="number" value="0" min="0" error-message="Cannot be negative"></form-field>
+        <form-field name="evasion" label="Evasion" type="number" value="0" min="0" error-message="Cannot be negative"></form-field>
+      </flex-row>
+
+      <div class="thresholds-row">
+        <span class="thresholds-label">Damage Thresholds:</span>
+        <flex-row gap="md">
+          <form-field name="threshold_minor" label="Minor" type="number" value="1" min="1" required error-message="Must be at least 1"></form-field>
+          <form-field name="threshold_major" label="Major" type="number" value="6" min="1" required error-message="Must be at least 1"></form-field>
+          <form-field name="threshold_severe" label="Severe" type="number" value="11" min="1" required error-message="Must be at least 1"></form-field>
+        </flex-row>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-title">Resources</div>
+      <flex-row gap="md" class="form-row">
+        <form-field name="stress_max" label="Max Stress" type="number" value="6" min="1" required error-message="Max Stress must be at least 1"></form-field>
+      </flex-row>
+    </div>
+
+    <flex-row class="form-actions" justify="flex-end" gap="md">
+      <action-button class="cancel-btn" variant="ghost" type="button">Cancel</action-button>
+      <action-button class="save-btn" variant="success" type="submit">Save Character</action-button>
+    </flex-row>
+  </form>
+</modal-dialog>

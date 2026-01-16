@@ -98,6 +98,10 @@ fn run_migrations(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
         migrate_v7_dice_rolls_table(conn)?;
     }
 
+    if current_version < 8 {
+        migrate_v8_player_characters_table(conn)?;
+    }
+
     Ok(())
 }
 
@@ -473,6 +477,71 @@ fn migrate_v7_dice_rolls_table(conn: &Connection) -> Result<(), Box<dyn std::err
 
     conn.execute(
         "INSERT INTO schema_migrations (version) VALUES (7)",
+        [],
+    )?;
+
+    Ok(())
+}
+
+/// V8: Create player_characters table
+fn migrate_v8_player_characters_table(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    let table_exists: bool = conn
+        .query_row(
+            "SELECT COUNT(*) > 0 FROM sqlite_master WHERE type='table' AND name='player_characters'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+    if !table_exists {
+        conn.execute(
+            "CREATE TABLE player_characters (
+                id TEXT PRIMARY KEY,
+                campaign_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                ancestry TEXT,
+                community TEXT,
+                class TEXT,
+                subclass TEXT,
+                domain TEXT,
+                level INTEGER NOT NULL DEFAULT 1,
+                attr_agility INTEGER NOT NULL DEFAULT 0,
+                attr_strength INTEGER NOT NULL DEFAULT 0,
+                attr_finesse INTEGER NOT NULL DEFAULT 0,
+                attr_instinct INTEGER NOT NULL DEFAULT 0,
+                attr_presence INTEGER NOT NULL DEFAULT 0,
+                attr_knowledge INTEGER NOT NULL DEFAULT 0,
+                hp_current INTEGER NOT NULL DEFAULT 6,
+                hp_max INTEGER NOT NULL DEFAULT 6,
+                threshold_minor INTEGER NOT NULL DEFAULT 1,
+                threshold_major INTEGER NOT NULL DEFAULT 6,
+                threshold_severe INTEGER NOT NULL DEFAULT 11,
+                armor_current INTEGER NOT NULL DEFAULT 0,
+                armor_max INTEGER NOT NULL DEFAULT 0,
+                evasion INTEGER NOT NULL DEFAULT 0,
+                hope INTEGER NOT NULL DEFAULT 0,
+                stress_current INTEGER NOT NULL DEFAULT 0,
+                stress_max INTEGER NOT NULL DEFAULT 6,
+                experiences TEXT NOT NULL DEFAULT '[]',
+                background TEXT,
+                notes TEXT,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
+            )",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE INDEX idx_player_characters_campaign ON player_characters(campaign_id)",
+            [],
+        )?;
+
+        println!("Created player_characters table");
+    }
+
+    conn.execute(
+        "INSERT INTO schema_migrations (version) VALUES (8)",
         [],
     )?;
 

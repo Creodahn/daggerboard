@@ -14,9 +14,18 @@
       <campaign-menu slot="controls"></campaign-menu>
     </sticky-header>
     <page-container>
+      <player-character-list></player-character-list>
+      <player-character-editor class="modal-editor"></player-character-editor>
       <countdown-editor></countdown-editor>
       <entity-list></entity-list>
       <entity-creator class="modal-creator"></entity-creator>
     </page-container>
+
+    <script>
+      // Wire up player character editor
+      document.querySelector('player-character-list').addEventListener('open-character-editor', (e) => {
+        document.querySelector('player-character-editor').open(e.detail?.characterId);
+      });
+    </script>
   </body>
 </html>

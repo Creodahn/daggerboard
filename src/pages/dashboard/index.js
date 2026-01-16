@@ -43,3 +43,6 @@ import '../../components/features/entity/item/component.js';
 import '../../components/features/entity/list/component.js';
 import '../../components/features/fear-tracker/component.js';
 import '../../components/features/visibility-toggle/component.js';
+import '../../components/features/player-character/list/component.js';
+import '../../components/features/player-character/item/component.js';
+import '../../components/features/player-character/editor/component.js';

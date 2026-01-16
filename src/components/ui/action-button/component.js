@@ -35,6 +35,35 @@ class ActionButton extends ExtendedHtmlElement {
       if (!this.disabled) {
         e.stopPropagation();
         this.emit('action-click');
+
+        // Handle form submission for type="submit" buttons
+        const type = this.getAttribute('type');
+        if (type === 'submit') {
+          // Find form - check both light DOM and shadow DOM contexts
+          let form = this.closest('form');
+          if (!form) {
+            // Try finding form in the parent shadow root
+            const root = this.getRootNode();
+            if (root instanceof ShadowRoot) {
+              form = root.querySelector('form');
+            }
+          }
+          if (form) {
+            // Use requestSubmit() to trigger validation and submit event
+            form.requestSubmit();
+          }
+        } else if (type === 'reset') {
+          let form = this.closest('form');
+          if (!form) {
+            const root = this.getRootNode();
+            if (root instanceof ShadowRoot) {
+              form = root.querySelector('form');
+            }
+          }
+          if (form) {
+            form.reset();
+          }
+        }
       }
     });
   }

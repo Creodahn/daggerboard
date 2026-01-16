@@ -67,6 +67,62 @@ CREATE TABLE IF NOT EXISTS app_state (
     FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
 
+-- Player characters
+CREATE TABLE IF NOT EXISTS player_characters (
+    id TEXT PRIMARY KEY,
+    campaign_id TEXT NOT NULL,
+
+    -- Basic info
+    name TEXT NOT NULL,
+    ancestry TEXT,
+    community TEXT,
+    class TEXT,
+    subclass TEXT,
+    domain TEXT,
+    level INTEGER NOT NULL DEFAULT 1,
+
+    -- Attributes (each is a modifier, typically -1 to +4)
+    attr_agility INTEGER NOT NULL DEFAULT 0,
+    attr_strength INTEGER NOT NULL DEFAULT 0,
+    attr_finesse INTEGER NOT NULL DEFAULT 0,
+    attr_instinct INTEGER NOT NULL DEFAULT 0,
+    attr_presence INTEGER NOT NULL DEFAULT 0,
+    attr_knowledge INTEGER NOT NULL DEFAULT 0,
+
+    -- Health
+    hp_current INTEGER NOT NULL DEFAULT 6,
+    hp_max INTEGER NOT NULL DEFAULT 6,
+    threshold_minor INTEGER NOT NULL DEFAULT 1,
+    threshold_major INTEGER NOT NULL DEFAULT 6,
+    threshold_severe INTEGER NOT NULL DEFAULT 11,
+
+    -- Defense
+    armor_current INTEGER NOT NULL DEFAULT 0,
+    armor_max INTEGER NOT NULL DEFAULT 0,
+    evasion INTEGER NOT NULL DEFAULT 0,
+
+    -- Resources
+    hope INTEGER NOT NULL DEFAULT 0,
+    stress_current INTEGER NOT NULL DEFAULT 0,
+    stress_max INTEGER NOT NULL DEFAULT 6,
+
+    -- Experiences (stored as JSON array of strings)
+    experiences TEXT NOT NULL DEFAULT '[]',
+
+    -- Background (free-form text)
+    background TEXT,
+
+    -- Notes
+    notes TEXT,
+
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+
+    FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_player_characters_campaign ON player_characters(campaign_id);
+
 -- Dice rolls history
 CREATE TABLE IF NOT EXISTS dice_rolls (
     id TEXT PRIMARY KEY,
