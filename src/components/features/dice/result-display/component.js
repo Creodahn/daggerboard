@@ -1,5 +1,7 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import '../shape/component.js';
+import '../../../layout/flex-column/component.js';
+import '../../../layout/flex-row/component.js';
 
 /**
  * Displays the most recent shared dice roll result.
@@ -25,6 +27,25 @@ class DiceResultDisplay extends ExtendedHtmlElement {
     await this.listenTauri('dice-roll-shared', (payload) => {
       this.startRolling(payload);
     });
+
+    // Listen for when sharing is disabled
+    await this.listenTauri('dice-roll-hidden', () => {
+      this.hideResult();
+    });
+  }
+
+  hideResult() {
+    // Clear any pending roll
+    if (this.#rollTimeout) {
+      clearTimeout(this.#rollTimeout);
+      this.#rollTimeout = null;
+    }
+
+    // Hide the result
+    this.#container.classList.remove('has-result', 'rolling');
+    this.#diceContainer.innerHTML = '';
+    this.#totalDisplay.textContent = '';
+    this.#totalDisplay.classList.remove('crit', 'fumble');
   }
 
   startRolling(roll) {

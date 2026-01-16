@@ -13,7 +13,8 @@
         { "event": "trackers-updated" },
         { "event": "fear-level-updated" },
         { "event": "entities-updated" },
-        { "event": "dice-roll-shared" }
+        { "event": "dice-roll-shared" },
+        { "event": "dice-roll-hidden" }
       ]
     }
   ]

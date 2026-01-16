@@ -150,9 +150,12 @@ class DiceRoller extends ExtendedHtmlElement {
     });
 
     // When share toggle is enabled, share the most recent roll from today
+    // When disabled, hide the result from the player view
     this.#shareCheckbox.addEventListener('toggle-change', (e) => {
       if (e.detail.checked) {
         this.shareLatestRoll();
+      } else {
+        emit('dice-roll-hidden');
       }
     });
   }

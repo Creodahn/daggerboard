@@ -1,18 +1,20 @@
-<div class="dice-result-display">
-  <div class="result-empty">
+<flex-column class="dice-result-display" align="center" justify="center" gap="sm">
+  <flex-column class="result-empty" align="center" gap="sm">
     <span class="empty-icon">🎲</span>
     <span class="empty-text">Waiting for dice roll...</span>
-  </div>
-  <div class="result-rolling">
-    <div class="rolling-dice">
+  </flex-column>
+  <flex-column class="result-rolling" align="center" gap="md">
+    <flex-row class="rolling-dice" gap="md">
       <span class="rolling-die">🎲</span>
       <span class="rolling-die">🎲</span>
       <span class="rolling-die">🎲</span>
-    </div>
+    </flex-row>
     <span class="rolling-text">Rolling...</span>
-  </div>
-  <div class="result-content">
-    <div class="result-dice"></div>
+  </flex-column>
+  <flex-column class="result-content" align="center" gap="lg">
+    <flex-row class="result-dice" gap="sm" wrap>
+      <!-- Dice shapes inserted by JS -->
+    </flex-row>
     <div class="result-total"></div>
-  </div>
-</div>
+  </flex-column>
+</flex-column>
