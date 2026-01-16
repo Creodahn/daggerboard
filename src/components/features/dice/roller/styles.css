@@ -140,12 +140,8 @@
   transform: scale(1.05);
 }
 
-/* History Header */
+/* History Header - layout handled by flex-row */
 .history-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
   padding: var(--space-sm) var(--space-lg);
   border-bottom: 1px solid var(--color-border-light);
   background: var(--color-surface);

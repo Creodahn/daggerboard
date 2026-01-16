@@ -1,4 +1,5 @@
 import ExtendedHtmlElement from '../../base/extended-html-element.js';
+import '../../layout/flex-row/component.js';
 
 class SectionHeader extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;

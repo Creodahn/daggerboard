@@ -2,6 +2,7 @@ import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import '../shape/component.js';
 import '../../../ui/input-group/component.js';
 import '../../../ui/toggle-switch/component.js';
+import '../../../layout/flex-row/component.js';
 import { emit } from '../../../../helpers/tauri.js';
 
 /**

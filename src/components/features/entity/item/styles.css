@@ -3,22 +3,11 @@
 }
 
 /* Entity container handled by card-container component */
-
 /* Collapse toggle handled by collapse-toggle component */
-
 /* Fade-out animation handled by card-container component */
-
-.entity-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-lg);
-}
+/* Layout handled by flex-row components */
 
 .entity-name-section {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
   min-width: 0;
 }
 

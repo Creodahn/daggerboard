@@ -1,5 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { debounce } from '../../../../helpers/debounce.js';
+import '../../../layout/flex-row/component.js';
 
 class EntityItem extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
@@ -106,12 +107,12 @@ class EntityItem extends ExtendedHtmlElement {
     if (!container) return;
 
     container.innerHTML = `
-      <div class="entity-header">
-        <div class="entity-name-section">
+      <flex-row justify="space-between" align="center" gap="lg" class="entity-header">
+        <flex-row align="center" gap="sm" class="entity-name-section">
           <collapse-toggle expanded></collapse-toggle>
           <type-badge type="${entity.entity_type}" label="${entity.entity_type === 'enemy' ? 'Enemy' : 'NPC'}" variant="pill"></type-badge>
           <input type="text" class="entity-name-input" value="${entity.name}">
-        </div>
+        </flex-row>
         <dropdown-menu class="hp-dropdown">
           <hp-bar slot="trigger" current="${entity.hp_current}" max="${entity.hp_max}" show-text></hp-bar>
           <div slot="content" class="hp-menu-content">
@@ -156,7 +157,7 @@ class EntityItem extends ExtendedHtmlElement {
             </delete-trigger>
           </dropdown-menu-item>
         </dropdown-menu>
-      </div>
+      </flex-row>
     `;
 
     this.#hasRendered = true;

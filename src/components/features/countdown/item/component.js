@@ -1,4 +1,5 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
+import '../../../layout/flex-row/component.js';
 
 /**
  * A component for rendering a single countdown tracker item.
@@ -132,12 +133,12 @@ class CountdownItem extends ExtendedHtmlElement {
 
     container.setAttribute('data-tracker-id', tracker.id);
     container.innerHTML = `
-      <div class="tracker-header">
-        <div class="tracker-info">
+      <flex-row justify="space-between" align="center" gap="lg" class="tracker-header">
+        <flex-row align="center" gap="md" class="tracker-info">
           <h4>${tracker.name}</h4>
           <type-badge type="${tracker.tracker_type}" label="${tracker.tracker_type.toUpperCase()}"></type-badge>
-        </div>
-        <div class="tracker-actions">
+        </flex-row>
+        <flex-row align="center" gap="sm" class="tracker-actions">
           <counter-control value="${tracker.current}" min="0" max="${tracker.max}" show-max="${tracker.max}"></counter-control>
           <dropdown-menu>
             <dropdown-menu-item slot="content" keep-open>
@@ -152,8 +153,8 @@ class CountdownItem extends ExtendedHtmlElement {
               </delete-trigger>
             </dropdown-menu-item>
           </dropdown-menu>
-        </div>
-      </div>
+        </flex-row>
+      </flex-row>
       ${currentLabel ? `<div class="current-label">${currentLabel}</div>` : ''}
     `;
 

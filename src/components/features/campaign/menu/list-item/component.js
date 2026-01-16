@@ -1,4 +1,5 @@
 import ExtendedHtmlElement from '../../../../base/extended-html-element.js';
+import '../../../../layout/flex-row/component.js';
 
 /**
  * A campaign list item for the campaign menu.

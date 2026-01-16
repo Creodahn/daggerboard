@@ -2,13 +2,10 @@
   display: block;
 }
 
+/* Layout handled by flex-row component */
 .campaign-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
-  gap: var(--space-sm);
 }
 
 .campaign-item:hover {

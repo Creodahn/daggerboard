@@ -2,17 +2,9 @@
   display: block;
 }
 
-.tracker-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-lg);
-}
+/* Layout handled by flex-row components */
 
 .tracker-info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
   flex: 1;
   min-width: 0;
 }
@@ -27,9 +19,6 @@
 }
 
 .tracker-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
   flex-shrink: 0;
 }
 

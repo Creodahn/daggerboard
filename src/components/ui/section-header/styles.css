@@ -2,10 +2,9 @@
   display: block;
 }
 
+/* Layout handled by flex-row components */
+
 .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: var(--space-lg);
 }
 
@@ -13,12 +12,6 @@
   margin: 0;
   font-size: var(--text-xl);
   color: var(--color-text-primary);
-}
-
-.action-slot {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
 }
 
 /* Action buttons handled by action-button component */

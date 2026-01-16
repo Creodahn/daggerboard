@@ -1,0 +1,84 @@
+:host {
+  display: block;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Stretch to fill available height */
+.flex-column.stretch {
+  height: 100%;
+}
+
+:host([stretch]) {
+  height: 100%;
+}
+
+/* Justify content */
+.flex-column.justify-start {
+  justify-content: flex-start;
+}
+
+.flex-column.justify-center {
+  justify-content: center;
+}
+
+.flex-column.justify-end {
+  justify-content: flex-end;
+}
+
+.flex-column.justify-space-between {
+  justify-content: space-between;
+}
+
+.flex-column.justify-space-around {
+  justify-content: space-around;
+}
+
+.flex-column.justify-space-evenly {
+  justify-content: space-evenly;
+}
+
+/* Align items */
+.flex-column.align-start {
+  align-items: flex-start;
+}
+
+.flex-column.align-center {
+  align-items: center;
+}
+
+.flex-column.align-end {
+  align-items: flex-end;
+}
+
+.flex-column.align-stretch {
+  align-items: stretch;
+}
+
+/* Gap */
+.flex-column.gap-none {
+  gap: 0;
+}
+
+.flex-column.gap-xs {
+  gap: var(--space-xs);
+}
+
+.flex-column.gap-sm {
+  gap: var(--space-sm);
+}
+
+.flex-column.gap-md {
+  gap: var(--space-md);
+}
+
+.flex-column.gap-lg {
+  gap: var(--space-lg);
+}
+
+.flex-column.gap-xl {
+  gap: var(--space-xl);
+}
