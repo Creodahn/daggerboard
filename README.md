@@ -1,10 +1,10 @@
 # Daggerboard
 
-A desktop companion app for Daggerheart game masters. Track entities (enemies and NPCs), countdown trackers, and fear levels across campaigns.
+A desktop companion app for Daggerheart game masters. Track entities (adversaries and NPCs), countdown trackers, and fear levels across campaigns.
 
 ## Features
 
-- **Entity Management**: Create and manage enemies and NPCs with HP tracking and damage thresholds
+- **Entity Management**: Create and manage adversaries and NPCs with HP tracking and damage thresholds
 - **Countdown Trackers**: Visual countdown timers with urgency states and tick labels
 - **Fear Tracker**: Track the party's fear level
 - **Player View**: A separate window for players showing visible entities and countdowns
@@ -108,7 +108,7 @@ daggerboard/
 │   │   ├── features/             # Feature-specific components
 │   │   │   ├── campaign/         # Campaign management
 │   │   │   ├── countdown/        # Countdown trackers
-│   │   │   ├── entity/           # Entity (enemy/NPC) management
+│   │   │   ├── entity/           # Entity (adversary/NPC) management
 │   │   │   └── fear-tracker/     # Fear level tracking
 │   │   ├── feedback/             # Flash/pulse animations
 │   │   ├── layout/               # Layout components
@@ -133,10 +133,10 @@ daggerboard/
 │   │       ├── entity.rs         # Entity CRUD
 │   │       ├── error.rs          # Error types
 │   │       ├── fear_tracker.rs   # Fear level management
-│   │       └── migration.rs      # Database migrations
+│   │       └── player_character.rs # Player character management
 │   ├── Cargo.toml                # Rust dependencies
 │   └── tauri.conf.json           # Tauri configuration
-└── package.json                  # Node.js dependencies
+└── README.md                     # This file
 ```
 
 ## Data Storage

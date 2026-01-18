@@ -9,7 +9,7 @@ import { getHealthPercentage, getNpcHealthClass } from '../../../../helpers/heal
  *   <entity-player-item
  *     entity-id="abc123"
  *     name="Goblin"
- *     type="enemy"
+ *     type="adversary"
  *   ></entity-player-item>
  *
  *   <entity-player-item
@@ -23,7 +23,7 @@ import { getHealthPercentage, getNpcHealthClass } from '../../../../helpers/heal
  * Attributes:
  *   - entity-id: Unique entity ID (used for flash animations)
  *   - name: Entity name to display
- *   - type: 'enemy' | 'npc'
+ *   - type: 'adversary' | 'npc'
  *   - hp-current: Current HP (for NPCs, determines health styling)
  *   - hp-max: Maximum HP (for NPCs)
  *
@@ -56,7 +56,7 @@ class EntityPlayerItem extends ExtendedHtmlElement {
 
   updateDisplay() {
     const name = this.getStringAttr('name', '');
-    const type = this.getStringAttr('type', 'enemy');
+    const type = this.getStringAttr('type', 'adversary');
     const hpCurrent = this.getIntAttr('hp-current', 0);
     const hpMax = this.getIntAttr('hp-max', 1);
 

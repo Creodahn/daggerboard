@@ -74,14 +74,14 @@ export default class EntityPlayerDisplay extends CampaignAwareMixin(ExtendedHtml
     const container = this.$('.entities-container');
     if (!container) return;
 
-    const enemies = this.entities.filter(e => e.entity_type === 'enemy');
+    const adversaries = this.entities.filter(e => e.entity_type === 'adversary');
     const npcs = this.entities.filter(e => e.entity_type === 'npc');
 
     // Clear loading message and empty state on first render with data
     const loadingMsg = container.querySelector('.empty-message');
     if (loadingMsg) loadingMsg.remove();
     const emptyState = container.querySelector('empty-state');
-    if (emptyState && (enemies.length > 0 || npcs.length > 0)) {
+    if (emptyState && (adversaries.length > 0 || npcs.length > 0)) {
       emptyState.remove();
     }
 
@@ -97,14 +97,14 @@ export default class EntityPlayerDisplay extends CampaignAwareMixin(ExtendedHtml
       }
     });
 
-    // Update or create enemy section
-    this.#renderSection(container, 'enemies', 'Enemies', enemies);
+    // Update or create adversary section
+    this.#renderSection(container, 'adversaries', 'Adversaries', adversaries);
 
     // Update or create NPC section
     this.#renderSection(container, 'npcs', 'NPCs', npcs);
 
     // Show empty state if no entities
-    if (enemies.length === 0 && npcs.length === 0) {
+    if (adversaries.length === 0 && npcs.length === 0) {
       // Clear sections first
       container.innerHTML = '<empty-state message="No visible entities"></empty-state>';
     }
@@ -136,7 +136,7 @@ export default class EntityPlayerDisplay extends CampaignAwareMixin(ExtendedHtml
     }
 
     const list = section.querySelector('.entities-list');
-    const entityType = sectionId === 'npcs' ? 'npc' : 'enemy';
+    const entityType = sectionId === 'npcs' ? 'npc' : 'adversary';
 
     entities.forEach(entity => {
       // Find existing item or create new one

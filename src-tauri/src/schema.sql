@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS entities (
     threshold_major INTEGER NOT NULL,
     threshold_severe INTEGER NOT NULL,
     visible_to_players INTEGER NOT NULL DEFAULT 0,
-    entity_type TEXT NOT NULL DEFAULT 'enemy',
+    entity_type TEXT NOT NULL DEFAULT 'adversary',
     FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
 

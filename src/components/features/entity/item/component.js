@@ -110,7 +110,7 @@ class EntityItem extends ExtendedHtmlElement {
       <flex-row justify="space-between" align="center" gap="lg" class="entity-header">
         <flex-row align="center" gap="sm" class="entity-name-section">
           <collapse-toggle expanded></collapse-toggle>
-          <type-badge type="${entity.entity_type}" label="${entity.entity_type === 'enemy' ? 'Enemy' : 'NPC'}" variant="pill"></type-badge>
+          <type-badge type="${entity.entity_type}" label="${entity.entity_type === 'adversary' ? 'Adversary' : 'NPC'}" variant="pill"></type-badge>
           <input type="text" class="entity-name-input" value="${entity.name}">
         </flex-row>
         <dropdown-menu class="hp-dropdown">

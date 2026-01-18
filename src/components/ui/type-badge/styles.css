@@ -21,7 +21,7 @@
 }
 
 /* Type-specific colors - these stay consistent in both themes */
-.badge.enemy {
+.badge.adversary {
   background: var(--color-danger);
   color: var(--color-text-inverse);
 }

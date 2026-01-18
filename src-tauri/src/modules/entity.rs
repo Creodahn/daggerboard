@@ -29,21 +29,21 @@ pub struct Entity {
 pub enum EntityType {
     Npc,
     #[default]
-    Enemy,
+    Adversary,
 }
 
 impl EntityType {
     fn as_str(&self) -> &'static str {
         match self {
             EntityType::Npc => "npc",
-            EntityType::Enemy => "enemy",
+            EntityType::Adversary => "adversary",
         }
     }
 
     fn from_str(s: &str) -> Self {
         match s {
             "npc" => EntityType::Npc,
-            _ => EntityType::Enemy,
+            _ => EntityType::Adversary,
         }
     }
 }
