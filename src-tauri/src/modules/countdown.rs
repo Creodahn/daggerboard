@@ -25,8 +25,14 @@ pub struct CountdownTracker {
     pub tracker_type: TrackerType,
     #[serde(default)]
     pub auto_interval: i32,  // Auto-countdown interval in seconds (0 = disabled)
+    #[serde(default = "default_true")]
+    pub notify_on_complete: bool,  // Show notification when auto-countdown hits 0
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tick_labels: Option<HashMap<i32, String>>,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
@@ -73,6 +79,7 @@ fn row_to_tracker(row: &Row) -> rusqlite::Result<CountdownTracker> {
         hide_name_from_players: row.get::<_, i32>(6)? != 0,
         tracker_type: TrackerType::from_str(&row.get::<_, String>(7)?),
         auto_interval: row.get(8)?,
+        notify_on_complete: row.get::<_, i32>(9).unwrap_or(1) != 0,
         tick_labels: None,
     })
 }
@@ -89,7 +96,7 @@ fn get_tick_labels(conn: &Connection, tracker_id: &str) -> AppResult<HashMap<i32
 
 fn get_trackers_for_campaign(conn: &Connection, campaign_id: &str) -> AppResult<Vec<CountdownTracker>> {
     let mut stmt = conn.prepare(
-        "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval
+        "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval, notify_on_complete
          FROM countdown_trackers WHERE campaign_id = ?1",
     )?;
 
@@ -108,7 +115,7 @@ fn get_trackers_for_campaign(conn: &Connection, campaign_id: &str) -> AppResult<
 
 fn get_tracker_by_id(conn: &Connection, id: &str) -> AppResult<CountdownTracker> {
     let mut stmt = conn.prepare(
-        "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval
+        "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval, notify_on_complete
          FROM countdown_trackers WHERE id = ?1",
     )?;
 
@@ -148,18 +155,20 @@ pub fn create_tracker(
     visible_to_players: Option<bool>,
     hide_name_from_players: Option<bool>,
     auto_interval: Option<i32>,
+    notify_on_complete: Option<bool>,
 ) -> AppResult<CountdownTracker> {
     let id = Uuid::new_v4().to_string();
     let visible = visible_to_players.unwrap_or(false);
     let hide_name = hide_name_from_players.unwrap_or(false);
     let interval = auto_interval.unwrap_or(0);
+    let notify = notify_on_complete.unwrap_or(true);
 
     db.with_conn(|conn| {
         let campaign_id = get_required_campaign_id(conn)?;
 
         conn.execute(
-            "INSERT INTO countdown_trackers (id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+            "INSERT INTO countdown_trackers (id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval, notify_on_complete)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             params![
                 id,
                 campaign_id,
@@ -169,7 +178,8 @@ pub fn create_tracker(
                 visible as i32,
                 hide_name as i32,
                 tracker_type.as_str(),
-                interval
+                interval,
+                notify as i32
             ],
         )?;
 
@@ -183,6 +193,7 @@ pub fn create_tracker(
             hide_name_from_players: hide_name,
             tracker_type: tracker_type.clone(),
             auto_interval: interval,
+            notify_on_complete: notify,
             tick_labels: if tracker_type == TrackerType::Complex {
                 Some(HashMap::new())
             } else {
@@ -220,12 +231,12 @@ pub fn get_trackers(db: State<Database>, visible_only: bool) -> AppResult<Vec<Co
 
         let mut stmt = if visible_only {
             conn.prepare(
-                "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval
+                "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval, notify_on_complete
                  FROM countdown_trackers WHERE campaign_id = ?1 AND visible_to_players = 1",
             )?
         } else {
             conn.prepare(
-                "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval
+                "SELECT id, campaign_id, name, current, max, visible_to_players, hide_name_from_players, tracker_type, auto_interval, notify_on_complete
                  FROM countdown_trackers WHERE campaign_id = ?1",
             )?
         };

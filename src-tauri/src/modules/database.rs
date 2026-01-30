@@ -110,6 +110,10 @@ fn run_migrations(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
         migrate_v10_entity_stress(conn)?;
     }
 
+    if current_version < 11 {
+        migrate_v11_countdown_notify_on_complete(conn)?;
+    }
+
     Ok(())
 }
 
@@ -608,6 +612,32 @@ fn migrate_v10_entity_stress(conn: &Connection) -> Result<(), Box<dyn std::error
 
     conn.execute(
         "INSERT INTO schema_migrations (version) VALUES (10)",
+        [],
+    )?;
+
+    Ok(())
+}
+
+/// V11: Add notify_on_complete column to countdown_trackers
+fn migrate_v11_countdown_notify_on_complete(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    let column_exists: bool = conn
+        .query_row(
+            "SELECT COUNT(*) > 0 FROM pragma_table_info('countdown_trackers') WHERE name='notify_on_complete'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+    if !column_exists {
+        conn.execute(
+            "ALTER TABLE countdown_trackers ADD COLUMN notify_on_complete INTEGER NOT NULL DEFAULT 1",
+            [],
+        )?;
+        println!("Added notify_on_complete column to countdown_trackers table");
+    }
+
+    conn.execute(
+        "INSERT INTO schema_migrations (version) VALUES (11)",
         [],
     )?;
 

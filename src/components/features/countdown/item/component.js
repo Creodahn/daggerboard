@@ -1,5 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import '../../../layout/flex-row/component.js';
+import createWindow from '../../../../helpers/create-window.js';
 
 /**
  * A component for rendering a single countdown tracker item.
@@ -195,11 +196,44 @@ class CountdownItem extends ExtendedHtmlElement {
     this.#timerInterval = setInterval(() => {
       if (this.#tracker.current > 0) {
         this.emit('value-change', { id: this.#tracker.id, delta: -1 });
+
+        // Check if we just hit 0 (current was 1, now will be 0)
+        if (this.#tracker.current === 1 && this.#tracker.notify_on_complete) {
+          this.showCompletionAlert();
+        }
       } else {
         this.stopTimer();
         this.updatePlayPauseButton();
       }
     }, this.#tracker.auto_interval * 1000);
+  }
+
+  async showCompletionAlert() {
+    const tracker = this.#tracker;
+    const windowLabel = `countdown-alert-${tracker.id}`;
+    const encodedName = encodeURIComponent(tracker.name);
+
+    // Get the tick label for tick 0 if it exists (for complex trackers)
+    const tickLabel = tracker.tick_labels?.[0] || '';
+    const encodedTickLabel = encodeURIComponent(tickLabel);
+
+    let url = `/pages/countdown-alert/index.html?id=${tracker.id}&name=${encodedName}`;
+    if (tickLabel) {
+      url += `&tickLabel=${encodedTickLabel}`;
+    }
+
+    await createWindow(windowLabel, {
+      url,
+      title: 'Countdown Complete',
+      width: 450,
+      height: 320,
+      resizable: false,
+      alwaysOnTop: true,
+      center: true,
+    }, {
+      focusIfExists: true,
+      cascade: false,
+    });
   }
 
   stopTimer() {

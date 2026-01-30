@@ -8,6 +8,7 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
   #nameField;
   #maxField;
   #autoIntervalField;
+  #notifyToggle;
   #visibleToggle;
   #hideNameToggle;
   #trackersList;
@@ -24,6 +25,7 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
     this.#nameField = this.$('form-field[name="name"]');
     this.#maxField = this.$('form-field[name="max"]');
     this.#autoIntervalField = this.$('form-field[name="autoInterval"]');
+    this.#notifyToggle = this.$('toggle-switch[name="notifyOnComplete"]');
     this.#visibleToggle = this.$('visibility-toggle[name="visibleToPlayers"]');
     this.#hideNameToggle = this.$('toggle-switch[name="hideNameFromPlayers"]');
     this.#trackersList = this.$('stack-list.trackers-list');
@@ -60,6 +62,9 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
     // Listen for max field changes to update tick label limits
     this.#maxField.addEventListener('field-input', () => this.updateTickLabelLimit());
 
+    // Show/hide notify toggle based on auto interval
+    this.#autoIntervalField.addEventListener('field-input', () => this.updateNotifyToggleVisibility());
+
     // Add first tick label entry by default
     this.addTickLabelEntry();
 
@@ -68,6 +73,11 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
     this.addEventListener('visibility-change', this.handleVisibilityChange.bind(this));
     this.addEventListener('name-visibility-change', this.handleNameVisibilityChange.bind(this));
     this.addEventListener('delete', this.handleDelete.bind(this));
+  }
+
+  updateNotifyToggleVisibility() {
+    const autoInterval = parseInt(this.#autoIntervalField.value) || 0;
+    this.#notifyToggle.hidden = autoInterval <= 0;
   }
 
   async loadTrackers() {
@@ -149,6 +159,7 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
     const name = this.#nameField.value.trim();
     const max = parseInt(this.#maxField.value);
     const autoInterval = parseInt(this.#autoIntervalField.value) || 0;
+    const notifyOnComplete = autoInterval > 0 ? this.#notifyToggle.checked : false;
     const visibleToPlayers = this.#visibleToggle.checked;
     const hideNameFromPlayers = this.#hideNameToggle.checked;
     const tickLabels = this.getTickLabels();
@@ -164,57 +175,57 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
       }
     }
 
-    try {
-      const tracker = await invoke('create_tracker', {
-        name,
-        max,
-        trackerType,
-        autoInterval,
-      });
+    const tracker = await safeInvoke('create_tracker', {
+      name,
+      max,
+      trackerType,
+      autoInterval,
+      notifyOnComplete,
+    }, { errorMessage: 'Failed to create tracker' });
 
-      // Set visibility preference
-      if (visibleToPlayers && tracker.id) {
-        await invoke('toggle_tracker_visibility', {
-          id: tracker.id,
-          visible: true,
-        });
-      }
+    if (!tracker) return;
 
-      // Set name visibility preference
-      if (hideNameFromPlayers && tracker.id) {
-        await invoke('toggle_tracker_name_visibility', {
-          id: tracker.id,
-          hideName: true,
-        });
-      }
-
-      // Set tick labels if complex
-      if (hasLabels && tracker.id) {
-        for (const [tick, text] of Object.entries(tickLabels)) {
-          await invoke('set_tick_label', {
-            id: tracker.id,
-            tick: parseInt(tick),
-            text,
-          });
-        }
-      }
-
-      // Reset form
-      this.#nameField.value = '';
-      this.#maxField.value = '10';
-      this.#autoIntervalField.value = '0';
-      this.#visibleToggle.removeAttribute('checked');
-      this.#hideNameToggle.removeAttribute('checked');
-      this.#tickLabelsContainer.innerHTML = '';
-      this.#tickLabelEntries = [];
-      this.updateAddButtonState();
-
-      // Close modal
-      this.#modal.close();
-    } catch (error) {
-      console.error('Failed to create tracker:', error);
-      alert(`Error: ${error}`);
+    // Set visibility preference
+    if (visibleToPlayers && tracker.id) {
+      await safeInvoke('toggle_tracker_visibility', {
+        id: tracker.id,
+        visible: true,
+      }, { errorMessage: 'Failed to set visibility' });
     }
+
+    // Set name visibility preference
+    if (hideNameFromPlayers && tracker.id) {
+      await safeInvoke('toggle_tracker_name_visibility', {
+        id: tracker.id,
+        hideName: true,
+      }, { errorMessage: 'Failed to set name visibility' });
+    }
+
+    // Set tick labels if complex
+    if (hasLabels && tracker.id) {
+      for (const [tick, text] of Object.entries(tickLabels)) {
+        await safeInvoke('set_tick_label', {
+          id: tracker.id,
+          tick: parseInt(tick),
+          text,
+        }, { errorMessage: 'Failed to set tick label' });
+      }
+    }
+
+    // Reset form
+    this.#nameField.value = '';
+    this.#maxField.value = '10';
+    this.#autoIntervalField.value = '0';
+    this.#notifyToggle.checked = true;
+    this.#notifyToggle.hidden = true;
+    this.#visibleToggle.removeAttribute('checked');
+    this.#hideNameToggle.removeAttribute('checked');
+    this.#tickLabelsContainer.innerHTML = '';
+    this.#tickLabelEntries = [];
+    this.updateAddButtonState();
+
+    // Close modal
+    this.#modal.close();
   }
 
   async handleValueChange(event) {

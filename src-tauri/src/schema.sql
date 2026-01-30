@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS countdown_trackers (
     hide_name_from_players INTEGER NOT NULL DEFAULT 0,
     tracker_type TEXT NOT NULL,
     auto_interval INTEGER NOT NULL DEFAULT 0,  -- Auto-countdown interval in seconds (0 = disabled)
+    notify_on_complete INTEGER NOT NULL DEFAULT 1,  -- Show notification when auto-countdown hits 0
     FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE
 );
 
