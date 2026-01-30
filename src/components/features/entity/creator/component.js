@@ -7,6 +7,7 @@ class EntityCreator extends ExtendedHtmlElement {
   #nameField;
   #entityTypeSelect;
   #hpMaxField;
+  #stressMaxField;
   #minorField;
   #majorField;
   #severeField;
@@ -19,6 +20,7 @@ class EntityCreator extends ExtendedHtmlElement {
     this.#nameField = this.$('form-field[name="name"]');
     this.#entityTypeSelect = this.$('select[name="entity-type"]');
     this.#hpMaxField = this.$('form-field[name="hp-max"]');
+    this.#stressMaxField = this.$('form-field[name="stress-max"]');
     this.#minorField = this.$('form-field[name="minor"]');
     this.#majorField = this.$('form-field[name="major"]');
     this.#severeField = this.$('form-field[name="severe"]');
@@ -50,6 +52,7 @@ class EntityCreator extends ExtendedHtmlElement {
     const name = this.#nameField.value.trim();
     const entityType = this.#entityTypeSelect.value;
     const hpMax = parseInt(this.#hpMaxField.value);
+    const stressMax = parseInt(this.#stressMaxField.value) || 0;
     const minor = parseInt(this.#minorField.value);
     const major = parseInt(this.#majorField.value);
     const severe = parseInt(this.#severeField.value);
@@ -64,6 +67,7 @@ class EntityCreator extends ExtendedHtmlElement {
     const result = await safeInvoke('create_entity', {
       name,
       hpMax,
+      stressMax,
       thresholds: {
         minor,
         major,
@@ -76,6 +80,7 @@ class EntityCreator extends ExtendedHtmlElement {
       // Reset form and clear any custom validity
       this.#nameField.value = '';
       this.#hpMaxField.value = '20';
+      this.#stressMaxField.value = '0';
       this.#minorField.value = '5';
       this.#majorField.value = '10';
       this.#severeField.value = '15';

@@ -106,6 +106,10 @@ fn run_migrations(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
         migrate_v9_countdown_auto_interval(conn)?;
     }
 
+    if current_version < 10 {
+        migrate_v10_entity_stress(conn)?;
+    }
+
     Ok(())
 }
 
@@ -573,6 +577,37 @@ fn migrate_v9_countdown_auto_interval(conn: &Connection) -> Result<(), Box<dyn s
 
     conn.execute(
         "INSERT INTO schema_migrations (version) VALUES (9)",
+        [],
+    )?;
+
+    Ok(())
+}
+
+/// V10: Add stress columns to entities table
+fn migrate_v10_entity_stress(conn: &Connection) -> Result<(), Box<dyn std::error::Error>> {
+    // Check if stress_current column already exists
+    let column_exists: bool = conn
+        .query_row(
+            "SELECT COUNT(*) > 0 FROM pragma_table_info('entities') WHERE name='stress_current'",
+            [],
+            |row| row.get(0),
+        )
+        .unwrap_or(false);
+
+    if !column_exists {
+        conn.execute(
+            "ALTER TABLE entities ADD COLUMN stress_current INTEGER NOT NULL DEFAULT 0",
+            [],
+        )?;
+        conn.execute(
+            "ALTER TABLE entities ADD COLUMN stress_max INTEGER NOT NULL DEFAULT 0",
+            [],
+        )?;
+        println!("Added stress columns to entities table");
+    }
+
+    conn.execute(
+        "INSERT INTO schema_migrations (version) VALUES (10)",
         [],
     )?;
 

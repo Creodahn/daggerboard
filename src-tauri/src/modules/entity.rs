@@ -18,6 +18,8 @@ pub struct Entity {
     pub name: String,
     pub hp_current: i32,
     pub hp_max: i32,
+    pub stress_current: i32,
+    pub stress_max: i32,
     pub thresholds: DamageThresholds,
     pub visible_to_players: bool,
     #[serde(default)]
@@ -79,20 +81,23 @@ fn row_to_entity(row: &Row) -> rusqlite::Result<Entity> {
         name: row.get(2)?,
         hp_current: row.get(3)?,
         hp_max: row.get(4)?,
+        stress_current: row.get(5)?,
+        stress_max: row.get(6)?,
         thresholds: DamageThresholds {
-            minor: row.get(5)?,
-            major: row.get(6)?,
-            severe: row.get(7)?,
+            minor: row.get(7)?,
+            major: row.get(8)?,
+            severe: row.get(9)?,
         },
-        visible_to_players: row.get::<_, i32>(8)? != 0,
-        entity_type: EntityType::from_str(&row.get::<_, String>(9)?),
+        visible_to_players: row.get::<_, i32>(10)? != 0,
+        entity_type: EntityType::from_str(&row.get::<_, String>(11)?),
     })
 }
 
+const SELECT_COLUMNS: &str = "id, campaign_id, name, hp_current, hp_max, stress_current, stress_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type";
+
 fn get_entities_for_campaign(conn: &Connection, campaign_id: &str) -> AppResult<Vec<Entity>> {
     let mut stmt = conn.prepare(
-        "SELECT id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
-         FROM entities WHERE campaign_id = ?1"
+        &format!("SELECT {} FROM entities WHERE campaign_id = ?1", SELECT_COLUMNS)
     )?;
 
     let entities = stmt
@@ -104,8 +109,7 @@ fn get_entities_for_campaign(conn: &Connection, campaign_id: &str) -> AppResult<
 
 fn get_entity_by_id(conn: &Connection, id: &str) -> AppResult<Entity> {
     let mut stmt = conn.prepare(
-        "SELECT id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
-         FROM entities WHERE id = ?1"
+        &format!("SELECT {} FROM entities WHERE id = ?1", SELECT_COLUMNS)
     )?;
 
     stmt.query_row([id], |row| row_to_entity(row))
@@ -133,23 +137,27 @@ pub fn create_entity(
     app: tauri::AppHandle,
     name: String,
     hp_max: i32,
+    stress_max: Option<i32>,
     thresholds: DamageThresholds,
     entity_type: EntityType,
 ) -> AppResult<Entity> {
     let id = Uuid::new_v4().to_string();
+    let stress_max = stress_max.unwrap_or(0).min(12); // Cap at 12
 
     db.with_conn(|conn| {
         let campaign_id = get_required_campaign_id(conn)?;
 
         conn.execute(
-            "INSERT INTO entities (id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+            "INSERT INTO entities (id, campaign_id, name, hp_current, hp_max, stress_current, stress_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
             params![
                 id,
                 campaign_id,
                 name,
                 hp_max,
                 hp_max,
+                0, // stress_current starts at 0
+                stress_max,
                 thresholds.minor,
                 thresholds.major,
                 thresholds.severe,
@@ -164,6 +172,8 @@ pub fn create_entity(
             name,
             hp_current: hp_max,
             hp_max,
+            stress_current: 0,
+            stress_max,
             thresholds,
             visible_to_players: false,
             entity_type,
@@ -196,17 +206,13 @@ pub fn get_entities(db: State<Database>, visible_only: bool) -> AppResult<Vec<En
     db.with_conn(|conn| {
         let campaign_id = get_required_campaign_id(conn)?;
 
-        let mut stmt = if visible_only {
-            conn.prepare(
-                "SELECT id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
-                 FROM entities WHERE campaign_id = ?1 AND visible_to_players = 1"
-            )?
+        let query = if visible_only {
+            format!("SELECT {} FROM entities WHERE campaign_id = ?1 AND visible_to_players = 1", SELECT_COLUMNS)
         } else {
-            conn.prepare(
-                "SELECT id, campaign_id, name, hp_current, hp_max, threshold_minor, threshold_major, threshold_severe, visible_to_players, entity_type
-                 FROM entities WHERE campaign_id = ?1"
-            )?
+            format!("SELECT {} FROM entities WHERE campaign_id = ?1", SELECT_COLUMNS)
         };
+
+        let mut stmt = conn.prepare(&query)?;
 
         let entities = stmt
             .query_map([&campaign_id], |row| row_to_entity(row))?
@@ -314,6 +320,85 @@ pub fn apply_damage(
             entity: updated_entity,
             damage_dealt: actual_hp_loss,
             threshold_hit,
+        })
+    })
+}
+
+// ============================================================================
+// Stress Management
+// ============================================================================
+
+/// Result of adjusting stress, including any HP overflow damage
+#[derive(Clone, Serialize)]
+pub struct StressResult {
+    pub entity: Entity,
+    pub stress_applied: i32,
+    pub hp_overflow_damage: i32,
+}
+
+/// Default stress cap when no specific maximum is set
+const DEFAULT_STRESS_CAP: i32 = 12;
+
+#[tauri::command]
+pub fn adjust_entity_stress(
+    db: State<Database>,
+    app: tauri::AppHandle,
+    id: String,
+    amount: i32,
+) -> AppResult<StressResult> {
+    db.with_conn(|conn| {
+        let entity = get_entity_by_id(conn, &id)?;
+
+        // Use entity's stress_max if set, otherwise default to 12
+        let effective_stress_max = if entity.stress_max > 0 {
+            entity.stress_max
+        } else {
+            DEFAULT_STRESS_CAP
+        };
+
+        let mut stress_applied = 0;
+        let mut hp_overflow_damage = 0;
+        let mut new_stress = entity.stress_current;
+        let mut new_hp = entity.hp_current;
+
+        if amount > 0 {
+            // Adding stress
+            for _ in 0..amount {
+                if new_stress < effective_stress_max {
+                    // Room for stress
+                    new_stress += 1;
+                    stress_applied += 1;
+                } else {
+                    // Stress is maxed - overflow to HP damage
+                    new_hp = (new_hp - 1).max(0);
+                    hp_overflow_damage += 1;
+                }
+            }
+        } else if amount < 0 {
+            // Removing stress (healing)
+            let reduction = (-amount).min(new_stress);
+            new_stress -= reduction;
+            stress_applied = -reduction;
+        }
+
+        // Update database
+        conn.execute(
+            "UPDATE entities SET stress_current = ?1, hp_current = ?2 WHERE id = ?3",
+            params![new_stress, new_hp, id],
+        )?;
+
+        let updated_entity = Entity {
+            stress_current: new_stress,
+            hp_current: new_hp,
+            ..entity
+        };
+
+        emit_entities_update(&app, conn, &updated_entity.campaign_id)?;
+
+        Ok(StressResult {
+            entity: updated_entity,
+            stress_applied,
+            hp_overflow_damage,
         })
     })
 }

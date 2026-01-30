@@ -81,6 +81,12 @@ class EntityItem extends ExtendedHtmlElement {
       }
     });
 
+    // Stress counter
+    this.$('.stress-counter').addEventListener('counter-change', e => {
+      const delta = e.detail.delta;
+      this.emit('stress-change', { id: this.#entity.id, amount: delta });
+    });
+
     // Name input
     this.$('.entity-name-input').addEventListener('input', e => {
       this.#emitNameChange(this.#entity.id, e.target.value);
@@ -140,6 +146,17 @@ class EntityItem extends ExtendedHtmlElement {
     if (hpBar) {
       hpBar.setAttribute('current', entity.hp_current);
       hpBar.setAttribute('max', entity.hp_max);
+    }
+
+    // Stress counter - always show, use 12 as default max
+    // Use allow-overflow so increment stays enabled at max (backend handles overflow to HP)
+    const stressCounter = this.$('.stress-counter');
+    if (stressCounter) {
+      const effectiveMax = entity.stress_max > 0 ? entity.stress_max : 12;
+      stressCounter.hidden = false;
+      stressCounter.setAttribute('value', entity.stress_current);
+      stressCounter.setAttribute('max', effectiveMax);
+      stressCounter.setAttribute('allow-overflow', '');
     }
 
     // Visibility toggle

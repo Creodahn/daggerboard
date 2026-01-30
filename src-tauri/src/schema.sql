@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS entities (
     name TEXT NOT NULL,
     hp_current INTEGER NOT NULL,
     hp_max INTEGER NOT NULL,
+    stress_current INTEGER NOT NULL DEFAULT 0,
+    stress_max INTEGER NOT NULL DEFAULT 0,
     threshold_minor INTEGER NOT NULL,
     threshold_major INTEGER NOT NULL,
     threshold_severe INTEGER NOT NULL,

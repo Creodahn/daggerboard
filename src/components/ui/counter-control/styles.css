@@ -62,11 +62,12 @@ button:disabled {
 }
 
 .value {
-  min-width: 3rem;
+  min-width: 4.5rem;
   text-align: center;
   font-weight: var(--font-semibold);
   font-size: var(--text-base);
   color: var(--counter-value-color, var(--color-text-primary));
+  white-space: nowrap;
 }
 
 /* Compact variant */

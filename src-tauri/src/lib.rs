@@ -63,6 +63,7 @@ pub fn run() {
             entity::update_entity_hp,
             entity::set_entity_hp,
             entity::apply_damage,
+            entity::adjust_entity_stress,
             entity::update_entity_thresholds,
             entity::update_entity_name,
             entity::toggle_entity_visibility,

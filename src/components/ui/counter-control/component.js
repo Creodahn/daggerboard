@@ -7,12 +7,15 @@ import ExtendedHtmlElement from '../../base/extended-html-element.js';
  *   <counter-control value="5"></counter-control>
  *   <counter-control value="10" max="20" label="Round"></counter-control>
  *   <counter-control value="5" show-max="10"></counter-control>
+ *   <counter-control value="5" max="12" allow-overflow></counter-control>
  *
  * Attributes:
  *   - value: Current value (default: 0)
  *   - min: Minimum value (default: 0)
- *   - max: Maximum value (optional)
- *   - show-max: Display format as "value / max" (optional)
+ *   - max: Maximum value (optional, clamps value and disables button at max)
+ *   - show-max: Display format as "value / max" (optional, display only)
+ *   - allow-overflow: When set with max, doesn't disable increment at max
+ *                     and always emits events (for server-side overflow handling)
  *   - label: Optional label to display
  *   - step: Increment/decrement step (default: 1)
  *   - readonly: Disable controls, display only
@@ -24,7 +27,7 @@ import ExtendedHtmlElement from '../../base/extended-html-element.js';
  */
 class CounterControl extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
-  static observedAttributes = ['value', 'min', 'max', 'show-max', 'label', 'step', 'readonly'];
+  static observedAttributes = ['value', 'min', 'max', 'show-max', 'label', 'step', 'readonly', 'allow-overflow'];
 
   #value = 0;
   #valueEl;
@@ -93,9 +96,14 @@ class CounterControl extends ExtendedHtmlElement {
   updateDisplay() {
     if (!this.#valueEl) return;
 
+    // show-max takes precedence, then max attribute
     const showMax = this.getStringAttr('show-max');
+    const maxAttr = this.getAttribute('max');
+
     if (showMax) {
       this.#valueEl.textContent = `${this.#value} / ${showMax}`;
+    } else if (maxAttr !== null) {
+      this.#valueEl.textContent = `${this.#value} / ${maxAttr}`;
     } else {
       this.#valueEl.textContent = String(this.#value);
     }
@@ -107,20 +115,25 @@ class CounterControl extends ExtendedHtmlElement {
     if (!this.#decrementBtn || !this.#incrementBtn) return;
 
     const readonly = this.getBoolAttr('readonly');
+    const allowOverflow = this.getBoolAttr('allow-overflow');
     const min = this.getIntAttr('min', 0);
     const maxAttr = this.getAttribute('max');
     const max = maxAttr !== null ? parseInt(maxAttr) : null;
 
     this.#decrementBtn.disabled = readonly || this.#value <= min;
-    this.#incrementBtn.disabled = readonly || (max !== null && this.#value >= max);
+    // If allow-overflow is set, don't disable at max (let server handle overflow)
+    this.#incrementBtn.disabled = readonly || (!allowOverflow && max !== null && this.#value >= max);
   }
 
   increment() {
     const step = this.getIntAttr('step', 1);
+    const allowOverflow = this.getBoolAttr('allow-overflow');
     const oldValue = this.#value;
     this.value = this.#value + step;
 
-    if (this.#value !== oldValue) {
+    // If allow-overflow, always emit (server handles the actual logic)
+    // Otherwise, only emit if value actually changed
+    if (allowOverflow || this.#value !== oldValue) {
       this.emit('counter-increment', { value: this.#value });
       this.emit('counter-change', { value: this.#value, delta: step });
     }

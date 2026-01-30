@@ -410,29 +410,85 @@ pub fn adjust_player_hope(
     })
 }
 
+/// Default stress cap when no specific maximum is set
+const DEFAULT_STRESS_CAP: i32 = 12;
+
+/// Result of adjusting stress, including any HP overflow damage
+#[derive(Clone, Serialize)]
+pub struct StressResult {
+    pub character: PlayerCharacter,
+    pub stress_applied: i32,
+    pub hp_overflow_damage: i32,
+}
+
 #[tauri::command]
 pub fn adjust_player_stress(
     db: State<Database>,
     app: AppHandle,
     id: String,
     amount: i32,
-) -> AppResult<PlayerCharacter> {
+) -> AppResult<StressResult> {
     db.with_conn(|conn| {
-        conn.execute(
-            "UPDATE player_characters SET stress_current = CLAMP(stress_current + ?1, 0, stress_max), updated_at = datetime('now') WHERE id = ?2",
-            params![amount, id],
-        )?;
-
+        // Get current character state
         let character = conn.query_row(
             &format!("SELECT {} FROM player_characters WHERE id = ?1", SELECT_COLUMNS),
             params![id],
             row_to_player_character,
         )?;
 
-        let _ = app.emit("player-characters-updated", &character.campaign_id);
-        let _ = app.emit("player-character-updated", &character);
+        // Use character's stress_max if set, otherwise default to 12
+        let effective_stress_max = if character.stress_max > 0 {
+            character.stress_max
+        } else {
+            DEFAULT_STRESS_CAP
+        };
 
-        Ok(character)
+        let mut stress_applied = 0;
+        let mut hp_overflow_damage = 0;
+        let mut new_stress = character.stress_current;
+        let mut new_hp = character.hp_current;
+
+        if amount > 0 {
+            // Adding stress
+            for _ in 0..amount {
+                if new_stress < effective_stress_max {
+                    // Room for stress
+                    new_stress += 1;
+                    stress_applied += 1;
+                } else {
+                    // Stress is maxed - overflow to HP damage
+                    new_hp = (new_hp - 1).max(0);
+                    hp_overflow_damage += 1;
+                }
+            }
+        } else if amount < 0 {
+            // Removing stress (healing)
+            let reduction = (-amount).min(new_stress);
+            new_stress -= reduction;
+            stress_applied = -reduction;
+        }
+
+        // Update database
+        conn.execute(
+            "UPDATE player_characters SET stress_current = ?1, hp_current = ?2, updated_at = datetime('now') WHERE id = ?3",
+            params![new_stress, new_hp, id],
+        )?;
+
+        // Fetch updated character
+        let updated_character = conn.query_row(
+            &format!("SELECT {} FROM player_characters WHERE id = ?1", SELECT_COLUMNS),
+            params![id],
+            row_to_player_character,
+        )?;
+
+        let _ = app.emit("player-characters-updated", &updated_character.campaign_id);
+        let _ = app.emit("player-character-updated", &updated_character);
+
+        Ok(StressResult {
+            character: updated_character,
+            stress_applied,
+            hp_overflow_damage,
+        })
     })
 }
 

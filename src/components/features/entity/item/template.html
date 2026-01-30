@@ -5,8 +5,17 @@
       <type-badge class="entity-type-badge" variant="pill"></type-badge>
       <input type="text" class="entity-name-input">
     </flex-row>
-    <dropdown-menu class="hp-dropdown">
-      <hp-bar slot="trigger" show-text></hp-bar>
+    <flex-row align="center" gap="md" class="entity-stats">
+      <!-- Stress counter - always visible, defaults to max of 12 -->
+      <!-- allow-overflow lets backend handle overflow to HP damage -->
+      <counter-control
+        class="stress-counter"
+        label="Stress"
+        min="0"
+        allow-overflow
+      ></counter-control>
+      <dropdown-menu class="hp-dropdown">
+        <hp-bar slot="trigger" show-text></hp-bar>
       <div slot="content" class="hp-menu-content">
         <div class="hp-menu-section damage-section">
           <section-label icon="⚔️">Damage</section-label>
@@ -38,16 +47,17 @@
           ></input-group>
         </div>
       </div>
-    </dropdown-menu>
-    <dropdown-menu>
-      <dropdown-menu-item slot="content" keep-open>
-        <visibility-toggle compact></visibility-toggle>
-      </dropdown-menu-item>
-      <dropdown-menu-item slot="content" variant="delete" keep-open>
-        <delete-trigger>
-          <span slot="trigger">🗑️ Delete Entity</span>
-        </delete-trigger>
-      </dropdown-menu-item>
-    </dropdown-menu>
+      </dropdown-menu>
+      <dropdown-menu>
+        <dropdown-menu-item slot="content" keep-open>
+          <visibility-toggle compact></visibility-toggle>
+        </dropdown-menu-item>
+        <dropdown-menu-item slot="content" variant="delete" keep-open>
+          <delete-trigger>
+            <span slot="trigger">🗑️ Delete Entity</span>
+          </delete-trigger>
+        </dropdown-menu-item>
+      </dropdown-menu>
+    </flex-row>
   </flex-row>
 </card-container>

@@ -17,15 +17,27 @@
       </select>
     </div>
 
-    <form-field
-      name="hp-max"
-      label="Max HP"
-      type="number"
-      value="20"
-      min="1"
-      required
-      error-message="Max HP must be greater than 0"
-    ></form-field>
+    <flex-row gap="md">
+      <form-field
+        name="hp-max"
+        label="Max HP"
+        type="number"
+        value="20"
+        min="1"
+        required
+        error-message="Max HP must be greater than 0"
+      ></form-field>
+
+      <form-field
+        name="stress-max"
+        label="Max Stress"
+        type="number"
+        value="0"
+        min="0"
+        max="12"
+        help-text="0 = default (12)"
+      ></form-field>
+    </flex-row>
 
     <fieldset class="thresholds-group">
       <legend>Damage Thresholds</legend>

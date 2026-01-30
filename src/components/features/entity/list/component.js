@@ -21,6 +21,7 @@ class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
     // Listen for events from entity-item components
     this.addEventListener('threshold-damage', this.handleThresholdDamage.bind(this));
     this.addEventListener('heal', this.handleHeal.bind(this));
+    this.addEventListener('stress-change', this.handleStressChange.bind(this));
     this.addEventListener('name-change', this.handleNameChange.bind(this));
     this.addEventListener('visibility-change', this.handleVisibilityChange.bind(this));
     this.addEventListener('delete', this.handleDelete.bind(this));
@@ -80,6 +81,13 @@ class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
     const { id, amount } = event.detail;
     await safeInvoke('update_entity_hp', { id, amount }, {
       errorMessage: 'Failed to heal entity'
+    });
+  }
+
+  async handleStressChange(event) {
+    const { id, amount } = event.detail;
+    await safeInvoke('adjust_entity_stress', { id, amount }, {
+      errorMessage: 'Failed to adjust stress'
     });
   }
 
