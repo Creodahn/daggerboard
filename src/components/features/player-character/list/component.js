@@ -1,6 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
-import { invoke } from '../../../../helpers/tauri.js';
+import { safeInvoke } from '../../../../helpers/tauri.js';
 import '../item/component.js';
 import '../../../ui/section-header/component.js';
 import '../../../ui/action-button/component.js';
@@ -47,50 +47,42 @@ class PlayerCharacterList extends CampaignAwareMixin(ExtendedHtmlElement) {
       return;
     }
 
-    try {
-      this.characters = await invoke('get_player_characters', {
-        campaignId: this.currentCampaignId
-      });
+    const characters = await safeInvoke('get_player_characters', {
+      campaignId: this.currentCampaignId
+    }, { errorMessage: 'Failed to load player characters' });
+
+    if (characters) {
+      this.characters = characters;
       this.renderCharacters();
-    } catch (error) {
-      console.error('Failed to load player characters:', error);
     }
   }
 
   async handleHpChange(event) {
     const { id, amount } = event.detail;
-    try {
-      await invoke('adjust_player_hp', { id, amount });
-    } catch (error) {
-      console.error('Failed to adjust HP:', error);
-    }
+    await safeInvoke('adjust_player_hp', { id, amount }, {
+      errorMessage: 'Failed to adjust HP'
+    });
   }
 
   async handleHopeChange(event) {
     const { id, amount } = event.detail;
-    try {
-      await invoke('adjust_player_hope', { id, amount });
-    } catch (error) {
-      console.error('Failed to adjust hope:', error);
-    }
+    await safeInvoke('adjust_player_hope', { id, amount }, {
+      errorMessage: 'Failed to adjust hope'
+    });
   }
 
   async handleStressChange(event) {
     const { id, amount } = event.detail;
-    try {
-      await invoke('adjust_player_stress', { id, amount });
-    } catch (error) {
-      console.error('Failed to adjust stress:', error);
-    }
+    await safeInvoke('adjust_player_stress', { id, amount }, {
+      errorMessage: 'Failed to adjust stress'
+    });
   }
 
   async handleArmorChange(event) {
     const { id, amount } = event.detail;
-    try {
-      await invoke('adjust_player_armor', { id, amount });
-    } catch (error) {
-      console.error('Failed to adjust armor:', error);
-    }
+    await safeInvoke('adjust_player_armor', { id, amount }, {
+      errorMessage: 'Failed to adjust armor'
+    });
   }
 
   handleEdit(event) {
@@ -100,11 +92,9 @@ class PlayerCharacterList extends CampaignAwareMixin(ExtendedHtmlElement) {
 
   async handleDelete(event) {
     const { id } = event.detail;
-    try {
-      await invoke('delete_player_character', { id });
-    } catch (error) {
-      console.error('Failed to delete character:', error);
-    }
+    await safeInvoke('delete_player_character', { id }, {
+      errorMessage: 'Failed to delete character'
+    });
   }
 
   renderCharacters() {

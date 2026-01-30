@@ -1,3 +1,107 @@
 <card-container class="character-container">
-  <div class="character-content"></div>
+  <div class="character-content">
+    <flex-row class="character-header" justify="space-between" align="center" gap="md">
+      <flex-row align="center" gap="sm">
+        <collapse-toggle size="small"></collapse-toggle>
+        <span class="character-name"></span>
+        <span class="character-level"></span>
+      </flex-row>
+      <span class="character-class"></span>
+    </flex-row>
+
+    <div class="quick-info">
+      <span class="quick-stat quick-hp">
+        <span class="quick-stat-label">HP:</span>
+        <span class="quick-stat-value"></span>
+      </span>
+      <span class="quick-stat quick-hope">
+        <span class="quick-stat-label">Hope:</span>
+        <span class="quick-stat-value"></span>
+      </span>
+      <span class="quick-stat quick-stress">
+        <span class="quick-stat-label">Stress:</span>
+        <span class="quick-stat-value"></span>
+      </span>
+      <span class="quick-stat quick-armor">
+        <span class="quick-stat-label">Armor:</span>
+        <span class="quick-stat-value"></span>
+      </span>
+    </div>
+
+    <div class="character-details">
+      <div class="stats-section">
+        <div class="section-label">Attributes</div>
+        <div class="stats-grid">
+          <div class="stat-item stat-agility">
+            <span class="stat-label">AGI</span>
+            <span class="stat-value"></span>
+          </div>
+          <div class="stat-item stat-strength">
+            <span class="stat-label">STR</span>
+            <span class="stat-value"></span>
+          </div>
+          <div class="stat-item stat-finesse">
+            <span class="stat-label">FIN</span>
+            <span class="stat-value"></span>
+          </div>
+          <div class="stat-item stat-instinct">
+            <span class="stat-label">INS</span>
+            <span class="stat-value"></span>
+          </div>
+          <div class="stat-item stat-presence">
+            <span class="stat-label">PRE</span>
+            <span class="stat-value"></span>
+          </div>
+          <div class="stat-item stat-knowledge">
+            <span class="stat-label">KNO</span>
+            <span class="stat-value"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hp-section">
+        <div class="section-label">Hit Points</div>
+        <hp-bar></hp-bar>
+      </div>
+
+      <div class="resources-section">
+        <div class="section-label">Resources</div>
+        <div class="resources-grid">
+          <div class="resource-item resource-hope">
+            <span class="resource-label">Hope</span>
+            <div class="resource-controls">
+              <button class="resource-btn danger" data-resource="hope" data-amount="-1">−</button>
+              <span class="resource-value"></span>
+              <button class="resource-btn success" data-resource="hope" data-amount="1">+</button>
+            </div>
+          </div>
+          <div class="resource-item resource-stress">
+            <span class="resource-label">Stress</span>
+            <div class="resource-controls">
+              <button class="resource-btn danger" data-resource="stress" data-amount="-1">−</button>
+              <span class="resource-value"></span>
+              <button class="resource-btn success" data-resource="stress" data-amount="1">+</button>
+            </div>
+          </div>
+          <div class="resource-item resource-armor">
+            <span class="resource-label">Armor</span>
+            <div class="resource-controls">
+              <button class="resource-btn danger" data-resource="armor" data-amount="-1">−</button>
+              <span class="resource-value"></span>
+              <button class="resource-btn success" data-resource="armor" data-amount="1">+</button>
+            </div>
+          </div>
+          <div class="resource-item resource-evasion">
+            <span class="resource-label">Evasion</span>
+            <span class="resource-value"></span>
+          </div>
+        </div>
+      </div>
+
+      <flex-row class="character-actions" justify="flex-end" gap="sm">
+        <action-button class="edit-btn" variant="ghost" size="small">Edit</action-button>
+        <delete-trigger class="delete-btn"></delete-trigger>
+      </flex-row>
+    </div>
+  </div>
 </card-container>

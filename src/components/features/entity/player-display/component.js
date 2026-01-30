@@ -1,7 +1,7 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
 import { getHpChangeType } from '../../../../helpers/health-utils.js';
-import { invoke } from '../../../../helpers/tauri.js';
+import { safeInvoke } from '../../../../helpers/tauri.js';
 
 export default class EntityPlayerDisplay extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
@@ -36,14 +36,14 @@ export default class EntityPlayerDisplay extends CampaignAwareMixin(ExtendedHtml
   }
 
   async loadEntities() {
-    try {
-      const newEntities = await invoke('get_entities', { visibleOnly: true });
+    const newEntities = await safeInvoke('get_entities', { visibleOnly: true }, {
+      errorMessage: 'Failed to load entities'
+    });
+    if (newEntities) {
       this.detectHpChanges(newEntities);
       this.entities = newEntities;
       this.render();
       this.applyFlashAnimations();
-    } catch (error) {
-      console.error('Failed to load entities:', error);
     }
   }
 

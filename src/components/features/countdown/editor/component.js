@@ -1,15 +1,15 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
-import { invoke } from '../../../../helpers/tauri.js';
+import { safeInvoke } from '../../../../helpers/tauri.js';
 
 class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
   #modal;
   #nameField;
   #maxField;
+  #autoIntervalField;
   #visibleToggle;
   #hideNameToggle;
-  #createButton;
   #trackersList;
   #tickLabelsContainer;
   #addTickLabelBtn;
@@ -23,9 +23,9 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
     this.#modal = this.$('modal-dialog');
     this.#nameField = this.$('form-field[name="name"]');
     this.#maxField = this.$('form-field[name="max"]');
+    this.#autoIntervalField = this.$('form-field[name="autoInterval"]');
     this.#visibleToggle = this.$('visibility-toggle[name="visibleToPlayers"]');
     this.#hideNameToggle = this.$('toggle-switch[name="hideNameFromPlayers"]');
-    this.#createButton = this.$('action-button.create');
     this.#trackersList = this.$('stack-list.trackers-list');
     this.#tickLabelsContainer = this.$('.tick-labels-container');
     this.#addTickLabelBtn = this.$('.add-tick-label');
@@ -48,8 +48,13 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
       }
     });
 
-    // Setup event listeners
-    this.#createButton.addEventListener('action-click', () => this.createTracker());
+    // Setup form submit handler (handles both Enter key and action-button type="submit")
+    this.$('form').addEventListener('submit', e => {
+      e.preventDefault();
+      this.createTracker();
+    });
+
+    // Add tick label button
     this.#addTickLabelBtn.addEventListener('action-click', () => this.addTickLabelEntry());
 
     // Listen for max field changes to update tick label limits
@@ -66,11 +71,12 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
   }
 
   async loadTrackers() {
-    try {
-      this.trackers = await invoke('get_trackers', { visibleOnly: false });
+    const trackers = await safeInvoke('get_trackers', { visibleOnly: false }, {
+      errorMessage: 'Failed to load trackers'
+    });
+    if (trackers) {
+      this.trackers = trackers;
       this.renderTrackers();
-    } catch (error) {
-      console.error('Failed to load trackers:', error);
     }
   }
 
@@ -142,6 +148,7 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
 
     const name = this.#nameField.value.trim();
     const max = parseInt(this.#maxField.value);
+    const autoInterval = parseInt(this.#autoIntervalField.value) || 0;
     const visibleToPlayers = this.#visibleToggle.checked;
     const hideNameFromPlayers = this.#hideNameToggle.checked;
     const tickLabels = this.getTickLabels();
@@ -162,6 +169,7 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
         name,
         max,
         trackerType,
+        autoInterval,
       });
 
       // Set visibility preference
@@ -194,6 +202,7 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
       // Reset form
       this.#nameField.value = '';
       this.#maxField.value = '10';
+      this.#autoIntervalField.value = '0';
       this.#visibleToggle.removeAttribute('checked');
       this.#hideNameToggle.removeAttribute('checked');
       this.#tickLabelsContainer.innerHTML = '';
@@ -210,38 +219,30 @@ class CountdownEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
 
   async handleValueChange(event) {
     const { id, delta } = event.detail;
-    try {
-      await invoke('update_tracker_value', { id, amount: delta });
-    } catch (error) {
-      console.error('Failed to update tracker:', error);
-    }
+    await safeInvoke('update_tracker_value', { id, amount: delta }, {
+      errorMessage: 'Failed to update tracker'
+    });
   }
 
   async handleVisibilityChange(event) {
     const { id, visible } = event.detail;
-    try {
-      await invoke('toggle_tracker_visibility', { id, visible });
-    } catch (error) {
-      console.error('Failed to toggle visibility:', error);
-    }
+    await safeInvoke('toggle_tracker_visibility', { id, visible }, {
+      errorMessage: 'Failed to toggle visibility'
+    });
   }
 
   async handleNameVisibilityChange(event) {
     const { id, hidden } = event.detail;
-    try {
-      await invoke('toggle_tracker_name_visibility', { id, hideName: hidden });
-    } catch (error) {
-      console.error('Failed to toggle name visibility:', error);
-    }
+    await safeInvoke('toggle_tracker_name_visibility', { id, hideName: hidden }, {
+      errorMessage: 'Failed to toggle name visibility'
+    });
   }
 
   async handleDelete(event) {
     const { id } = event.detail;
-    try {
-      await invoke('delete_tracker', { id });
-    } catch (error) {
-      console.error('Failed to delete tracker:', error);
-    }
+    await safeInvoke('delete_tracker', { id }, {
+      errorMessage: 'Failed to delete tracker'
+    });
   }
 
   renderTrackers() {

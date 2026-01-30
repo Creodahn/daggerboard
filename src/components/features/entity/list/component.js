@@ -1,6 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
-import { invoke } from '../../../../helpers/tauri.js';
+import { safeInvoke } from '../../../../helpers/tauri.js';
 
 class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
@@ -42,18 +42,22 @@ class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
   }
 
   async loadEntities() {
-    try {
-      this.entities = await invoke('get_entities', { visibleOnly: false });
+    const entities = await safeInvoke('get_entities', { visibleOnly: false }, {
+      errorMessage: 'Failed to load entities'
+    });
+
+    if (entities) {
+      this.entities = entities;
 
       // Also load campaign settings for massive damage toggle
       if (this.currentCampaignId) {
-        const settings = await invoke('get_campaign_settings', { campaignId: this.currentCampaignId });
-        this.#allowMassiveDamage = settings.allow_massive_damage;
+        const settings = await safeInvoke('get_campaign_settings', { campaignId: this.currentCampaignId });
+        if (settings) {
+          this.#allowMassiveDamage = settings.allow_massive_damage;
+        }
       }
 
       this.renderEntities();
-    } catch (error) {
-      console.error('Failed to load entities:', error);
     }
   }
 
@@ -67,29 +71,23 @@ class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
 
   async handleThresholdDamage(event) {
     const { id, hpLoss } = event.detail;
-    try {
-      await invoke('update_entity_hp', { id, amount: -hpLoss });
-    } catch (error) {
-      console.error('Failed to apply threshold damage:', error);
-    }
+    await safeInvoke('update_entity_hp', { id, amount: -hpLoss }, {
+      errorMessage: 'Failed to apply threshold damage'
+    });
   }
 
   async handleHeal(event) {
     const { id, amount } = event.detail;
-    try {
-      await invoke('update_entity_hp', { id, amount });
-    } catch (error) {
-      console.error('Failed to heal entity:', error);
-    }
+    await safeInvoke('update_entity_hp', { id, amount }, {
+      errorMessage: 'Failed to heal entity'
+    });
   }
 
   async handleNameChange(event) {
     const { id, name } = event.detail;
-    try {
-      await invoke('update_entity_name', { id, name });
-    } catch (error) {
-      console.error('Failed to update entity name:', error);
-    }
+    await safeInvoke('update_entity_name', { id, name }, {
+      errorMessage: 'Failed to update entity name'
+    });
   }
 
   async handleVisibilityChange(event) {
@@ -98,22 +96,20 @@ class EntityList extends CampaignAwareMixin(ExtendedHtmlElement) {
     const entityIdToUse = entityId || id;
     const visibleToUse = checked !== undefined ? checked : visible;
 
-    try {
-      await invoke('toggle_entity_visibility', { id: entityIdToUse, visible: visibleToUse });
-    } catch (error) {
-      console.error('Failed to toggle visibility:', error);
-    }
+    await safeInvoke('toggle_entity_visibility', { id: entityIdToUse, visible: visibleToUse }, {
+      errorMessage: 'Failed to toggle visibility'
+    });
   }
 
   async handleDelete(event) {
     const { id } = event.detail;
-    try {
-      await invoke('delete_entity', { id });
+    const result = await safeInvoke('delete_entity', { id }, {
+      errorMessage: 'Failed to delete entity'
+    });
+
+    if (result !== null) {
       // Manually reload in case event doesn't fire
       await this.loadEntities();
-    } catch (error) {
-      console.error('Failed to delete entity:', error);
-      alert(`Failed to delete entity: ${error}`);
     }
   }
 

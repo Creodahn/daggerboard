@@ -1,6 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
-import { invoke } from '../../../../helpers/tauri.js';
+import { safeInvoke } from '../../../../helpers/tauri.js';
 
 class CountdownDisplay extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
@@ -25,11 +25,12 @@ class CountdownDisplay extends CampaignAwareMixin(ExtendedHtmlElement) {
   }
 
   async loadTrackers() {
-    try {
-      this.trackers = await invoke('get_trackers', { visibleOnly: true });
+    const trackers = await safeInvoke('get_trackers', { visibleOnly: true }, {
+      errorMessage: 'Failed to load trackers'
+    });
+    if (trackers) {
+      this.trackers = trackers;
       this.renderTrackers();
-    } catch (error) {
-      console.error('Failed to load trackers:', error);
     }
   }
 
@@ -45,6 +46,7 @@ class CountdownDisplay extends CampaignAwareMixin(ExtendedHtmlElement) {
       const item = document.createElement('countdown-player-item');
       item.setAttribute('name', tracker.name);
       item.setAttribute('current', tracker.current);
+      item.setAttribute('max', tracker.max);
       if (tracker.hide_name_from_players) {
         item.setAttribute('hide-name', '');
       }

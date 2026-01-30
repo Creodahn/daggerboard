@@ -26,10 +26,19 @@
         <action-button type="button" variant="success" size="small" class="add-tick-label">+ Add Label</action-button>
       </div>
 
+      <form-field
+        name="autoInterval"
+        label="Auto-countdown Interval (seconds)"
+        type="number"
+        value="0"
+        min="0"
+        placeholder="0 = disabled"
+      ></form-field>
+
       <visibility-toggle name="visibleToPlayers"></visibility-toggle>
       <toggle-switch name="hideNameFromPlayers" label="🙈 Hide Name from Players"></toggle-switch>
 
-      <action-button variant="primary" size="large" class="create">Create Tracker</action-button>
+      <action-button variant="primary" size="large" type="submit" class="create">Create Tracker</action-button>
     </form>
   </modal-dialog>
 

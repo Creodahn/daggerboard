@@ -1,6 +1,6 @@
 import ExtendedHtmlElement from '../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../helpers/campaign-aware-mixin.js';
-import { invoke } from '../../../helpers/tauri.js';
+import { safeInvoke } from '../../../helpers/tauri.js';
 
 class FearTracker extends CampaignAwareMixin(ExtendedHtmlElement) {
   static moduleUrl = import.meta.url;
@@ -58,17 +58,21 @@ class FearTracker extends CampaignAwareMixin(ExtendedHtmlElement) {
   }
 
   async loadFearLevel() {
-    try {
-      this.fearLevel = await invoke('get_fear_level');
+    const level = await safeInvoke('get_fear_level', {}, {
+      errorMessage: 'Failed to load fear level'
+    });
+
+    if (level !== null) {
+      this.fearLevel = level;
       this.#counter.value = this.fearLevel;
       this.updateScale();
-    } catch (error) {
-      console.error('Failed to load fear level:', error);
     }
   }
 
   changeFearLevel(amount) {
-    invoke('adjust_fear_level', { amount });
+    safeInvoke('adjust_fear_level', { amount }, {
+      errorMessage: 'Failed to adjust fear level'
+    });
   }
 }
 

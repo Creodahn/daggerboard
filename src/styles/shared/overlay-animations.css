@@ -1,0 +1,58 @@
+/* Shared overlay animation styles
+ * Used by modal-dialog, dropdown-menu, and other overlay components
+ */
+
+/* Base overlay animation - hidden state */
+.overlay-animate {
+  opacity: 0;
+  transform: translateY(var(--overlay-translate-y, -8px)) scale(var(--overlay-scale, 0.95));
+  transition:
+    opacity var(--overlay-duration, 150ms) var(--overlay-easing, ease-out),
+    transform var(--overlay-duration, 150ms) var(--overlay-easing, ease-out);
+}
+
+/* Visible state */
+.overlay-animate.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Variant for modals - larger movement for more dramatic entrance */
+.overlay-animate--modal {
+  --overlay-translate-y: -30px;
+  --overlay-duration: 200ms;
+}
+
+/* Variant for dropdowns - subtle, quick animation */
+.overlay-animate--dropdown {
+  --overlay-translate-y: -8px;
+  --overlay-duration: 150ms;
+}
+
+/* Transform origin utilities */
+.overlay-origin-top-right {
+  transform-origin: top right;
+}
+
+.overlay-origin-top-left {
+  transform-origin: top left;
+}
+
+.overlay-origin-top-center {
+  transform-origin: top center;
+}
+
+.overlay-origin-center {
+  transform-origin: center;
+}
+
+/* Backdrop animation for modals */
+.overlay-backdrop {
+  opacity: 0;
+  transition: opacity var(--overlay-duration, 150ms) ease-out;
+}
+
+.overlay-animate.visible::backdrop,
+.overlay-backdrop.visible {
+  opacity: 1;
+}

@@ -1,0 +1,47 @@
+:host {
+  display: block;
+}
+
+.collapsible-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  padding: var(--space-xs) 0;
+  user-select: none;
+}
+
+.section-header:hover .section-label {
+  color: var(--color-text-primary);
+}
+
+.section-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+  flex: 1;
+}
+
+/* Content area with collapse animation */
+.section-content {
+  overflow: hidden;
+  transition: max-height var(--transition-base), opacity var(--transition-base);
+  max-height: 1000px;
+  opacity: 1;
+}
+
+.section-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* Slot for header actions (right side) */
+::slotted([slot="header-actions"]) {
+  margin-left: auto;
+}

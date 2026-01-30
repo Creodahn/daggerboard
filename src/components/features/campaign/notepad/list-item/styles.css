@@ -1,0 +1,42 @@
+@import '/styles/shared/utilities.css';
+
+:host {
+  display: block;
+}
+
+.note-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-base);
+}
+
+.note-list-item:hover {
+  background: var(--color-surface-hover);
+}
+
+.note-list-item.current {
+  background: var(--color-primary-light);
+}
+
+.note-title {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+  flex: 1;
+  min-width: 0;
+}
+
+.note-list-item.current .note-title {
+  font-weight: var(--font-semibold);
+  color: var(--color-primary);
+}
+
+.note-date {
+  font-size: var(--text-2xs);
+  color: var(--color-text-muted);
+  margin-left: var(--space-sm);
+  flex-shrink: 0;
+}

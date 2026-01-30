@@ -1,7 +1,7 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
 import ToastMessage from '../../../feedback/toast-message/component.js';
-import { invoke } from '../../../../helpers/tauri.js';
+import { safeInvoke } from '../../../../helpers/tauri.js';
 import '../../../layout/setting-row/component.js';
 
 class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
@@ -38,16 +38,18 @@ class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
   }
 
   async loadSettings() {
-    try {
-      this.#currentCampaign = await invoke('get_current_campaign');
-      if (this.#currentCampaign) {
-        this.#settings = await invoke('get_campaign_settings', {
-          campaignId: this.#currentCampaign.id
-        });
+    this.#currentCampaign = await safeInvoke('get_current_campaign', {}, {
+      errorMessage: 'Failed to load current campaign'
+    });
+
+    if (this.#currentCampaign) {
+      this.#settings = await safeInvoke('get_campaign_settings', {
+        campaignId: this.#currentCampaign.id
+      }, { errorMessage: 'Failed to load campaign settings' });
+
+      if (this.#settings) {
         this.render();
       }
-    } catch (error) {
-      console.error('Failed to load campaign settings:', error);
     }
   }
 
@@ -120,15 +122,15 @@ class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
         const newName = e.detail.value.trim();
         if (!newName) return;
 
-        try {
-          const updated = await invoke('rename_campaign', {
-            id: this.#currentCampaign.id,
-            name: newName
-          });
+        const updated = await safeInvoke('rename_campaign', {
+          id: this.#currentCampaign.id,
+          name: newName
+        }, { errorMessage: 'Failed to rename campaign' });
+
+        if (updated) {
           this.#currentCampaign = updated;
           this.showStatus('Campaign renamed successfully', 'success');
-        } catch (error) {
-          console.error('Failed to rename campaign:', error);
+        } else {
           // Revert to original name
           nameInput.value = this.#currentCampaign.name;
           this.showStatus('Failed to rename campaign', 'error');
@@ -140,15 +142,14 @@ class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
     const massiveDamageToggle = this.$('#allow-massive-damage');
     if (massiveDamageToggle) {
       massiveDamageToggle.addEventListener('toggle-change', async (e) => {
-        try {
-          await invoke('update_campaign_settings', {
-            campaignId: this.#currentCampaign.id,
-            settings: {
-              allow_massive_damage: e.detail.checked
-            }
-          });
-        } catch (error) {
-          console.error('Failed to update settings:', error);
+        const result = await safeInvoke('update_campaign_settings', {
+          campaignId: this.#currentCampaign.id,
+          settings: {
+            allow_massive_damage: e.detail.checked
+          }
+        }, { errorMessage: 'Failed to update settings' });
+
+        if (result === null) {
           // Revert toggle on error
           this.updateToggles();
         }
@@ -181,14 +182,14 @@ class SettingsPanel extends CampaignAwareMixin(ExtendedHtmlElement) {
   }
 
   async confirmDeleteCampaign() {
-    try {
-      await invoke('delete_campaign', { id: this.#currentCampaign.id });
+    const result = await safeInvoke('delete_campaign', { id: this.#currentCampaign.id }, {
+      errorMessage: 'Failed to delete campaign'
+    });
+
+    if (result !== null) {
       this.$('.delete-campaign-modal').close();
       // Close the settings window after deletion
       window.close();
-    } catch (error) {
-      console.error('Failed to delete campaign:', error);
-      alert(`Failed to delete campaign: ${error}`);
     }
   }
 

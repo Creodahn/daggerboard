@@ -1,6 +1,6 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { CampaignAwareMixin } from '../../../../helpers/campaign-aware-mixin.js';
-import { invoke } from '../../../../helpers/tauri.js';
+import { safeInvoke } from '../../../../helpers/tauri.js';
 import '../../../overlays/modal-dialog/component.js';
 import '../../../ui/form-field/component.js';
 import '../../../ui/action-button/component.js';
@@ -62,11 +62,11 @@ class PlayerCharacterEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
   }
 
   async loadCharacter(id) {
-    try {
-      const character = await invoke('get_player_character', { id });
+    const character = await safeInvoke('get_player_character', { id }, {
+      errorMessage: 'Failed to load character'
+    });
+    if (character) {
       this.populateForm(character);
-    } catch (error) {
-      console.error('Failed to load character:', error);
     }
   }
 
@@ -223,22 +223,21 @@ class PlayerCharacterEditor extends CampaignAwareMixin(ExtendedHtmlElement) {
       stress_max: parseInt(this.getFieldValue('stress_max'), 10) || 6,
     };
 
-    try {
-      if (this.#editingId) {
-        await invoke('update_player_character', {
-          id: this.#editingId,
-          data
-        });
-      } else {
-        await invoke('create_player_character', {
-          campaignId: this.currentCampaignId,
-          data
-        });
-      }
+    let result;
+    if (this.#editingId) {
+      result = await safeInvoke('update_player_character', {
+        id: this.#editingId,
+        data
+      }, { errorMessage: 'Failed to update character' });
+    } else {
+      result = await safeInvoke('create_player_character', {
+        campaignId: this.currentCampaignId,
+        data
+      }, { errorMessage: 'Failed to create character' });
+    }
 
+    if (result !== null) {
       this.close();
-    } catch (error) {
-      console.error('Failed to save character:', error);
     }
   }
 }

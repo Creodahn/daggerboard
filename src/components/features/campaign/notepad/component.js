@@ -1,10 +1,12 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import { debounce } from '../../../../helpers/debounce.js';
+import { formatDateTime, formatShortDate, parseDbTimestamp } from '../../../../helpers/date-utils.js';
 import ToastMessage from '../../../feedback/toast-message/component.js';
 import createWindow from '../../../../helpers/create-window.js';
-import { invoke, listen, emitTo, getCurrentWindow, getAllWindows } from '../../../../helpers/tauri.js';
+import { safeInvoke, listen, emitTo, getCurrentWindow, getAllWindows } from '../../../../helpers/tauri.js';
 import '../../../ui/action-button/component.js';
 import '../../../feedback/loading-spinner/component.js';
+import './list-item/component.js';
 
 /**
  * Campaign notepad component with multi-note support and auto-save.
@@ -146,36 +148,37 @@ class CampaignNotepad extends ExtendedHtmlElement {
   }
 
   async loadCampaign() {
-    try {
-      this.#currentCampaign = await invoke('get_current_campaign');
-      if (!this.#currentCampaign) {
-        this.#textarea.disabled = true;
-        this.#textarea.placeholder = 'No campaign selected';
-      }
-    } catch (error) {
-      console.error('Failed to load campaign:', error);
+    this.#currentCampaign = await safeInvoke('get_current_campaign', {}, {
+      errorMessage: 'Failed to load campaign'
+    });
+    if (!this.#currentCampaign) {
+      this.#textarea.disabled = true;
+      this.#textarea.placeholder = 'No campaign selected';
     }
   }
 
   async loadNotes() {
     if (!this.#currentCampaign) return;
 
-    try {
-      this.#notes = await invoke('get_campaign_notes', {
-        campaignId: this.#currentCampaign.id
-      });
+    const notes = await safeInvoke('get_campaign_notes', {
+      campaignId: this.#currentCampaign.id
+    }, { errorMessage: 'Failed to load notes' });
+
+    if (notes) {
+      this.#notes = notes;
       this.renderNotesList();
-    } catch (error) {
-      console.error('Failed to load notes:', error);
     }
   }
 
   async loadNote(noteId) {
-    try {
-      this.#currentNote = await invoke('get_note', { noteId });
+    const note = await safeInvoke('get_note', { noteId }, {
+      errorMessage: 'Failed to load note'
+    });
+
+    if (note) {
+      this.#currentNote = note;
       this.updateDisplay();
-    } catch (error) {
-      console.error('Failed to load note:', error);
+    } else {
       ToastMessage.error('Failed to load note');
     }
   }
@@ -214,17 +217,8 @@ class CampaignNotepad extends ExtendedHtmlElement {
   }
 
   getDefaultTitle(note) {
-    // SQLite stores datetime in UTC without timezone indicator
-    // Append 'Z' to parse as UTC, then format in local timezone
-    const dateStr = note.created_at.endsWith('Z') ? note.created_at : note.created_at + 'Z';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit'
-    });
+    const date = parseDbTimestamp(note.created_at);
+    return formatDateTime(date);
   }
 
   renderNotesList() {
@@ -233,35 +227,34 @@ class CampaignNotepad extends ExtendedHtmlElement {
       return;
     }
 
-    this.#notesList.innerHTML = this.#notes.map(note => {
+    this.#notesList.innerHTML = '';
+
+    this.#notes.forEach(note => {
       const isCurrent = note.id === this.#currentNote?.id;
       const title = this.getNoteDisplayTitle(note);
-      const date = new Date(note.updated_at);
-      const dateStr = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      const date = parseDbTimestamp(note.updated_at);
+      const dateDisplay = formatShortDate(date);
 
-      return `
-        <div class="note-list-item ${isCurrent ? 'current' : ''}" data-note-id="${note.id}">
-          <span class="note-list-item-title truncate">${this.escapeHtml(title)}</span>
-          <span class="note-list-item-date">${dateStr}</span>
-        </div>
-      `;
-    }).join('');
+      const item = document.createElement('note-list-item');
+      item.setAttribute('note-id', note.id);
+      item.setAttribute('title', title);
+      item.setAttribute('date', dateDisplay);
+      if (isCurrent) {
+        item.setAttribute('current', '');
+      }
 
-    // Add click listeners - open each note in its own window
-    this.#notesList.querySelectorAll('.note-list-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const noteId = item.dataset.noteId;
-        const isCurrent = item.classList.contains('current');
-
+      item.addEventListener('note-select', (e) => {
         if (isCurrent) {
           // Already viewing this note, just close dropdown
           this.#dropdown.closeDropdown();
         } else {
           // Open in new window
-          this.openNoteInNewWindow(noteId);
+          this.openNoteInNewWindow(e.detail.noteId);
           this.#dropdown.closeDropdown();
         }
       });
+
+      this.#notesList.appendChild(item);
     });
   }
 
@@ -279,28 +272,21 @@ class CampaignNotepad extends ExtendedHtmlElement {
     }, { focusIfExists: true });
   }
 
-  escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
   async createNewNote() {
     if (!this.#currentCampaign) return;
 
-    try {
-      const note = await invoke('create_note', {
-        campaignId: this.#currentCampaign.id,
-        title: null
-      });
+    const note = await safeInvoke('create_note', {
+      campaignId: this.#currentCampaign.id,
+      title: null
+    }, { errorMessage: 'Failed to create note' });
 
+    if (note) {
       this.#dropdown.closeDropdown();
 
       // Open the new note in a new window
       const title = this.getNoteDisplayTitle(note);
       await this.openNoteInNewWindow(note.id, title);
-    } catch (error) {
-      console.error('Failed to create note:', error);
+    } else {
       ToastMessage.error('Failed to create note');
     }
   }
@@ -331,44 +317,49 @@ class CampaignNotepad extends ExtendedHtmlElement {
     const currentWindow = getCurrentWindow();
     const currentLabel = currentWindow.label;
 
-    try {
-      await invoke('delete_note', { noteId: deletedNoteId });
+    const result = await safeInvoke('delete_note', { noteId: deletedNoteId }, {
+      errorMessage: 'Failed to delete note'
+    });
 
-      // Refresh notes list
-      await this.loadNotes();
+    if (result === null) {
+      ToastMessage.error('Failed to delete note');
+      return;
+    }
 
-      // Check if there's another notepad window already open
-      const allWindows = await getAllWindows();
-      const otherNotepadWindow = allWindows.find(win =>
-        win.label.startsWith('notepad-') && win.label !== currentLabel
-      );
+    // Refresh notes list
+    await this.loadNotes();
 
-      if (otherNotepadWindow) {
-        // Send toast message to the other window, then focus it and close this one
-        await emitTo(otherNotepadWindow.label, 'show-toast', {
-          type: 'success',
-          message: `Deleted "${deletedTitle}"`
-        });
-        await otherNotepadWindow.unminimize();
-        await otherNotepadWindow.show();
-        await otherNotepadWindow.setFocus();
-        await currentWindow.close();
-      } else if (this.#notes.length > 0) {
-        // No other window open - load the most recent remaining note
-        await this.loadNote(this.#notes[0].id);
-        ToastMessage.success(`Deleted "${deletedTitle}"`);
-      } else {
-        // No notes left - create a new one
-        const newNote = await invoke('create_note', {
-          campaignId: this.#currentCampaign.id,
-          title: null
-        });
+    // Check if there's another notepad window already open
+    const allWindows = await getAllWindows();
+    const otherNotepadWindow = allWindows.find(win =>
+      win.label.startsWith('notepad-') && win.label !== currentLabel
+    );
+
+    if (otherNotepadWindow) {
+      // Send toast message to the other window, then focus it and close this one
+      await emitTo(otherNotepadWindow.label, 'show-toast', {
+        type: 'success',
+        message: `Deleted "${deletedTitle}"`
+      });
+      await otherNotepadWindow.unminimize();
+      await otherNotepadWindow.show();
+      await otherNotepadWindow.setFocus();
+      await currentWindow.close();
+    } else if (this.#notes.length > 0) {
+      // No other window open - load the most recent remaining note
+      await this.loadNote(this.#notes[0].id);
+      ToastMessage.success(`Deleted "${deletedTitle}"`);
+    } else {
+      // No notes left - create a new one
+      const newNote = await safeInvoke('create_note', {
+        campaignId: this.#currentCampaign.id,
+        title: null
+      }, { errorMessage: 'Failed to create new note' });
+
+      if (newNote) {
         await this.loadNote(newNote.id);
         ToastMessage.success(`Deleted "${deletedTitle}"`);
       }
-    } catch (error) {
-      console.error('Failed to delete note:', error);
-      ToastMessage.error('Failed to delete note');
     }
   }
 
@@ -407,16 +398,16 @@ class CampaignNotepad extends ExtendedHtmlElement {
   async save() {
     if (!this.#currentNote) return;
 
-    try {
-      const title = this.#titleInput.value.trim() || null;
-      const content = this.#textarea.value;
+    const title = this.#titleInput.value.trim() || null;
+    const content = this.#textarea.value;
 
-      await invoke('update_note', {
-        noteId: this.#currentNote.id,
-        title,
-        content
-      });
+    const result = await safeInvoke('update_note', {
+      noteId: this.#currentNote.id,
+      title,
+      content
+    }, { errorMessage: 'Failed to save note' });
 
+    if (result !== null) {
       // Update local state
       this.#currentNote.title = title;
       this.#currentNote.content = content;
@@ -426,8 +417,7 @@ class CampaignNotepad extends ExtendedHtmlElement {
       this.updateWindowTitle();
 
       this.showSaved();
-    } catch (error) {
-      console.error('Failed to save note:', error);
+    } else {
       this.showError();
       ToastMessage.error('Failed to save note');
     }

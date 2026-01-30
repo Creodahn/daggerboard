@@ -11,27 +11,37 @@ export const { WebviewWindow } = window.__TAURI__.webviewWindow;
 
 /**
  * Wrapper for invoke that handles common error patterns.
- * Logs errors and optionally shows user feedback.
+ * Shows toast errors by default and logs to console.
  *
  * @param {string} command - The Tauri command to invoke
  * @param {Object} [args] - Arguments to pass to the command
  * @param {Object} [options] - Options for error handling
  * @param {string} [options.errorMessage] - Custom error message prefix
- * @param {boolean} [options.showToast] - Show toast on error (requires ToastMessage import)
- * @param {boolean} [options.rethrow] - Re-throw the error after logging
- * @returns {Promise<any>} - The result of the invoke call
+ * @param {boolean} [options.showToast=true] - Show toast on error (default: true)
+ * @param {boolean} [options.silent] - Suppress both toast and console logging
+ * @param {boolean} [options.rethrow] - Re-throw the error after handling
+ * @returns {Promise<any>} - The result of the invoke call, or null on error
  */
 export async function safeInvoke(command, args = {}, options = {}) {
-  const { errorMessage, showToast = false, rethrow = false } = options;
+  const { errorMessage, showToast = true, silent = false, rethrow = false } = options;
 
   try {
     return await invoke(command, args);
   } catch (error) {
     const message = errorMessage || `Failed to execute ${command}`;
-    console.error(`${message}:`, error);
 
-    if (showToast && window.ToastMessage) {
-      window.ToastMessage.error(message);
+    if (!silent) {
+      console.error(`${message}:`, error);
+
+      if (showToast) {
+        // Dynamically import to avoid circular dependencies
+        try {
+          const { default: ToastMessage } = await import('../components/feedback/toast-message/component.js');
+          ToastMessage.error(message);
+        } catch {
+          // Toast component not available, already logged to console
+        }
+      }
     }
 
     if (rethrow) {

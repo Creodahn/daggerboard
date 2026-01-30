@@ -34,6 +34,8 @@ export function getUrgencyClass(current, thresholds) {
 
 /**
  * Get urgency level based on percentage remaining.
+ * Urgency kicks in at ~60% remaining and increases as it approaches 0%.
+ *
  * @param {number} current - Current value
  * @param {number} max - Maximum value
  * @returns {'critical' | 'urgent' | 'warning' | 'normal'} Urgency level
@@ -43,7 +45,8 @@ export function getUrgencyByPercentage(current, max) {
   const percentage = (current / max) * 100;
 
   if (percentage <= 0) return 'critical';
-  if (percentage <= 20) return 'urgent';
-  if (percentage <= 40) return 'warning';
+  if (percentage <= 20) return 'critical';
+  if (percentage <= 40) return 'urgent';
+  if (percentage <= 60) return 'warning';
   return 'normal';
 }

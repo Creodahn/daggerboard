@@ -1,4 +1,6 @@
 import ExtendedHtmlElement from '../../base/extended-html-element.js';
+import { lockScroll, unlockScroll } from '../../../helpers/scroll-lock.js';
+import { animateOverlayOpen, animateOverlayClose } from '../../../helpers/overlay-animation.js';
 
 class ModalDialog extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
@@ -7,6 +9,7 @@ class ModalDialog extends ExtendedHtmlElement {
   #dialog;
   #titleEl;
   #closeBtn;
+  #isClosing = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
@@ -57,10 +60,10 @@ class ModalDialog extends ExtendedHtmlElement {
    * Open the modal dialog
    */
   open() {
+    this.#isClosing = false;
+    lockScroll();
     this.#dialog.showModal();
-    // Trigger reflow then add visible class for enter animation
-    void this.#dialog.offsetHeight;
-    this.#dialog.classList.add('visible');
+    animateOverlayOpen(this.#dialog);
     this.emit('modal-open');
   }
 
@@ -80,26 +83,15 @@ class ModalDialog extends ExtendedHtmlElement {
    * Close the modal dialog
    */
   close() {
-    // Remove visible class to trigger exit animation
-    this.#dialog.classList.remove('visible');
+    if (this.#isClosing || !this.#dialog.open) return;
+    this.#isClosing = true;
 
-    const finishClose = () => {
-      if (!this.#dialog.open) return; // Already closed
+    animateOverlayClose(this.#dialog, () => {
       this.#dialog.close();
+      unlockScroll();
       this.emit('modal-close');
-    };
-
-    // Wait for transition to complete before closing
-    // Use opacity as the trigger since it's the primary visual indicator
-    const handler = (e) => {
-      if (e.propertyName === 'opacity') {
-        finishClose();
-      }
-    };
-    this.#dialog.addEventListener('transitionend', handler, { once: true });
-
-    // Fallback timeout in case transitionend doesn't fire
-    setTimeout(finishClose, 350);
+      this.#isClosing = false;
+    }, { timeout: 250 });
   }
 
   /**

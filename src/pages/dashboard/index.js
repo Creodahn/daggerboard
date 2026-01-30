@@ -1,4 +1,8 @@
 import '../../components/base/extended-html-element.js';
+import { initTheme } from '../../helpers/theme.js';
+
+// Initialize theme as early as possible
+initTheme();
 
 // Layout components
 import '../../components/layout/page-container/component.js';

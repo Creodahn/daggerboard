@@ -1,3 +1,5 @@
+@import '/styles/shared/overlay-animations.css';
+
 :host {
   display: inline-block;
   position: relative;
@@ -34,7 +36,7 @@
   color: var(--color-text-primary);
 }
 
-/* Popover content - using top layer */
+/* Popover content - uses shared overlay animation */
 .dropdown-content {
   margin: 0;
   padding: 0;
@@ -44,25 +46,11 @@
   box-shadow: var(--shadow-dropdown);
   min-width: 200px;
   overflow: visible;
+  /* Dropdown-specific: animate from top-right (near trigger) */
+  transform-origin: top right;
 }
 
 /* Remove default popover styling */
 .dropdown-content::backdrop {
   background: transparent;
-}
-
-/* Animation for opening */
-.dropdown-content:popover-open {
-  animation: slideDown var(--transition-base) ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }

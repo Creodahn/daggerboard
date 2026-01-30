@@ -1,1 +1,27 @@
-<card-container></card-container>
+<card-container>
+  <flex-row justify="space-between" align="center" gap="lg" class="tracker-header">
+    <flex-row align="center" gap="md" class="tracker-info">
+      <h4 class="truncate tracker-name"></h4>
+      <type-badge class="tracker-type-badge"></type-badge>
+      <span class="auto-interval-badge" hidden>⏱ <span class="interval-value"></span>s</span>
+    </flex-row>
+    <flex-row align="center" gap="sm" class="tracker-actions">
+      <action-button class="play-pause-btn" variant="success" size="small" hidden>▶</action-button>
+      <counter-control></counter-control>
+      <dropdown-menu>
+        <dropdown-menu-item slot="content" keep-open>
+          <visibility-toggle compact></visibility-toggle>
+        </dropdown-menu-item>
+        <dropdown-menu-item slot="content" keep-open>
+          <toggle-switch name="hide-name" label="🙈 Hide Name from Players" label-first></toggle-switch>
+        </dropdown-menu-item>
+        <dropdown-menu-item slot="content" variant="delete" keep-open>
+          <delete-trigger>
+            <span slot="trigger">🗑️ Delete Tracker</span>
+          </delete-trigger>
+        </dropdown-menu-item>
+      </dropdown-menu>
+    </flex-row>
+  </flex-row>
+  <div class="current-label" hidden></div>
+</card-container>

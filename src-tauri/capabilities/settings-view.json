@@ -6,12 +6,15 @@
   "permissions": [
     "core:default",
     "core:event:allow-listen",
-    "core:event:allow-emit-to",
+    "core:event:allow-emit",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
     {
       "identifier": "core:event:allow-listen",
       "allow": [
         { "event": "campaign-settings-updated" },
-        { "event": "current-campaign-changed" }
+        { "event": "current-campaign-changed" },
+        { "event": "app://window-close-request" }
       ]
     }
   ]

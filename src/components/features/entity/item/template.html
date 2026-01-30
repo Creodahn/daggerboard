@@ -1,1 +1,53 @@
-<card-container class="entity-container"></card-container>
+<card-container class="entity-container">
+  <flex-row justify="space-between" align="center" gap="lg" class="entity-header">
+    <flex-row align="center" gap="sm" class="entity-name-section">
+      <collapse-toggle expanded></collapse-toggle>
+      <type-badge class="entity-type-badge" variant="pill"></type-badge>
+      <input type="text" class="entity-name-input">
+    </flex-row>
+    <dropdown-menu class="hp-dropdown">
+      <hp-bar slot="trigger" show-text></hp-bar>
+      <div slot="content" class="hp-menu-content">
+        <div class="hp-menu-section damage-section">
+          <section-label icon="⚔️">Damage</section-label>
+          <div class="threshold-buttons">
+            <button class="threshold minor" data-hp-loss="1" data-threshold="minor">
+              Minor: <span class="threshold-value minor-value"></span>
+            </button>
+            <button class="threshold major" data-hp-loss="2" data-threshold="major">
+              Major: <span class="threshold-value major-value"></span>
+            </button>
+            <button class="threshold severe" data-hp-loss="3" data-threshold="severe">
+              Severe: <span class="threshold-value severe-value"></span>
+            </button>
+            <button class="threshold massive" data-hp-loss="4" data-threshold="massive" hidden>
+              Massive: <span class="threshold-value massive-value"></span>
+            </button>
+          </div>
+        </div>
+        <div class="hp-menu-section heal-section">
+          <section-label icon="💚">Heal</section-label>
+          <input-group
+            type="number"
+            min="1"
+            value="1"
+            placeholder="Amount"
+            button-text="Heal"
+            button-variant="success"
+            class="heal-input-group"
+          ></input-group>
+        </div>
+      </div>
+    </dropdown-menu>
+    <dropdown-menu>
+      <dropdown-menu-item slot="content" keep-open>
+        <visibility-toggle compact></visibility-toggle>
+      </dropdown-menu-item>
+      <dropdown-menu-item slot="content" variant="delete" keep-open>
+        <delete-trigger>
+          <span slot="trigger">🗑️ Delete Entity</span>
+        </delete-trigger>
+      </dropdown-menu-item>
+    </dropdown-menu>
+  </flex-row>
+</card-container>

@@ -30,9 +30,11 @@ function decrementWindowCreationCount() {
  * @param {Object} behavior - Behavior options
  * @param {boolean} behavior.focusIfExists - If true, focus existing window instead of recreating (default: false)
  * @param {boolean} behavior.cascade - If true, offset window position for cascading effect (default: true)
+ * @param {boolean} behavior.silentIfExists - If true, silently return null if window exists (default: false)
+ * @returns {Promise<WebviewWindow|null>} The window instance, or null if silentIfExists and window exists
  */
 export default async function createWindow(name, options = {}, behavior = {}) {
-  const { focusIfExists = false, cascade = true } = behavior;
+  const { focusIfExists = false, cascade = true, silentIfExists = false } = behavior;
 
   const existing = await WebviewWindow.getByLabel(name);
   if (existing) {
@@ -47,9 +49,20 @@ export default async function createWindow(name, options = {}, behavior = {}) {
         console.error(`Failed to focus window "${name}":`, e);
       }
       return existing;
+    } else if (silentIfExists) {
+      // Silently return - caller doesn't want an error or close
+      return null;
     } else {
-      console.log(`Window "${name}" already exists, closing it first`);
-      await existing.close();
+      // Request the window to close itself and wait a moment
+      // Note: Direct close may fail due to permissions, so we import requestWindowClose
+      try {
+        const { requestWindowClose } = await import('./window-lifecycle.js');
+        await requestWindowClose(name);
+        // Give a small delay for the close to process
+        await new Promise(resolve => setTimeout(resolve, 100));
+      } catch {
+        console.warn(`Could not request window "${name}" to close`);
+      }
     }
   }
 
@@ -69,26 +82,44 @@ export default async function createWindow(name, options = {}, behavior = {}) {
   }
 
   console.log(`Creating window "${name}" with URL: ${options.url}`);
-  const webview = new WebviewWindow(name, finalOptions);
 
-  webview.once('tauri://created', () => {
-    console.log(`Webview "${name}" created successfully`);
-  });
+  return new Promise((resolve) => {
+    const webview = new WebviewWindow(name, finalOptions);
 
-  webview.once('tauri://error', error => {
-    console.error(`Error creating webview "${name}":`, error);
-    // Decrement on error since window wasn't actually created
+    webview.once('tauri://created', () => {
+      console.log(`Webview "${name}" created successfully`);
+      resolve(webview);
+    });
+
+    webview.once('tauri://error', error => {
+      // Check if it's just a "window already exists" error - this can happen in race conditions
+      if (error?.payload?.includes?.('already exists')) {
+        console.log(`Window "${name}" already exists (race condition), attempting to focus`);
+        WebviewWindow.getByLabel(name).then(async (existing) => {
+          if (existing && focusIfExists) {
+            try {
+              await existing.unminimize();
+              await existing.show();
+              await existing.setFocus();
+            } catch { /* ignore focus errors */ }
+          }
+          resolve(existing);
+        });
+      } else {
+        console.error(`Error creating webview "${name}":`, error);
+        resolve(null);
+      }
+      // Decrement on error since window wasn't actually created
+      if (cascade) {
+        decrementWindowCreationCount();
+      }
+    });
+
+    // Decrement cascade counter when window is destroyed
     if (cascade) {
-      decrementWindowCreationCount();
+      webview.once('tauri://destroyed', () => {
+        decrementWindowCreationCount();
+      });
     }
   });
-
-  // Decrement cascade counter when window is destroyed
-  if (cascade) {
-    webview.once('tauri://destroyed', () => {
-      decrementWindowCreationCount();
-    });
-  }
-
-  return webview;
 }

@@ -1,12 +1,15 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
+import { formatRelativeDate } from '../../../../helpers/date-utils.js';
+import { safeJsonParse } from '../../../../helpers/string-utils.js';
 import '../shape/component.js';
+import '../history-item/component.js';
 import '../../../ui/input-group/component.js';
 import '../../../ui/toggle-switch/component.js';
 import '../../../ui/action-button/component.js';
-import '../../../ui/collapse-toggle/component.js';
+import '../../../ui/collapsible-section/component.js';
 import '../../../layout/flex-row/component.js';
 import '../../../layout/split-panel/component.js';
-import { emit, invoke, listen } from '../../../../helpers/tauri.js';
+import { emit, safeInvoke } from '../../../../helpers/tauri.js';
 
 /**
  * Dice bag component with history and custom roll notation support.
@@ -174,14 +177,7 @@ class DiceRoller extends ExtendedHtmlElement {
       const latestRoll = firstGroup.rolls[0];
 
       // Parse dice_data if it's a string
-      let diceResults = latestRoll.dice_data;
-      if (typeof diceResults === 'string') {
-        try {
-          diceResults = JSON.parse(diceResults);
-        } catch {
-          diceResults = [];
-        }
-      }
+      const diceResults = safeJsonParse(latestRoll.dice_data, []);
 
       // Emit in the format expected by the player view
       emit('dice-roll-shared', {
@@ -196,13 +192,11 @@ class DiceRoller extends ExtendedHtmlElement {
   }
 
   async loadCampaignAndRolls() {
-    try {
-      const campaign = await invoke('get_current_campaign');
-      this.#campaignId = campaign?.id;
-      await this.loadRolls();
-    } catch (error) {
-      console.error('Failed to load campaign:', error);
-    }
+    const campaign = await safeInvoke('get_current_campaign', {}, {
+      errorMessage: 'Failed to load campaign'
+    });
+    this.#campaignId = campaign?.id;
+    await this.loadRolls();
   }
 
   async loadRolls({ expandFirst = false } = {}) {
@@ -212,55 +206,49 @@ class DiceRoller extends ExtendedHtmlElement {
       return;
     }
 
-    try {
-      const rollsByDate = await invoke('get_dice_rolls_by_date', {
-        campaignId: this.#campaignId,
-        limit: 100
-      });
+    const rollsByDate = await safeInvoke('get_dice_rolls_by_date', {
+      campaignId: this.#campaignId,
+      limit: 100
+    }, { errorMessage: 'Failed to load rolls' });
 
-      // Preserve expanded state from existing groups, or default to first expanded
-      const existingState = new Map(
-        this.#rollsByDate.map(g => [g.date, g.expanded])
-      );
+    if (!rollsByDate) return;
 
-      this.#rollsByDate = rollsByDate.map((group, index) => {
-        // If expandFirst is true, always expand the first group (new roll just added)
-        if (index === 0 && expandFirst) {
-          return { ...group, expanded: true, animateOpen: true };
-        }
-        // Otherwise preserve existing state or default to first expanded
-        const wasExpanded = existingState.get(group.date);
-        return {
-          ...group,
-          expanded: wasExpanded !== undefined ? wasExpanded : index === 0,
-          animateOpen: false
-        };
-      });
+    // Preserve expanded state from existing groups, or default to first expanded
+    const existingState = new Map(
+      this.#rollsByDate.map(g => [g.date, g.expanded])
+    );
 
-      this.renderHistory();
-    } catch (error) {
-      console.error('Failed to load rolls:', error);
-    }
+    this.#rollsByDate = rollsByDate.map((group, index) => {
+      // If expandFirst is true, always expand the first group (new roll just added)
+      if (index === 0 && expandFirst) {
+        return { ...group, expanded: true, animateOpen: true };
+      }
+      // Otherwise preserve existing state or default to first expanded
+      const wasExpanded = existingState.get(group.date);
+      return {
+        ...group,
+        expanded: wasExpanded !== undefined ? wasExpanded : index === 0,
+        animateOpen: false
+      };
+    });
+
+    this.renderHistory();
   }
 
   async saveRoll(rollResult) {
     if (!this.#campaignId) return;
 
-    try {
-      await invoke('save_dice_roll', {
-        campaignId: this.#campaignId,
-        notation: rollResult.notation,
-        diceData: JSON.stringify(rollResult.diceResults || []),
-        modifier: rollResult.modifier || 0,
-        total: rollResult.total,
-        isCrit: rollResult.isCrit || false,
-        isFumble: rollResult.isFumble || false,
-        sharedWithPlayers: this.#shareCheckbox.checked
-      });
-      // The dice-roll-saved event will trigger a reload
-    } catch (error) {
-      console.error('Failed to save roll:', error);
-    }
+    await safeInvoke('save_dice_roll', {
+      campaignId: this.#campaignId,
+      notation: rollResult.notation,
+      diceData: JSON.stringify(rollResult.diceResults || []),
+      modifier: rollResult.modifier || 0,
+      total: rollResult.total,
+      isCrit: rollResult.isCrit || false,
+      isFumble: rollResult.isFumble || false,
+      sharedWithPlayers: this.#shareCheckbox.checked
+    }, { errorMessage: 'Failed to save roll' });
+    // The dice-roll-saved event will trigger a reload
   }
 
   updateGhostPosition(x, y) {
@@ -475,180 +463,63 @@ class DiceRoller extends ExtendedHtmlElement {
       return;
     }
 
-    // Render each date section
+    // Render each date section using collapsible-section
     this.#rollsByDate.forEach((group, groupIndex) => {
-      const section = document.createElement('div');
+      // Parse date string as local date (YYYY-MM-DD format)
+      const dateObj = new Date(group.date + 'T00:00:00');
+      const dateLabel = formatRelativeDate(dateObj);
+
+      const section = document.createElement('collapsible-section');
       section.className = 'date-section';
+      section.setAttribute('label', dateLabel);
+      section.setAttribute('size', 'small');
 
-      // Collapsible header with label
-      const header = document.createElement('div');
-      header.className = 'date-header';
-
-      const toggle = document.createElement('collapse-toggle');
-      toggle.setAttribute('size', 'small');
-      if (group.expanded) {
-        toggle.setAttribute('expanded', '');
+      // Set initial expanded state (animate if needed)
+      if (group.animateOpen) {
+        // Start collapsed, then expand after a frame to trigger animation
+        section.expanded = false;
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            section.expanded = true;
+            group.animateOpen = false;
+          });
+        });
+      } else {
+        section.expanded = group.expanded;
       }
 
-      const label = document.createElement('span');
-      label.className = 'date-label';
-      label.textContent = this.formatDate(group.date);
-
-      header.appendChild(toggle);
-      header.appendChild(label);
-
-      // Click on header or toggle to expand/collapse
-      header.addEventListener('click', () => {
-        group.expanded = !group.expanded;
-        toggle.expanded = group.expanded;
-        rollsContainer.classList.toggle('collapsed', !group.expanded);
+      // Track expand/collapse state
+      section.addEventListener('section-toggle', (e) => {
+        group.expanded = e.detail.expanded;
       });
 
-      section.appendChild(header);
-
-      // Rolls container
+      // Add rolls to section
       const rollsContainer = document.createElement('div');
-      rollsContainer.className = 'date-rolls';
-
-      // If animating open, start collapsed then remove after a frame
-      if (group.animateOpen) {
-        rollsContainer.classList.add('collapsed');
-      } else if (!group.expanded) {
-        rollsContainer.classList.add('collapsed');
-      }
+      rollsContainer.className = 'date-rolls-content';
 
       group.rolls.forEach((roll, rollIndex) => {
         const isFirst = groupIndex === 0 && rollIndex === 0;
-        const item = this.createRollItem(roll, isFirst);
+        const item = document.createElement('dice-history-item');
+        item.roll = roll;
+        item.latest = isFirst;
+        item.addEventListener('delete-roll', (e) => this.deleteRoll(e.detail.id));
         rollsContainer.appendChild(item);
       });
 
       section.appendChild(rollsContainer);
       this.#historyList.appendChild(section);
-
-      // Animate open after DOM is ready
-      if (group.animateOpen) {
-        group.animateOpen = false; // Only animate once
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            rollsContainer.classList.remove('collapsed');
-          });
-        });
-      }
     });
-  }
-
-  createRollItem(roll, isLatest = false) {
-    const item = document.createElement('div');
-    item.className = `history-item${isLatest ? ' latest' : ''}`;
-
-    // Dice display section
-    const diceDisplay = document.createElement('div');
-    diceDisplay.className = 'roll-dice';
-
-    // Parse dice_data from JSON string if needed
-    let diceResults = roll.dice_data;
-    if (typeof diceResults === 'string') {
-      try {
-        diceResults = JSON.parse(diceResults);
-      } catch {
-        diceResults = [];
-      }
-    }
-
-    if (diceResults && diceResults.length > 0) {
-      diceResults.forEach((d, i) => {
-        if (i > 0) {
-          const plus = document.createElement('span');
-          plus.className = 'roll-operator';
-          plus.textContent = '+';
-          diceDisplay.appendChild(plus);
-        }
-        const die = document.createElement('die-shape');
-        die.setAttribute('sides', d.sides);
-        die.setAttribute('result', d.result);
-        if (d.colorIndex !== undefined) {
-          die.setAttribute('color', d.colorIndex);
-        }
-        die.style.setProperty('--die-size', '28px');
-        diceDisplay.appendChild(die);
-      });
-
-      // Show modifier if present
-      if (roll.modifier && roll.modifier !== 0) {
-        const mod = document.createElement('span');
-        mod.className = 'roll-modifier';
-        mod.textContent = roll.modifier > 0 ? `+${roll.modifier}` : roll.modifier;
-        diceDisplay.appendChild(mod);
-      }
-    }
-
-    item.appendChild(diceDisplay);
-
-    // Time display
-    const time = document.createElement('span');
-    time.className = 'roll-time';
-    time.textContent = this.formatTime(roll.rolled_at);
-    item.appendChild(time);
-
-    // Result
-    const result = document.createElement('span');
-    result.className = 'roll-result';
-    if (roll.is_crit) result.classList.add('crit');
-    if (roll.is_fumble) result.classList.add('fumble');
-    result.textContent = roll.total;
-    item.appendChild(result);
-
-    // Delete button (appears on hover)
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'roll-delete-btn';
-    deleteBtn.title = 'Delete this roll';
-    deleteBtn.textContent = '×';
-    deleteBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.deleteRoll(roll.id);
-    });
-    item.appendChild(deleteBtn);
-
-    return item;
   }
 
   async deleteRoll(rollId) {
-    try {
-      await invoke('delete_dice_roll', { id: rollId });
-      await this.loadRolls();
-    } catch (error) {
-      console.error('Failed to delete roll:', error);
-    }
-  }
-
-  formatDate(dateStr) {
-    const date = new Date(dateStr + 'T00:00:00');
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    } else {
-      return date.toLocaleDateString(undefined, {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric'
-      });
-    }
-  }
-
-  formatTime(timestampStr) {
-    if (!timestampStr) return '';
-    const date = new Date(timestampStr.replace(' ', 'T') + 'Z');
-    return date.toLocaleTimeString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit'
+    const result = await safeInvoke('delete_dice_roll', { id: rollId }, {
+      errorMessage: 'Failed to delete roll'
     });
+    if (result !== null) {
+      await this.loadRolls();
+    }
   }
+
 }
 
 customElements.define('dice-roller', DiceRoller);

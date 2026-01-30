@@ -17,7 +17,8 @@ import '../../../layout/flex-row/component.js';
 class CountdownItem extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #tracker = null;
-  #hasRendered = false;
+  #timerInterval = null;
+  #isRunning = false;
   stylesPath = './styles.css';
   templatePath = './template.html';
 
@@ -26,12 +27,12 @@ class CountdownItem extends ExtendedHtmlElement {
     this.#tracker = value;
 
     if (this.isSetup) {
-      if (this.#hasRendered && oldTracker?.id === value?.id) {
-        // Same tracker, just update values without re-rendering
-        this.updateValues();
+      if (oldTracker?.id === value?.id) {
+        // Same tracker, just update values
+        this.updateDisplay();
       } else {
-        // Different tracker or first render
-        this.render();
+        // Different tracker, full update
+        this.bindTracker();
       }
     }
   }
@@ -41,7 +42,7 @@ class CountdownItem extends ExtendedHtmlElement {
   }
 
   async setup() {
-    // Attach delegated event listeners (setup is only called once)
+    // Attach delegated event listeners
     this.shadowRoot.addEventListener('counter-change', e => {
       e.stopPropagation();
       this.emit('value-change', { id: this.#tracker.id, delta: e.detail.delta });
@@ -52,7 +53,7 @@ class CountdownItem extends ExtendedHtmlElement {
       this.emit('visibility-change', { id: e.detail.entityId, visible: e.detail.checked });
     });
 
-    // Hide name toggle - only handle toggle-change from hide-name switch
+    // Hide name toggle
     this.shadowRoot.addEventListener('toggle-change', e => {
       if (e.target.closest('visibility-toggle')) return;
       e.stopPropagation();
@@ -66,99 +67,155 @@ class CountdownItem extends ExtendedHtmlElement {
       this.emit('delete', { id: e.detail.id, name: e.detail.name });
     });
 
+    // Play/pause button click handler
+    this.shadowRoot.addEventListener('action-click', e => {
+      if (e.target.closest('.play-pause-btn')) {
+        this.toggleTimer();
+      }
+    });
+
     if (this.#tracker) {
-      this.render();
+      this.bindTracker();
     }
   }
 
-  updateValues() {
+  cleanup() {
+    this.stopTimer();
+  }
+
+  /**
+   * Initial binding of tracker data to template elements
+   */
+  bindTracker() {
     if (!this.#tracker) return;
 
     const tracker = this.#tracker;
     const container = this.$('card-container');
-    if (!container) return;
 
-    // Update counter control value
-    const counter = container.querySelector('counter-control');
+    // Set tracker ID on container
+    container.setAttribute('data-tracker-id', tracker.id);
+
+    // Name
+    this.$('.tracker-name').textContent = tracker.name;
+
+    // Type badge
+    const typeBadge = this.$('.tracker-type-badge');
+    typeBadge.setAttribute('type', tracker.tracker_type);
+    typeBadge.setAttribute('label', tracker.tracker_type.toUpperCase());
+
+    // Visibility toggle
+    const visToggle = this.$('visibility-toggle');
+    visToggle.setAttribute('entity-id', tracker.id);
+
+    // Delete trigger
+    const deleteTrigger = this.$('delete-trigger');
+    deleteTrigger.setAttribute('item-name', tracker.name);
+    deleteTrigger.setAttribute('item-id', tracker.id);
+
+    // Counter control
+    const counter = this.$('counter-control');
+    counter.setAttribute('min', '0');
+    counter.setAttribute('max', tracker.max);
+    counter.setAttribute('show-max', tracker.max);
+
+    // Update dynamic values
+    this.updateDisplay();
+  }
+
+  /**
+   * Update dynamic values without rebuilding DOM
+   */
+  updateDisplay() {
+    if (!this.#tracker) return;
+
+    const tracker = this.#tracker;
+
+    // Counter value
+    const counter = this.$('counter-control');
     if (counter) {
       counter.setAttribute('value', tracker.current);
     }
 
-    // Update visibility toggle
-    const visibilityToggle = container.querySelector('visibility-toggle');
+    // Visibility toggle
+    const visibilityToggle = this.$('visibility-toggle');
     if (visibilityToggle) {
       visibilityToggle.checked = tracker.visible_to_players;
     }
 
-    // Update hide name toggle
-    const hideNameToggle = container.querySelector('toggle-switch[name="hide-name"]');
+    // Hide name toggle
+    const hideNameToggle = this.$('toggle-switch[name="hide-name"]');
     if (hideNameToggle) {
       hideNameToggle.checked = tracker.hide_name_from_players;
     }
 
-    // Update current label
+    // Auto interval badge and play/pause button
+    const hasAutoInterval = tracker.auto_interval > 0;
+    const intervalBadge = this.$('.auto-interval-badge');
+    const playPauseBtn = this.$('.play-pause-btn');
+
+    if (intervalBadge) {
+      intervalBadge.hidden = !hasAutoInterval;
+      if (hasAutoInterval) {
+        this.$('.interval-value').textContent = tracker.auto_interval;
+        intervalBadge.title = `Auto: ${tracker.auto_interval}s`;
+      }
+    }
+
+    if (playPauseBtn) {
+      playPauseBtn.hidden = !hasAutoInterval;
+    }
+
+    // Current label (for complex trackers)
     const isComplex = tracker.tracker_type === 'complex';
     const currentLabel =
       isComplex && tracker.tick_labels?.[tracker.current]
         ? tracker.tick_labels[tracker.current]
         : null;
 
-    let labelEl = container.querySelector('.current-label');
-    if (currentLabel) {
-      if (labelEl) {
-        labelEl.textContent = currentLabel;
-      } else {
-        labelEl = document.createElement('div');
-        labelEl.className = 'current-label';
-        labelEl.textContent = currentLabel;
-        container.appendChild(labelEl);
-      }
-    } else if (labelEl) {
-      labelEl.remove();
+    const labelEl = this.$('.current-label');
+    if (labelEl) {
+      labelEl.hidden = !currentLabel;
+      labelEl.textContent = currentLabel || '';
     }
   }
 
-  render() {
-    if (!this.#tracker) return;
+  toggleTimer() {
+    if (this.#isRunning) {
+      this.stopTimer();
+    } else {
+      this.startTimer();
+    }
+    this.updatePlayPauseButton();
+  }
 
-    const tracker = this.#tracker;
-    const container = this.$('card-container');
-    if (!container) return;
+  startTimer() {
+    if (this.#isRunning || !this.#tracker?.auto_interval) return;
 
-    const isComplex = tracker.tracker_type === 'complex';
-    const currentLabel =
-      isComplex && tracker.tick_labels?.[tracker.current]
-        ? tracker.tick_labels[tracker.current]
-        : null;
+    this.#isRunning = true;
+    this.#timerInterval = setInterval(() => {
+      if (this.#tracker.current > 0) {
+        this.emit('value-change', { id: this.#tracker.id, delta: -1 });
+      } else {
+        this.stopTimer();
+        this.updatePlayPauseButton();
+      }
+    }, this.#tracker.auto_interval * 1000);
+  }
 
-    container.setAttribute('data-tracker-id', tracker.id);
-    container.innerHTML = `
-      <flex-row justify="space-between" align="center" gap="lg" class="tracker-header">
-        <flex-row align="center" gap="md" class="tracker-info">
-          <h4 class="truncate">${tracker.name}</h4>
-          <type-badge type="${tracker.tracker_type}" label="${tracker.tracker_type.toUpperCase()}"></type-badge>
-        </flex-row>
-        <flex-row align="center" gap="sm" class="tracker-actions">
-          <counter-control value="${tracker.current}" min="0" max="${tracker.max}" show-max="${tracker.max}"></counter-control>
-          <dropdown-menu>
-            <dropdown-menu-item slot="content" keep-open>
-              <visibility-toggle entity-id="${tracker.id}" ${tracker.visible_to_players ? 'checked' : ''} compact></visibility-toggle>
-            </dropdown-menu-item>
-            <dropdown-menu-item slot="content" keep-open>
-              <toggle-switch name="hide-name" label="🙈 Hide Name from Players" ${tracker.hide_name_from_players ? 'checked' : ''} label-first></toggle-switch>
-            </dropdown-menu-item>
-            <dropdown-menu-item slot="content" variant="delete" keep-open>
-              <delete-trigger item-name="${tracker.name}" item-id="${tracker.id}">
-                <span slot="trigger">🗑️ Delete Tracker</span>
-              </delete-trigger>
-            </dropdown-menu-item>
-          </dropdown-menu>
-        </flex-row>
-      </flex-row>
-      ${currentLabel ? `<div class="current-label">${currentLabel}</div>` : ''}
-    `;
+  stopTimer() {
+    if (this.#timerInterval) {
+      clearInterval(this.#timerInterval);
+      this.#timerInterval = null;
+    }
+    this.#isRunning = false;
+  }
 
-    this.#hasRendered = true;
+  updatePlayPauseButton() {
+    const btn = this.$('.play-pause-btn');
+    if (btn) {
+      btn.textContent = this.#isRunning ? '⏸' : '▶';
+      btn.setAttribute('variant', this.#isRunning ? 'warning' : 'success');
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 import ExtendedHtmlElement from '../../base/extended-html-element.js';
+import { animateOverlayOpen, animateOverlayClose } from '../../../helpers/overlay-animation.js';
 
 class DropdownMenu extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
@@ -67,8 +68,7 @@ class DropdownMenu extends ExtendedHtmlElement {
     this.#content.showPopover();
     this.positionContent();
 
-    // Listen for clicks to close - delay to avoid immediate trigger
-    requestAnimationFrame(() => {
+    animateOverlayOpen(this.#content, () => {
       document.addEventListener('click', this.#boundHandleDocumentClick);
     });
   }
@@ -78,9 +78,13 @@ class DropdownMenu extends ExtendedHtmlElement {
 
     this.#isOpen = false;
     this.removeAttribute('open');
-    this.#content.hidePopover();
-
     document.removeEventListener('click', this.#boundHandleDocumentClick);
+
+    animateOverlayClose(this.#content, () => {
+      if (this.#content.matches(':popover-open')) {
+        this.#content.hidePopover();
+      }
+    });
   }
 
   positionContent() {

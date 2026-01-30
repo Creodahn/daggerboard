@@ -1,7 +1,10 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
 import createWindow from '../../../../helpers/create-window.js';
-import { invoke, listen, WebviewWindow } from '../../../../helpers/tauri.js';
+import { safeInvoke, listen, WebviewWindow } from '../../../../helpers/tauri.js';
+import { initTheme, toggleTheme, isDarkMode } from '../../../../helpers/theme.js';
+import { onWindowOpened, onWindowClosed, isWindowOpen, requestWindowClose } from '../../../../helpers/window-lifecycle.js';
 import '../../../ui/action-button/component.js';
+import '../../../ui/toggle-switch/component.js';
 
 /**
  * Campaign menu component for the sticky header.
@@ -16,6 +19,8 @@ class CampaignMenu extends ExtendedHtmlElement {
   #playerViewBtn;
   #playerViewText;
   #settingsBtn;
+  #themeToggleBtn;
+  #themeSwitch;
   #isPlayerViewOpen = false;
   #playerWindow = null;
   stylesPath = './styles.css';
@@ -80,8 +85,41 @@ class CampaignMenu extends ExtendedHtmlElement {
       this.openSettings();
     });
 
-    // Poll for player view window state
-    setInterval(() => this.checkPlayerViewState(), 1000);
+    // Setup theme toggle
+    this.#themeToggleBtn = this.$('.theme-toggle-btn');
+    this.#themeSwitch = this.$('.theme-switch');
+
+    // Initialize theme and sync toggle state
+    initTheme();
+    this.updateThemeToggle();
+
+    this.#themeToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTheme();
+      this.updateThemeToggle();
+    });
+
+    // Listen for theme changes (from other windows)
+    window.addEventListener('theme-changed', () => {
+      this.updateThemeToggle();
+    });
+
+    // Listen for window lifecycle events (replaces polling)
+    await onWindowOpened(async (label) => {
+      if (label === 'player-view') {
+        this.#isPlayerViewOpen = true;
+        this.#playerWindow = await WebviewWindow.getByLabel('player-view');
+        this.updatePlayerViewButton();
+      }
+    });
+
+    await onWindowClosed((label) => {
+      if (label === 'player-view') {
+        this.#isPlayerViewOpen = false;
+        this.#playerWindow = null;
+        this.updatePlayerViewButton();
+      }
+    });
 
     // Listen for campaign updates
     await listen('campaigns-updated', event => {
@@ -103,21 +141,21 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   async loadCampaigns() {
-    try {
-      this.#campaigns = await invoke('get_campaigns');
+    const campaigns = await safeInvoke('get_campaigns', {}, {
+      errorMessage: 'Failed to load campaigns'
+    });
+    if (campaigns) {
+      this.#campaigns = campaigns;
       this.renderCampaignList();
-    } catch (error) {
-      console.error('Failed to load campaigns:', error);
     }
   }
 
   async loadCurrentCampaign() {
-    try {
-      this.#currentCampaign = await invoke('get_current_campaign');
-      this.updateCurrentCampaignDisplay();
-    } catch (error) {
-      console.error('Failed to load current campaign:', error);
-    }
+    const campaign = await safeInvoke('get_current_campaign', {}, {
+      errorMessage: 'Failed to load current campaign'
+    });
+    this.#currentCampaign = campaign;
+    this.updateCurrentCampaignDisplay();
   }
 
   updateCurrentCampaignDisplay() {
@@ -155,13 +193,11 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   async selectCampaign(id) {
-    try {
-      await invoke('set_current_campaign', { id });
-      // Close dropdown after selection
+    const result = await safeInvoke('set_current_campaign', { id }, {
+      errorMessage: 'Failed to switch campaign'
+    });
+    if (result !== null) {
       this.#dropdown.closeDropdown();
-    } catch (error) {
-      console.error('Failed to select campaign:', error);
-      alert(`Failed to switch campaign: ${error}`);
     }
   }
 
@@ -176,38 +212,24 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   async createCampaign(name) {
-    try {
-      const campaign = await invoke('create_campaign', { name });
+    const campaign = await safeInvoke('create_campaign', { name }, {
+      errorMessage: 'Failed to create campaign'
+    });
+    if (campaign) {
       // Automatically switch to the new campaign
-      await invoke('set_current_campaign', { id: campaign.id });
+      await safeInvoke('set_current_campaign', { id: campaign.id });
       this.#dropdown.closeDropdown();
-    } catch (error) {
-      console.error('Failed to create campaign:', error);
-      alert(`Failed to create campaign: ${error}`);
     }
   }
 
   // Player View Methods
   async checkPlayerViewState() {
-    try {
-      const existing = await WebviewWindow.getByLabel('player-view');
-      const wasOpen = this.#isPlayerViewOpen;
-      this.#isPlayerViewOpen = !!existing;
-
-      if (wasOpen !== this.#isPlayerViewOpen) {
-        this.updatePlayerViewButton();
-      }
-
-      if (this.#isPlayerViewOpen && !this.#playerWindow) {
-        this.#playerWindow = existing;
-      } else if (!this.#isPlayerViewOpen) {
-        this.#playerWindow = null;
-      }
-    } catch (error) {
-      this.#isPlayerViewOpen = false;
-      this.#playerWindow = null;
-      this.updatePlayerViewButton();
+    // Initial check on load - subsequent updates come via onWindowClosed event
+    this.#isPlayerViewOpen = await isWindowOpen('player-view');
+    if (this.#isPlayerViewOpen) {
+      this.#playerWindow = await WebviewWindow.getByLabel('player-view');
     }
+    this.updatePlayerViewButton();
   }
 
   updatePlayerViewButton() {
@@ -222,12 +244,11 @@ class CampaignMenu extends ExtendedHtmlElement {
   }
 
   async togglePlayerView() {
-    if (this.#isPlayerViewOpen && this.#playerWindow) {
-      await this.#playerWindow.close();
-      this.#isPlayerViewOpen = false;
-      this.#playerWindow = null;
-      this.updatePlayerViewButton();
+    if (this.#isPlayerViewOpen) {
+      // Request the window to close itself - state will be updated by onWindowClosed event
+      await requestWindowClose('player-view');
     } else {
+      // Open the window - state will be updated by onWindowOpened event
       await createWindow('player-view', {
         title: 'Player View',
         width: 400,
@@ -235,7 +256,6 @@ class CampaignMenu extends ExtendedHtmlElement {
         resizable: true,
         url: '/pages/player-view/index.html',
       });
-      // State will be updated by checkPlayerViewState interval
     }
     this.#dropdown.closeDropdown();
   }
@@ -262,6 +282,17 @@ class CampaignMenu extends ExtendedHtmlElement {
     this.#dropdown.closeDropdown();
   }
 
+  updateThemeToggle() {
+    const dark = isDarkMode();
+    this.#themeSwitch.checked = dark;
+
+    // Update icon based on current theme
+    const icon = this.$('.theme-icon');
+    if (icon) {
+      icon.textContent = dark ? '🌙' : '☀️';
+    }
+  }
+
   async openNotepad(noteId = null) {
     const title = this.#currentCampaign
       ? `${this.#currentCampaign.name} Notepad`
@@ -270,15 +301,12 @@ class CampaignMenu extends ExtendedHtmlElement {
     // If no specific note requested, try to get the most recent one
     let targetNoteId = noteId;
     if (!targetNoteId && this.#currentCampaign) {
-      try {
-        const notes = await invoke('get_campaign_notes', {
-          campaignId: this.#currentCampaign.id
-        });
-        if (notes.length > 0) {
-          targetNoteId = notes[0].id; // Most recent note
-        }
-      } catch (error) {
-        console.error('Failed to fetch notes:', error);
+      const notes = await safeInvoke('get_campaign_notes', {
+        campaignId: this.#currentCampaign.id
+      }, { errorMessage: 'Failed to fetch notes' });
+
+      if (notes && notes.length > 0) {
+        targetNoteId = notes[0].id; // Most recent note
       }
     }
 

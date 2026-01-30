@@ -1,3 +1,5 @@
+@import '/styles/shared/overlay-animations.css';
+
 :host {
   display: contents;
 }
@@ -14,19 +16,13 @@
   color: var(--color-text-primary);
 }
 
+/* Modal uses [open] attribute from <dialog> element */
 .modal-dialog[open] {
   display: flex;
   flex-direction: column;
-  opacity: 0;
-  transform: translateY(-30px) scale(0.95);
-  transition: opacity var(--transition-slow), transform var(--transition-slow);
 }
 
-.modal-dialog[open].visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
+/* Backdrop animation */
 .modal-dialog::backdrop {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(3px);

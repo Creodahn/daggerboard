@@ -26,7 +26,8 @@
         { "event": "campaign-note-deleted" },
         { "event": "campaign-notes-list-updated" },
         { "event": "current-campaign-changed" },
-        { "event": "show-toast" }
+        { "event": "show-toast" },
+        { "event": "app://window-close-request" }
       ]
     }
   ]

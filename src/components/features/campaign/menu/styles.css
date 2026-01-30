@@ -161,10 +161,8 @@
   white-space: nowrap;
 }
 
-.player-view-btn,
-.notepad-btn,
-.dice-btn,
-.settings-btn {
+/* Menu action buttons - shared styles */
+.menu-action-btn {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -179,29 +177,35 @@
   transition: all var(--transition-base);
 }
 
-.player-view-btn:hover,
-.notepad-btn:hover,
-.dice-btn:hover,
-.settings-btn:hover {
+.menu-action-btn:hover {
   background: var(--color-border-light);
   border-color: var(--color-border);
 }
 
-.player-view-btn.active {
+.menu-action-btn.active {
   background: var(--color-primary-light);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
-.player-view-icon,
-.notepad-icon,
-.dice-icon,
-.settings-icon {
+.menu-action-btn + .menu-action-btn {
+  margin-top: var(--space-sm);
+}
+
+.menu-action-btn .icon {
   font-size: var(--text-base);
 }
 
-.notepad-btn,
-.dice-btn,
-.settings-btn {
-  margin-top: var(--space-sm);
+/* Theme toggle specific */
+.theme-section {
+  padding: var(--space-sm) var(--space-lg);
+}
+
+.theme-text {
+  flex: 1;
+  text-align: left;
+}
+
+.theme-switch {
+  pointer-events: none; /* Let the button handle clicks */
 }

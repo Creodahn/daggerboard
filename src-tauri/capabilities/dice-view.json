@@ -6,8 +6,16 @@
   "permissions": [
     "core:default",
     "core:window:default",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
     "core:event:default",
-    "core:event:allow-emit-to",
-    "core:event:allow-listen"
+    "core:event:allow-emit",
+    "core:event:allow-listen",
+    {
+      "identifier": "core:event:allow-listen",
+      "allow": [
+        { "event": "app://window-close-request" }
+      ]
+    }
   ]
 }

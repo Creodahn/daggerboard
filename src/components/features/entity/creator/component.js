@@ -1,5 +1,5 @@
 import ExtendedHtmlElement from '../../../base/extended-html-element.js';
-import { invoke } from '../../../../helpers/tauri.js';
+import { safeInvoke } from '../../../../helpers/tauri.js';
 
 class EntityCreator extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
@@ -28,14 +28,9 @@ class EntityCreator extends ExtendedHtmlElement {
       this.#modal.openAndFocus(this.#nameField);
     });
 
-    // Setup form submit handler (handles Enter key in form fields)
+    // Setup form submit handler (handles both Enter key and action-button type="submit")
     this.$('form').addEventListener('submit', e => {
       e.preventDefault();
-      this.createEntity();
-    });
-
-    // Handle action-button click (button is in shadow DOM so can't trigger form submit)
-    this.$('action-button.create').addEventListener('action-click', () => {
       this.createEntity();
     });
   }
@@ -66,18 +61,18 @@ class EntityCreator extends ExtendedHtmlElement {
       return;
     }
 
-    try {
-      await invoke('create_entity', {
-        name,
-        hpMax,
-        thresholds: {
-          minor,
-          major,
-          severe,
-        },
-        entityType,
-      });
+    const result = await safeInvoke('create_entity', {
+      name,
+      hpMax,
+      thresholds: {
+        minor,
+        major,
+        severe,
+      },
+      entityType,
+    }, { errorMessage: 'Failed to create adversary' });
 
+    if (result) {
       // Reset form and clear any custom validity
       this.#nameField.value = '';
       this.#hpMaxField.value = '20';
@@ -88,9 +83,6 @@ class EntityCreator extends ExtendedHtmlElement {
 
       // Close modal
       this.#modal.close();
-    } catch (error) {
-      console.error('Failed to create entity:', error);
-      alert(`Error: ${error}`);
     }
   }
 }

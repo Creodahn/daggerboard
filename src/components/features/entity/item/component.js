@@ -5,7 +5,6 @@ import '../../../layout/flex-row/component.js';
 class EntityItem extends ExtendedHtmlElement {
   static moduleUrl = import.meta.url;
   #entity = null;
-  #hasRendered = false;
   #emitNameChange;
   #allowMassiveDamage = false;
   stylesPath = './styles.css';
@@ -24,12 +23,12 @@ class EntityItem extends ExtendedHtmlElement {
     this.#entity = value;
 
     if (this.isSetup) {
-      if (this.#hasRendered && oldEntity?.id === value?.id) {
-        // Same entity, just update values without re-rendering
-        this.updateValues();
+      if (oldEntity?.id === value?.id) {
+        // Same entity, just update values
+        this.updateDisplay();
       } else {
-        // Different entity or first render
-        this.render();
+        // Different entity, full binding
+        this.bindEntity();
       }
     }
   }
@@ -52,7 +51,7 @@ class EntityItem extends ExtendedHtmlElement {
   }
 
   async setup() {
-    // Attach delegated event listeners (setup is only called once)
+    // Attach delegated event listeners
     this.shadowRoot.addEventListener('delete-confirmed', async e => {
       e.stopPropagation();
       const container = this.$('card-container');
@@ -60,120 +59,13 @@ class EntityItem extends ExtendedHtmlElement {
       this.emit('delete', { id: e.detail.id, name: e.detail.name });
     });
 
-    // Render now that template is ready (if entity was already set)
-    if (this.#entity) {
-      this.render();
-    }
-  }
-
-  cleanup() {
-    this.#emitNameChange.cancel();
-  }
-
-  updateValues() {
-    if (!this.#entity) return;
-
-    const entity = this.#entity;
-    const container = this.$('card-container');
-    if (!container) return;
-
-    // Update HP bar
-    const hpBar = container.querySelector('hp-bar');
-    if (hpBar) {
-      hpBar.setAttribute('current', entity.hp_current);
-      hpBar.setAttribute('max', entity.hp_max);
-    }
-
-    // Update visibility toggle
-    const visibilityToggle = container.querySelector('visibility-toggle');
-    if (visibilityToggle) {
-      visibilityToggle.checked = entity.visible_to_players;
-    }
-
-    // Update name input only if it's not currently focused (to avoid overwriting user input)
-    const nameInput = container.querySelector('.entity-name-input');
-    if (nameInput && document.activeElement !== nameInput) {
-      nameInput.value = entity.name;
-    }
-  }
-
-  render() {
-    if (!this.#entity) return;
-
-    const entity = this.#entity;
-    const massiveThreshold = entity.thresholds.severe * 2;
-
-    const container = this.$('card-container');
-    if (!container) return;
-
-    container.innerHTML = `
-      <flex-row justify="space-between" align="center" gap="lg" class="entity-header">
-        <flex-row align="center" gap="sm" class="entity-name-section">
-          <collapse-toggle expanded></collapse-toggle>
-          <type-badge type="${entity.entity_type}" label="${entity.entity_type === 'adversary' ? 'Adversary' : 'NPC'}" variant="pill"></type-badge>
-          <input type="text" class="entity-name-input" value="${entity.name}">
-        </flex-row>
-        <dropdown-menu class="hp-dropdown">
-          <hp-bar slot="trigger" current="${entity.hp_current}" max="${entity.hp_max}" show-text></hp-bar>
-          <div slot="content" class="hp-menu-content">
-            <div class="hp-menu-section damage-section">
-              <section-label icon="⚔️">Damage</section-label>
-              <div class="threshold-buttons">
-                <button class="threshold minor" data-hp-loss="1" data-threshold="minor">
-                  Minor: ${entity.thresholds.minor}
-                </button>
-                <button class="threshold major" data-hp-loss="2" data-threshold="major">
-                  Major: ${entity.thresholds.major}
-                </button>
-                <button class="threshold severe" data-hp-loss="3" data-threshold="severe">
-                  Severe: ${entity.thresholds.severe}
-                </button>
-                <button class="threshold massive" data-hp-loss="4" data-threshold="massive" ${this.#allowMassiveDamage ? '' : 'hidden'}>
-                  Massive: ${massiveThreshold}
-                </button>
-              </div>
-            </div>
-            <div class="hp-menu-section heal-section">
-              <section-label icon="💚">Heal</section-label>
-              <input-group
-                type="number"
-                min="1"
-                value="1"
-                placeholder="Amount"
-                button-text="Heal"
-                button-variant="success"
-                class="heal-input-group"
-              ></input-group>
-            </div>
-          </div>
-        </dropdown-menu>
-        <dropdown-menu>
-          <dropdown-menu-item slot="content" keep-open>
-            <visibility-toggle entity-id="${entity.id}" ${entity.visible_to_players ? 'checked' : ''} compact></visibility-toggle>
-          </dropdown-menu-item>
-          <dropdown-menu-item slot="content" variant="delete" keep-open>
-            <delete-trigger item-name="${entity.name}" item-id="${entity.id}">
-              <span slot="trigger">🗑️ Delete Entity</span>
-            </delete-trigger>
-          </dropdown-menu-item>
-        </dropdown-menu>
-      </flex-row>
-    `;
-
-    this.#hasRendered = true;
-    this.attachEventListeners();
-  }
-
-  attachEventListeners() {
-    const container = this.$('card-container');
-
     // Collapse toggle
-    container.querySelector('collapse-toggle').addEventListener('collapse-toggle', e => {
-      container.classList.toggle('collapsed', !e.detail.expanded);
+    this.$('collapse-toggle').addEventListener('collapse-toggle', e => {
+      this.$('card-container').classList.toggle('collapsed', !e.detail.expanded);
     });
 
     // Threshold buttons
-    container.querySelectorAll('.threshold').forEach(btn => {
+    this.$$('.threshold').forEach(btn => {
       btn.addEventListener('click', () => {
         const hpLoss = parseInt(btn.dataset.hpLoss);
         const threshold = btn.dataset.threshold;
@@ -181,30 +73,90 @@ class EntityItem extends ExtendedHtmlElement {
       });
     });
 
-    // Heal input-group - keep value after healing for repeated heals
-    const healInputGroup = container.querySelector('.heal-input-group');
-    healInputGroup.addEventListener('action-submit', e => {
+    // Heal input-group
+    this.$('.heal-input-group').addEventListener('action-submit', e => {
       const amount = parseInt(e.detail.value);
       if (!isNaN(amount) && amount > 0) {
         this.emit('heal', { id: this.#entity.id, amount });
       }
     });
 
-    // Name input - using debounced emitter
-    container.querySelector('.entity-name-input').addEventListener('input', e => {
+    // Name input
+    this.$('.entity-name-input').addEventListener('input', e => {
       this.#emitNameChange(this.#entity.id, e.target.value);
     });
 
-    // Visibility toggle - event bubbles up from visibility-toggle component
-    // The visibility-change event is already dispatched by the component with entityId
-    // Delete trigger is handled in attachGlobalListeners
+    if (this.#entity) {
+      this.bindEntity();
+    }
+  }
+
+  cleanup() {
+    this.#emitNameChange.cancel();
+  }
+
+  /**
+   * Initial binding of entity data to template elements
+   */
+  bindEntity() {
+    if (!this.#entity) return;
+
+    const entity = this.#entity;
+
+    // Type badge
+    const typeBadge = this.$('.entity-type-badge');
+    typeBadge.setAttribute('type', entity.entity_type);
+    typeBadge.setAttribute('label', entity.entity_type === 'adversary' ? 'Adversary' : 'NPC');
+
+    // Visibility toggle
+    this.$('visibility-toggle').setAttribute('entity-id', entity.id);
+
+    // Delete trigger
+    const deleteTrigger = this.$('delete-trigger');
+    deleteTrigger.setAttribute('item-name', entity.name);
+    deleteTrigger.setAttribute('item-id', entity.id);
+
+    // Threshold values
+    this.$('.minor-value').textContent = entity.thresholds.minor;
+    this.$('.major-value').textContent = entity.thresholds.major;
+    this.$('.severe-value').textContent = entity.thresholds.severe;
+    this.$('.massive-value').textContent = entity.thresholds.severe * 2;
+
+    // Update dynamic values
+    this.updateDisplay();
+    this.updateMassiveDamageButton();
+  }
+
+  /**
+   * Update dynamic values without rebuilding DOM
+   */
+  updateDisplay() {
+    if (!this.#entity) return;
+
+    const entity = this.#entity;
+
+    // HP bar
+    const hpBar = this.$('hp-bar');
+    if (hpBar) {
+      hpBar.setAttribute('current', entity.hp_current);
+      hpBar.setAttribute('max', entity.hp_max);
+    }
+
+    // Visibility toggle
+    const visibilityToggle = this.$('visibility-toggle');
+    if (visibilityToggle) {
+      visibilityToggle.checked = entity.visible_to_players;
+    }
+
+    // Name input (only update if not focused to avoid overwriting user input)
+    const nameInput = this.$('.entity-name-input');
+    if (nameInput && document.activeElement !== nameInput) {
+      nameInput.value = entity.name;
+    }
   }
 
   updateMassiveDamageButton() {
-    const container = this.$('card-container');
-    if (!container) return;
-
-    const massiveBtn = container.querySelector('.threshold.massive');
+    const massiveBtn = this.$('.threshold.massive');
     if (massiveBtn) {
       massiveBtn.hidden = !this.#allowMassiveDamage;
     }
