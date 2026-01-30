@@ -156,6 +156,7 @@ class EntityItem extends ExtendedHtmlElement {
       stressCounter.hidden = false;
       stressCounter.setAttribute('value', entity.stress_current);
       stressCounter.setAttribute('max', effectiveMax);
+      stressCounter.setAttribute('show-max', effectiveMax);
       stressCounter.setAttribute('allow-overflow', '');
     }
 

@@ -96,14 +96,11 @@ class CounterControl extends ExtendedHtmlElement {
   updateDisplay() {
     if (!this.#valueEl) return;
 
-    // show-max takes precedence, then max attribute
+    // Only show "value / max" format when show-max is explicitly set
     const showMax = this.getStringAttr('show-max');
-    const maxAttr = this.getAttribute('max');
 
     if (showMax) {
       this.#valueEl.textContent = `${this.#value} / ${showMax}`;
-    } else if (maxAttr !== null) {
-      this.#valueEl.textContent = `${this.#value} / ${maxAttr}`;
     } else {
       this.#valueEl.textContent = String(this.#value);
     }

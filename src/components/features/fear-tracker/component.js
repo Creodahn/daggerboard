@@ -12,9 +12,12 @@ class FearTracker extends CampaignAwareMixin(ExtendedHtmlElement) {
   async setup() {
     this.#counter = this.$('counter-control');
 
-    // If no-controls mode, set counter to display-only
+    // If no-controls mode (player view), set counter to display-only
+    // Otherwise (dashboard), show the max value
     if (this.getBoolAttr('no-controls')) {
       this.#counter.setAttribute('display-only', '');
+    } else {
+      this.#counter.setAttribute('show-max', '12');
     }
 
     // Setup campaign awareness
